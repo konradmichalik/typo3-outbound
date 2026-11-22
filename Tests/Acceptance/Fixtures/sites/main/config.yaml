@@ -1,0 +1,15 @@
+# Imported by `ddev install` over the site created by `typo3 setup`.
+# The site set renders the Petstore plugin as page body.
+rootPageId: 1
+base: /
+dependencies:
+  - konradmichalik/outbound-petstore
+languages:
+  -
+    title: English
+    enabled: true
+    languageId: 0
+    base: /
+    locale: en_US.UTF-8
+    navigationTitle: English
+    flag: us

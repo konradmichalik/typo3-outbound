@@ -1,0 +1,14 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<f:layout name="Default"/>
+<f:section name="Main">
+    <h1>Add a pet</h1>
+    <f:form action="create">
+        <label>Name <f:form.textfield name="name" value="typo3-outbound-demo" required="true"/></label>
+        <label>Category <f:form.textfield name="category" value="Dogs"/></label>
+        <label>Photo URL <f:form.textfield name="photoUrl" type="url" value="https://example.org/pet.jpg"/></label>
+        <label>Status <f:form.select name="status" options="{statuses}" optionValueField=""/></label>
+        <f:form.submit value="Add pet"/>
+    </f:form>
+    <p>PetApi::add is a POST and is never retried automatically.</p>
+</f:section>
+</html>

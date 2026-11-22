@@ -1,0 +1,21 @@
+includes:
+	- phpstan-baseline.neon
+	- %rootDir%/../../konradmichalik/phpstan-typo3-preset/phpstan.neon.dist
+
+parameters:
+	level: max
+
+	scanDirectories:
+		- ../../vendor
+	paths:
+		- ../../Classes
+		- ../../Configuration
+		- ../../Tests/Unit
+
+	ignoreErrors:
+		-
+			identifier: trait.unused
+			path: ../../Classes/Testing/OutboundTestTrait.php
+
+	excludePaths:
+		- ../../Tests/Functional/Fixtures/Extensions/*/ext_emconf.php

@@ -1,0 +1,11 @@
+# Renders the Petstore plugin as the whole page body, for quick manual testing.
+page = PAGE
+page {
+  typeNum = 0
+  10 = EXTBASEPLUGIN
+  10 {
+    extensionName = OutboundPetstore
+    pluginName = Pets
+  }
+  includeCSS.petstore = EXT:outbound_petstore/Resources/Public/Css/petstore.css
+}

@@ -1,0 +1,24 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<f:layout name="Default"/>
+<f:section name="Main">
+    <h1>Pets</h1>
+    <p>
+        <f:for each="{statuses}" as="option" iteration="i">
+            <f:if condition="{option} == {status}"><f:then><strong>{option}</strong></f:then><f:else><f:link.action action="list" arguments="{status: option}">{option}</f:link.action></f:else></f:if><f:if condition="{i.isLast}"><f:else> · </f:else></f:if>
+        </f:for>
+    </p>
+    <table>
+        <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Status</th></tr></thead>
+        <tbody>
+        <f:for each="{pets}" as="pet">
+            <tr>
+                <td><f:link.action action="show" arguments="{pet: pet.id}">{pet.id}</f:link.action></td>
+                <td>{pet.name}</td>
+                <td>{f:if(condition: pet.category, then: pet.category.name, else: '–')}</td>
+                <td>{pet.status.value}</td>
+            </tr>
+        </f:for>
+        </tbody>
+    </table>
+</f:section>
+</html>

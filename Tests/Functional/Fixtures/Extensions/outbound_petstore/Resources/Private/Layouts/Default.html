@@ -1,0 +1,20 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<div class="outbound-petstore">
+    <nav>
+        <f:link.action action="list">Pets</f:link.action> ·
+        <f:link.action action="new">Add pet</f:link.action> ·
+        <f:link.action action="inventory">Inventory</f:link.action>
+    </nav>
+    <f:if condition="{error}">
+        <f:then>
+            <div class="outbound-error" role="alert">
+                <strong>{error.type}</strong>: {error.message}<br>
+                Endpoint {error.endpoint}, status {f:if(condition: error.status, then: error.status, else: '–')}
+            </div>
+        </f:then>
+        <f:else>
+            <f:render section="Main"/>
+        </f:else>
+    </f:if>
+</div>
+</html>

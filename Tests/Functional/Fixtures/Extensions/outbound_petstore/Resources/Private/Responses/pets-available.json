@@ -1,0 +1,1 @@
+[{"id":10,"category":{"id":1,"name":"Dogs"},"name":"doggie","photoUrls":["https://example.org/doggie.jpg"],"tags":[{"id":1,"name":"friendly"}],"status":"available"},{"id":11,"name":"whiskers","photoUrls":[],"tags":[],"status":"available","unknownFutureField":true}]

@@ -1,0 +1,17 @@
+# cat=timeouts/enable/010; type=string; label=Web timeout (seconds):Total duration of one attempt in a web request (Symfony max_duration). An endpoint's #[Timeout] overrides it. Defaults to 3.
+webTimeout = 3
+
+# cat=timeouts/enable/020; type=string; label=CLI timeout (seconds):Total duration of one attempt in CLI, Scheduler and Messenger. Defaults to 30.
+cliTimeout = 30
+
+# cat=timeouts/enable/030; type=string; label=Web time budget (seconds):Time all outbound calls of one web request may take together, retries included. Defaults to 8.
+webBudget = 8
+
+# cat=timeouts/enable/040; type=string; label=Retry-After cap in web requests (seconds):A Retry-After header asking for longer fails the call instead of blocking the page. Defaults to 1.
+webRetryAfterCap = 1
+
+# cat=timeouts/enable/050; type=string; label=Retry-After cap in CLI (seconds):Defaults to 60.
+cliRetryAfterCap = 60
+
+# cat=safety/enable/010; type=int+; label=Maximum response size (bytes):Responses above this size are aborted. A connection's maxResponseBytes overrides it. Defaults to 5242880 (5 MB).
+maxResponseBytes = 5242880

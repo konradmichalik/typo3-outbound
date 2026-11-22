@@ -1,0 +1,21 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<f:layout name="Default"/>
+<f:section name="Main">
+    <f:if condition="{pet}">
+        <f:then>
+            <h1><f:if condition="{created}"><f:then>Pet created</f:then><f:else>{pet.name}</f:else></f:if></h1>
+            <dl>
+                <dt>ID</dt><dd>{pet.id}</dd>
+                <dt>Name</dt><dd>{pet.name}</dd>
+                <dt>Category</dt><dd>{f:if(condition: pet.category, then: pet.category.name, else: '–')}</dd>
+                <dt>Status</dt><dd>{pet.status.value}</dd>
+                <dt>Photos</dt><dd><f:for each="{pet.photoUrls}" as="url">{url}<br></f:for></dd>
+            </dl>
+        </f:then>
+        <f:else>
+            <h1>Pet not found</h1>
+            <p>#[OnStatus(404, returns: null)] turned the 404 into null.</p>
+        </f:else>
+    </f:if>
+</f:section>
+</html>

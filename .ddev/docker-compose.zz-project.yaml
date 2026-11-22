@@ -1,0 +1,14 @@
+# .ddev/docker-compose.zz-project.yaml - repo-owned overrides for
+# docker-compose.typo3-setup.yaml. Not managed by the add-on, so it survives
+# `ddev add-on get` upgrades; the "zz" prefix makes its values win.
+#
+# Run `ddev restart` after changing it.
+services:
+    web:
+        environment:
+            # This project only supports TYPO3 13/14 (see composer.json).
+            - TYPO3_VERSIONS=13 14
+            - TYPO3_SERVER_TYPE=apache
+            # Set to 1 to answer the Petstore plugin from the fixture responses
+            # instead of calling petstore3.swagger.io.
+            - OUTBOUND_PETSTORE_MOCK=0

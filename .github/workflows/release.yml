@@ -1,0 +1,15 @@
+name: Release
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  ter-publish:
+    uses: konradmichalik/reusable-github-actions/.github/workflows/release-typo3.yml@b207c7a6eb8db6c385156a57cdacaaa1c7d3cd0b # 0.2.0
+    permissions:
+      contents: write
+    secrets:
+      typo3-api-token: ${{ secrets.TYPO3_API_TOKEN }}
+    with:
+      typo3-extension-key: 'typo3_outbound'
