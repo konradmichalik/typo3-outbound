@@ -41,6 +41,8 @@ return Config::create()
     ->withFinder(
         static fn (Finder $finder) => $finder
             ->in($rootPath)
+            // Files under .ddev are managed by the DDEV add-on and overwritten on its updates.
+            ->exclude(['.ddev'])
             ->notPath(['ext_emconf.php']),
     )
 ;
