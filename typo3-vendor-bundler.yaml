@@ -1,0 +1,10 @@
+# Bundles non-TYPO3 vendor libraries into the extension so it works in
+# classic mode (TER / non-Composer installations).
+# See https://github.com/eliashaeussler/typo3-vendor-bundler
+autoload:
+  enabled: true
+dependencies:
+  enabled: false
+dependencyExtraction:
+  # Abort the build instead of shipping an incomplete bundle.
+  failOnProblems: true
