@@ -15,6 +15,7 @@ namespace KonradMichalik\Typo3Outbound\DependencyInjection;
 
 use KonradMichalik\Typo3Outbound\Attribute\{Connection, Resource};
 use KonradMichalik\Typo3Outbound\Exception\InvalidDefinition;
+use PhpToken;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
@@ -24,7 +25,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use function file_get_contents;
 use function interface_exists;
 use function is_dir;
-use function preg_match;
 use function sprintf;
 
 /**
@@ -103,14 +103,42 @@ final class OutboundServices
      */
     private static function interfaceIn(string $code): ?string
     {
-        if (1 !== preg_match('/^\s*interface\s+(\w+)/m', $code, $name)) {
-            return null;
+        // Tokens, not a regex: an attribute on the same line, a bracketed namespace or
+        // the word "interface" in a comment must not change the result.
+        $tokens = PhpToken::tokenize($code);
+        $namespace = '';
+        foreach ($tokens as $index => $token) {
+            if ($token->is(\T_NAMESPACE)) {
+                $name = self::nextToken($tokens, $index);
+                $namespace = null !== $name && $name->is([\T_NAME_QUALIFIED, \T_STRING]) ? $name->text.'\\' : '';
+            }
+            if ($token->is(\T_INTERFACE)) {
+                $name = self::nextToken($tokens, $index);
+                if (null === $name || !$name->is(\T_STRING)) {
+                    return null;
+                }
+
+                /** @var class-string $interface */
+                $interface = $namespace.$name->text;
+
+                return $interface;
+            }
         }
-        $namespace = 1 === preg_match('/^\s*namespace\s+([\w\\\\]+)\s*;/m', $code, $match) ? $match[1].'\\' : '';
 
-        /** @var class-string $interface */
-        $interface = $namespace.$name[1];
+        return null;
+    }
 
-        return $interface;
+    /**
+     * @param list<PhpToken> $tokens
+     */
+    private static function nextToken(array $tokens, int $index): ?PhpToken
+    {
+        for ($next = $index + 1; isset($tokens[$next]); ++$next) {
+            if (!$tokens[$next]->isIgnorable()) {
+                return $tokens[$next];
+            }
+        }
+
+        return null;
     }
 }

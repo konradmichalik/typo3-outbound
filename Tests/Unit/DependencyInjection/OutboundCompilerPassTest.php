@@ -55,6 +55,22 @@ final class OutboundCompilerPassTest extends TestCase
     }
 
     #[Test]
+    public function discoveryFindsAnAttributedInterfaceOnOneLineInABracketedNamespace(): void
+    {
+        $directory = sys_get_temp_dir().'/outbound-discover-'.bin2hex(random_bytes(4));
+        mkdir($directory);
+        $code = "<?php\nnamespace Vendor\\OneLine {\n    // interface CommentedOut is no declaration\n    #[\\KonradMichalik\\Typo3Outbound\\Attribute\\Connection(baseUri: 'https://one.example.com')] interface OneLineApi { #[\\KonradMichalik\\Typo3Outbound\\Attribute\\Get('/a')] public function a(): string; }\n}\n";
+        file_put_contents($directory.'/OneLineApi.php', $code);
+        require_once $directory.'/OneLineApi.php';
+
+        $registered = OutboundServices::discover(new ContainerBuilder(), $directory);
+
+        unlink($directory.'/OneLineApi.php');
+        rmdir($directory);
+        self::assertSame(['Vendor\\OneLine\\OneLineApi'], $registered);
+    }
+
+    #[Test]
     public function percentSignsInAttributeValuesSurviveContainerCompilation(): void
     {
         $builder = new ContainerBuilder();
