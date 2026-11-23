@@ -4,40 +4,40 @@ parameters:
 			message: '#^Assign by reference should not be used\.$#'
 			identifier: ergebnis.noAssignByReference
 			count: 1
-			path: ../../Classes/Configuration.php
+			path: ../../Classes/Configuration/Configuration.php
 
 		-
 			message: '#^Cannot access offset ''SYS'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: ../../Classes/Configuration.php
+			path: ../../Classes/Configuration/Configuration.php
 
 		-
 			message: '#^Cannot access offset ''cacheConfigurations'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: ../../Classes/Configuration.php
+			path: ../../Classes/Configuration/Configuration.php
 
 		-
 			message: '#^Cannot access offset ''caching'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: ../../Classes/Configuration.php
+			path: ../../Classes/Configuration/Configuration.php
 
 		-
 			message: '#^Cannot access offset ''outbound'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: ../../Classes/Configuration.php
+			path: ../../Classes/Configuration/Configuration.php
 
 		-
 			message: '#^Cannot access offset ''outbound_proxies'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: ../../Classes/Configuration.php
+			path: ../../Classes/Configuration/Configuration.php
 
 		-
 			message: '#^Cannot access offset ''outbound_state'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: ../../Classes/Configuration.php
+			path: ../../Classes/Configuration/Configuration.php

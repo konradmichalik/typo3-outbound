@@ -11,9 +11,10 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace KonradMichalik\Typo3Outbound;
+namespace KonradMichalik\Typo3Outbound\Cache;
 
 use KonradMichalik\Outbound\Cache\CacheTagReporter;
+use KonradMichalik\Typo3Outbound\Context\RequestContext;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Cache\{CacheDataCollectorInterface, CacheTag};
 

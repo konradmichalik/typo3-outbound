@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace KonradMichalik\Typo3Outbound;
+namespace KonradMichalik\Typo3Outbound\Mapping;
 
 use CuyZ\Valinor\Cache\{Cache, FileSystemCache, FileWatchingCache};
 use TYPO3\CMS\Core\Core\Environment;

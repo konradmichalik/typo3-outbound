@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Unit;
 
-use KonradMichalik\Typo3Outbound\LockFactoryCacheLock;
+use KonradMichalik\Typo3Outbound\Cache\LockFactoryCacheLock;
 use KonradMichalik\Typo3Outbound\Tests\Support\FakeClock;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;

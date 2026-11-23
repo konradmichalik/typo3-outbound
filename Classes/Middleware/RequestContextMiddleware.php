@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Middleware;
 
-use KonradMichalik\Typo3Outbound\RequestContext;
+use KonradMichalik\Typo3Outbound\Context\RequestContext;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 

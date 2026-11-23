@@ -7,7 +7,7 @@ services:
   KonradMichalik\Typo3Outbound\:
     resource: '../Classes/*'
     exclude:
-      - '../Classes/{Configuration,ValinorCacheFactory}.php'
+      - '../Classes/{Configuration/Configuration,Mapping/ValinorCacheFactory}.php'
 
   # Arguments are injected at container compile time by OutboundCompilerPass.
   KonradMichalik\Outbound\Metadata\Registry:
@@ -16,29 +16,29 @@ services:
       $endpointChunks: []
       $interfaces: []
 
-  KonradMichalik\Typo3Outbound\RequestContext:
+  KonradMichalik\Typo3Outbound\Context\RequestContext:
     public: true
-  KonradMichalik\Outbound\Context\CallContext: '@KonradMichalik\Typo3Outbound\RequestContext'
-  KonradMichalik\Outbound\Context\ScopeRunner: '@KonradMichalik\Typo3Outbound\RequestContext'
-  KonradMichalik\Outbound\Context\ExecutionContext: '@KonradMichalik\Typo3Outbound\Typo3ExecutionContext'
+  KonradMichalik\Outbound\Context\CallContext: '@KonradMichalik\Typo3Outbound\Context\RequestContext'
+  KonradMichalik\Outbound\Context\ScopeRunner: '@KonradMichalik\Typo3Outbound\Context\RequestContext'
+  KonradMichalik\Outbound\Context\ExecutionContext: '@KonradMichalik\Typo3Outbound\Context\Typo3ExecutionContext'
   KonradMichalik\Outbound\Support\Clock: '@KonradMichalik\Outbound\Support\SystemClock'
   outbound.valinor_cache:
     class: CuyZ\Valinor\Cache\Cache
-    factory: ['KonradMichalik\Typo3Outbound\ValinorCacheFactory', 'create']
+    factory: ['KonradMichalik\Typo3Outbound\Mapping\ValinorCacheFactory', 'create']
   KonradMichalik\Outbound\Mapping\ValinorMapper:
     arguments:
       $cache: '@outbound.valinor_cache'
   KonradMichalik\Outbound\Mapping\ResponseMapper: '@KonradMichalik\Outbound\Mapping\ValinorMapper'
-  KonradMichalik\Outbound\Cache\CacheTagReporter: '@KonradMichalik\Typo3Outbound\PageCacheTagReporter'
-  KonradMichalik\Outbound\Cache\CacheInvalidator: '@KonradMichalik\Typo3Outbound\CacheManagerInvalidator'
-  KonradMichalik\Outbound\Cache\CacheLock: '@KonradMichalik\Typo3Outbound\LockFactoryCacheLock'
+  KonradMichalik\Outbound\Cache\CacheTagReporter: '@KonradMichalik\Typo3Outbound\Cache\PageCacheTagReporter'
+  KonradMichalik\Outbound\Cache\CacheInvalidator: '@KonradMichalik\Typo3Outbound\Cache\CacheManagerInvalidator'
+  KonradMichalik\Outbound\Cache\CacheLock: '@KonradMichalik\Typo3Outbound\Cache\LockFactoryCacheLock'
 
   KonradMichalik\Outbound\Transport\SymfonyTransport:
     factory: ['KonradMichalik\Outbound\Transport\SymfonyTransport', 'create']
   KonradMichalik\Outbound\Transport\Transport: '@KonradMichalik\Outbound\Transport\SymfonyTransport'
 
   KonradMichalik\Outbound\Runtime\Settings:
-    factory: ['@KonradMichalik\Typo3Outbound\SettingsFactory', 'create']
+    factory: ['@KonradMichalik\Typo3Outbound\Configuration\SettingsFactory', 'create']
 
   KonradMichalik\Typo3Outbound\Middleware\RequestContextMiddleware:
     public: true
@@ -56,20 +56,20 @@ services:
     factory: ['@TYPO3\CMS\Core\Cache\CacheManager', 'getCache']
     arguments: ['outbound_proxies']
 
-  KonradMichalik\Typo3Outbound\CacheResponseCache:
+  KonradMichalik\Typo3Outbound\Cache\CacheResponseCache:
     arguments: ['@cache.outbound']
-  KonradMichalik\Outbound\Cache\ResponseCache: '@KonradMichalik\Typo3Outbound\CacheResponseCache'
-  KonradMichalik\Typo3Outbound\CacheStateStore:
+  KonradMichalik\Outbound\Cache\ResponseCache: '@KonradMichalik\Typo3Outbound\Cache\CacheResponseCache'
+  KonradMichalik\Typo3Outbound\Resilience\CacheStateStore:
     arguments: ['@cache.outbound_state']
-  KonradMichalik\Outbound\Resilience\StateStore: '@KonradMichalik\Typo3Outbound\CacheStateStore'
-  KonradMichalik\Typo3Outbound\RateLimiterStorage:
+  KonradMichalik\Outbound\Resilience\StateStore: '@KonradMichalik\Typo3Outbound\Resilience\CacheStateStore'
+  KonradMichalik\Typo3Outbound\Resilience\RateLimiterStorage:
     arguments: ['@cache.outbound_state']
   KonradMichalik\Outbound\Resilience\RateLimitGuard:
     arguments:
-      $storage: '@KonradMichalik\Typo3Outbound\RateLimiterStorage'
-  KonradMichalik\Typo3Outbound\PhpCacheProxyStore:
+      $storage: '@KonradMichalik\Typo3Outbound\Resilience\RateLimiterStorage'
+  KonradMichalik\Typo3Outbound\Proxy\PhpCacheProxyStore:
     arguments: ['@cache.outbound_proxies']
-  KonradMichalik\Outbound\Proxy\ProxyStore: '@KonradMichalik\Typo3Outbound\PhpCacheProxyStore'
+  KonradMichalik\Outbound\Proxy\ProxyStore: '@KonradMichalik\Typo3Outbound\Proxy\PhpCacheProxyStore'
   KonradMichalik\Outbound\Proxy\ProxyFactory:
     public: true
 

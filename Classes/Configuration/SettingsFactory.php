@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace KonradMichalik\Typo3Outbound;
+namespace KonradMichalik\Typo3Outbound\Configuration;
 
 use KonradMichalik\Outbound\Runtime\Settings;
 use Throwable;

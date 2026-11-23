@@ -13,7 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Unit;
 
-use KonradMichalik\Typo3Outbound\{PageCacheTagReporter, RequestContext};
+use KonradMichalik\Typo3Outbound\Cache\PageCacheTagReporter;
+use KonradMichalik\Typo3Outbound\Context\RequestContext;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;

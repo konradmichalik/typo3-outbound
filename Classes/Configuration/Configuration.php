@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace KonradMichalik\Typo3Outbound;
+namespace KonradMichalik\Typo3Outbound\Configuration;
 
 use TYPO3\CMS\Core\Cache\Backend\{SimpleFileBackend, Typo3DatabaseBackend};
 use TYPO3\CMS\Core\Cache\Frontend\{PhpFrontend, VariableFrontend};

@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace KonradMichalik\Typo3Outbound;
+namespace KonradMichalik\Typo3Outbound\Cache;
 
 use KonradMichalik\Outbound\Cache\{CacheLock, CacheLockHandle};
 use KonradMichalik\Outbound\Support\Clock;
