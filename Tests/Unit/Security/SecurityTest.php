@@ -28,14 +28,11 @@ use KonradMichalik\Typo3Outbound\Testing\MockTransport;
 use KonradMichalik\Typo3Outbound\Tests\Support\FakeClock;
 use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\{KeyedApi, SiteTokenUrlWithoutHostsApi, SiteUriWithoutHostsResource, StaticHeaderApi, TenantApi};
 use KonradMichalik\Typo3Outbound\Transport\{Call, Transport};
-use KonradMichalik\Typo3Outbound\Typo3\RequestContext;
 use PHPUnit\Framework\Attributes\{CoversNothing, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Contracts\HttpClient\ResponseInterface;
-use TYPO3\CMS\Core\Site\SiteFinder;
 
 use function sprintf;
 use function strlen;
@@ -299,8 +296,7 @@ final class SecurityTest extends TestCase
         $tokens = new TokenProvider($mock, $store, $values, $context, $clock, new RequestBudget($settings, $execution, $clock));
         $calls = new CallFactory(new RequestBuilder($values, $context), new Authenticator($values, $tokens, $context), $store, $execution, $settings);
         $outbound = $this->outbound([KeyedApi::class])->withTransport($mock);
-        $requestContext = new RequestContext((new ReflectionClass(SiteFinder::class))->newInstanceWithoutConstructor());
-        $tester = new CommandTester(new CallCommand($outbound->registry(), new EndpointLocator($outbound->registry()), $outbound->invoker(), $calls, $requestContext));
+        $tester = new CommandTester(new CallCommand($outbound->registry(), new EndpointLocator($outbound->registry()), $outbound->invoker(), $calls));
 
         $tester->execute(['endpoint' => 'KeyedApi::login', 'arguments' => ['credentials={"password":"hunter2"}'], '--dry-run' => true]);
 

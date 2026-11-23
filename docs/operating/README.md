@@ -36,7 +36,7 @@ Use a shared backend such as Redis for `outbound_state` on multi-server setups. 
 
 ## Site context outside requests
 
-CLI, Scheduler and Messenger have no current site. Select one with `--site=main` on `outbound:call`, or in your own code with `withSite()` of the injected `RequestContext`:
+CLI, Scheduler and Messenger have no current site. Select one with `--scope=main` (the site identifier) on `outbound:call`, or in your own code with `withSite()` of the injected `RequestContext`:
 
 ```php
 $contact = $this->requestContext->withSite('main', fn () => $this->contacts->find(42));
@@ -48,7 +48,7 @@ $contact = $this->requestContext->withSite('main', fn () => $this->contacts->fin
 |---------|---------|
 | `outbound:debug [connection] [--format=json]` | endpoints with effective configuration and origin |
 | `outbound:lint [--strict]` | likely mistakes the build accepts |
-| `outbound:call Key name=value [--site] [--dry-run]` | call an endpoint or show the redacted request; unknown argument names fail |
+| `outbound:call Key name=value [--scope] [--dry-run]` | call an endpoint or show the redacted request; unknown argument names fail |
 | `outbound:health` | run `#[HealthCheck]` endpoints, report deprecations; exit code 1 on failure |
 | `outbound:cache:flush connection` | flush cached responses and pages of a connection |
 | `outbound:make:dto Class --from=sample.json --namespace=... --output=...` | DTO scaffolds from a sample |

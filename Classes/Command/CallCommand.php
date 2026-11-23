@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Command;
 
+use KonradMichalik\Typo3Outbound\Context\ScopeRunner;
 use KonradMichalik\Typo3Outbound\Mapping\Normalizer;
 use KonradMichalik\Typo3Outbound\Metadata\{ParameterKind, ParameterMetadata, Registry};
 use KonradMichalik\Typo3Outbound\Runtime\{CallFactory, EndpointInvoker};
 use KonradMichalik\Typo3Outbound\Support\Redactor;
-use KonradMichalik\Typo3Outbound\Typo3\RequestContext;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{InputArgument, InputInterface, InputOption};
 use Symfony\Component\Console\Output\OutputInterface;
@@ -46,7 +46,7 @@ use const JSON_UNESCAPED_UNICODE;
 /**
  * CallCommand.
  *
- *     outbound:call PetApi::find petId=10 --site=main
+ *     outbound:call PetApi::find petId=10 --scope=main
  *     outbound:call PetApi::add 'pet={"name":"Rex"}' --dry-run
  *
  * With --dry-run the request is built (including authentication) and shown with
@@ -63,7 +63,7 @@ final class CallCommand extends Command
         private readonly EndpointLocator $endpoints,
         private readonly EndpointInvoker $invoker,
         private readonly CallFactory $calls,
-        private readonly RequestContext $context,
+        private readonly ?ScopeRunner $scopes = null,
     ) {
         parent::__construct();
     }
@@ -77,7 +77,7 @@ final class CallCommand extends Command
             unknown names fail with the list of valid ones.
 
               <info>%command.full_name% PetApi::find petId=10</info>
-              <info>%command.full_name% PetApi::find petId=10 --site=main</info>     site settings and secrets of a site
+              <info>%command.full_name% PetApi::find petId=10 --scope=main</info>     settings and secrets of a scope
               <info>%command.full_name% PetApi::add 'pet={"name":"Rex"}' --dry-run</info>
 
             With --dry-run the request is built, including authentication, and shown with redacted
@@ -85,7 +85,7 @@ final class CallCommand extends Command
             HELP);
         $this->addArgument('endpoint', InputArgument::REQUIRED, 'Endpoint key, e.g. PetApi::find')
             ->addArgument('arguments', InputArgument::IS_ARRAY, 'name=value pairs; JSON values for objects and lists')
-            ->addOption('site', null, InputOption::VALUE_REQUIRED, 'Site identifier for site settings and secrets')
+            ->addOption('scope', null, InputOption::VALUE_REQUIRED, 'Scope for runtime settings and secrets')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Build and show the request without sending it');
     }
 
@@ -143,8 +143,16 @@ final class CallCommand extends Command
             return Command::SUCCESS;
         };
 
-        $site = $input->getOption('site');
+        $scope = $input->getOption('scope');
+        if (!is_string($scope)) {
+            return $run();
+        }
+        if (null === $this->scopes) {
+            $output->writeln('<error>--scope needs a framework integration that provides scopes.</error>');
 
-        return is_string($site) ? $this->context->withSite($site, $run) : $run();
+            return Command::INVALID;
+        }
+
+        return $this->scopes->runInScope($scope, $run);
     }
 }

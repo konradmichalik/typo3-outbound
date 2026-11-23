@@ -37,6 +37,7 @@ services:
   KonradMichalik\Typo3Outbound\Typo3\RequestContext:
     public: true
   KonradMichalik\Typo3Outbound\Context\CallContext: '@KonradMichalik\Typo3Outbound\Typo3\RequestContext'
+  KonradMichalik\Typo3Outbound\Context\ScopeRunner: '@KonradMichalik\Typo3Outbound\Typo3\RequestContext'
   KonradMichalik\Typo3Outbound\Context\ExecutionContext: '@KonradMichalik\Typo3Outbound\Typo3\Typo3ExecutionContext'
   KonradMichalik\Typo3Outbound\Support\Clock: '@KonradMichalik\Typo3Outbound\Support\SystemClock'
   outbound.valinor_cache:

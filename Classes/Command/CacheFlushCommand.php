@@ -13,12 +13,11 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Command;
 
-use KonradMichalik\Typo3Outbound\Cache\CacheTags;
+use KonradMichalik\Typo3Outbound\Cache\{CacheInvalidator, CacheTags};
 use KonradMichalik\Typo3Outbound\Metadata\Registry;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{InputArgument, InputInterface};
 use Symfony\Component\Console\Output\OutputInterface;
-use TYPO3\CMS\Core\Cache\CacheManager;
 
 use function is_string;
 use function sprintf;
@@ -38,7 +37,7 @@ final class CacheFlushCommand extends Command
 {
     public function __construct(
         private readonly Registry $registry,
-        private readonly CacheManager $caches,
+        private readonly CacheInvalidator $invalidator,
     ) {
         parent::__construct();
     }
@@ -65,7 +64,7 @@ final class CacheFlushCommand extends Command
         }
         $this->registry->connection($name);
         $tag = CacheTags::connectionTag($name);
-        $this->caches->flushCachesByTags([$tag]);
+        $this->invalidator->invalidate([$tag]);
         $output->writeln(sprintf('Flushed tag %s.', $tag));
 
         return Command::SUCCESS;

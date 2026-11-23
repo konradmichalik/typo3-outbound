@@ -120,4 +120,4 @@ final class CourseController extends ActionController
 5. **Replace the service.** Inject the resource interface where the service was used. Keep the old service as a thin adapter for a while if many places use it.
 6. **Make failures visible.** Catch `ApiException` (or a specific subclass) where a fallback makes sense; do not swallow errors into empty arrays.
 7. **Test by endpoint.** `OutboundTestTrait::mockEndpoint()` in functional tests, `MockTransport` in unit tests.
-8. **Check the request and the page.** `outbound:call CoursesApi::list category=yoga --site=main --dry-run` shows the request with the settings of site `main`; a page using the data must carry the `courses` tag in its page cache entry.
+8. **Check the request and the page.** `outbound:call CoursesApi::list category=yoga --scope=main --dry-run` shows the request with the settings of site `main`; a page using the data must carry the `courses` tag in its page cache entry.

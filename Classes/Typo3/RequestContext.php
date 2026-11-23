@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Typo3;
 
-use KonradMichalik\Typo3Outbound\Context\CallContext;
+use KonradMichalik\Typo3Outbound\Context\{CallContext, ScopeRunner};
 use KonradMichalik\Typo3Outbound\Exception\MissingContext;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Site\Entity\{Site, SiteLanguage};
@@ -34,7 +34,7 @@ use function str_replace;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-final class RequestContext implements CallContext
+final class RequestContext implements CallContext, ScopeRunner
 {
     private ?ServerRequestInterface $request = null;
     private ?Site $scopedSite = null;
@@ -76,6 +76,11 @@ final class RequestContext implements CallContext
         }
     }
 
+    public function runInScope(string $scope, callable $callback): mixed
+    {
+        return $this->withSite($scope, $callback);
+    }
+
     public function siteIdentifier(): ?string
     {
         return $this->site()?->getIdentifier();
@@ -83,7 +88,7 @@ final class RequestContext implements CallContext
 
     public function setting(string $key): mixed
     {
-        $site = $this->site() ?? throw new MissingContext(sprintf('Site setting "%s" needs a site. Outside a request, select one with RequestContext::withSite() or --site.', $key), 1794700190);
+        $site = $this->site() ?? throw new MissingContext(sprintf('Site setting "%s" needs a site. Outside a request, select one with RequestContext::withSite() or --scope.', $key), 1794700190);
 
         return $site->getSettings()->get($key);
     }
