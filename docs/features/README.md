@@ -22,7 +22,7 @@ Templates like `crm_contact_{id}` are validated when the container is built: eve
 
 ## Rate limits and circuit breaker
 
-`#[RateLimit(100, per: '1 minute')]` applies to the whole connection. In web requests an exhausted limit throws `ApiRateLimited`; CLI waits. A quota announced by the API (`X-RateLimit-Remaining`/`-Reset`, configurable) is honoured the same way. `#[CircuitBreaker]` opens after consecutive failures; while open, calls fail with `ApiUnavailable` without touching the network.
+`#[RateLimit(100, per: '1 minute')]` applies to the whole connection. In web requests an exhausted limit throws `ApiRateLimited`; CLI waits. A quota announced by the API (`X-RateLimit-Remaining`/`-Reset`, configurable) is honoured the same way. `#[CircuitBreaker]` opens after consecutive failures; while open, calls fail with `ApiUnavailable` without touching the network. Retries and the resend after a 401 need a closed breaker and a rate limit token like the first request; without them the original answer stands.
 
 The rate limit, the announced quota and the circuit breaker are shared by all sites as long as the connection has one base URI. With a base URI from a site setting every site talks to its own API, so each site keeps its own state.
 
