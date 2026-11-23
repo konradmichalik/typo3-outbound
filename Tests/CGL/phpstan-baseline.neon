@@ -1,6 +1,12 @@
 parameters:
 	ignoreErrors:
 		-
+			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\Auth\\TokenProvider\:\:token\(\)" is 11, keep it under 10$#'
+			identifier: complexity.functionLike
+			count: 1
+			path: ../../Classes/Auth/TokenProvider.php
+
+		-
 			message: '#^Parameter \#1 \$items of method KonradMichalik\\Typo3Outbound\\Codegen\\DtoGenerator\:\:merge\(\) expects list\<mixed\>, non\-empty\-array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -229,7 +235,7 @@ parameters:
 			path: ../../Classes/Metadata/MetadataFactory.php
 
 		-
-			message: '#^Class cognitive complexity is 118, keep it under 40$#'
+			message: '#^Class cognitive complexity is 126, keep it under 40$#'
 			identifier: complexity.classLike
 			count: 1
 			path: ../../Classes/Metadata/MetadataFactory.php
@@ -241,7 +247,7 @@ parameters:
 			path: ../../Classes/Metadata/MetadataFactory.php
 
 		-
-			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\Metadata\\MetadataFactory\:\:parameters\(\)" is 17, keep it under 10$#'
+			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\Metadata\\MetadataFactory\:\:parameters\(\)" is 16, keep it under 10$#'
 			identifier: complexity.functionLike
 			count: 1
 			path: ../../Classes/Metadata/MetadataFactory.php
@@ -319,7 +325,7 @@ parameters:
 			path: ../../Classes/Runtime/Dispatcher.php
 
 		-
-			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\Runtime\\Paginator\:\:iterate\(\)" is 39, keep it under 10$#'
+			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\Runtime\\Paginator\:\:iterate\(\)" is 33, keep it under 10$#'
 			identifier: complexity.functionLike
 			count: 1
 			path: ../../Classes/Runtime/Paginator.php
@@ -391,6 +397,12 @@ parameters:
 			path: ../../Classes/Typo3/Configuration.php
 
 		-
+			message: '#^Calling exec\(\) is forbidden\.$#'
+			identifier: disallowed.function
+			count: 1
+			path: ../Unit/Codegen/CodegenTest.php
+
+		-
 			message: '#^Calling putenv\(\) is forbidden, might overwrite existing variables\.$#'
 			identifier: disallowed.function
 			count: 2
@@ -401,6 +413,12 @@ parameters:
 			identifier: disallowed.function
 			count: 2
 			path: ../Unit/Conventions/ConventionsTest.php
+
+		-
+			message: '#^Method KonradMichalik\\Typo3Outbound\\Tests\\Unit\\Fixtures\\UntypedPathApi\:\:a\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: ../Unit/Fixtures/Definitions.php
 
 		-
 			message: '#^Calling exec\(\) is forbidden\.$#'

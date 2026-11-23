@@ -15,7 +15,7 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Metadata;
 
 use KonradMichalik\Typo3Outbound\Exception\InvalidDefinition;
 use KonradMichalik\Typo3Outbound\Metadata\{Naming, Registry, ReturnKind};
-use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\{BodyOnGetApi, CachedCatalogApi, CachedPostApi, ExtendsWithEndpointsApi, GeneratorApi, InsecureApi, ItemDto, ItemsApi, NoRoleApi, OrphanApi, PaginateWithoutIterableApi, UnboundPlaceholderApi};
+use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\{BodyOnGetApi, ByReferenceApi, CachedCatalogApi, CachedPostApi, DuplicatePathApi, ExtendsWithEndpointsApi, GeneratorApi, InsecureApi, ItemDto, ItemsApi, NeverReturnApi, NoRoleApi, NullablePathApi, OrphanApi, PaginateWithoutIterableApi, UnboundPlaceholderApi, UntypedPathApi};
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 
@@ -104,6 +104,16 @@ final class MetadataFactoryTest extends TestCase
         yield 'body on GET' => [BodyOnGetApi::class, 1794700016];
         yield 'cache on POST' => [CachedPostApi::class, 1794700012];
         yield 'paginate without iterable' => [PaginateWithoutIterableApi::class, 1794700011];
+        yield 'parameter by reference' => [ByReferenceApi::class, 1794700038];
+        yield 'never return type' => [NeverReturnApi::class, 1794700039];
+        yield 'placeholder bound twice' => [DuplicatePathApi::class, 1794700042];
+        yield 'nullable path parameter' => [NullablePathApi::class, 1794700043];
+    }
+
+    #[Test]
+    public function anUntypedPathParameterIsNoNullableOne(): void
+    {
+        self::assertSame('/a/{id}', Registry::build([UntypedPathApi::class])->endpoint(UntypedPathApi::class, 'a')->path);
     }
 
     #[Test]

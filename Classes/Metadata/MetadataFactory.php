@@ -28,6 +28,7 @@ use ReflectionIntersectionType;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
+use ReflectionType;
 use ReflectionUnionType;
 use Reflector;
 use Throwable;
@@ -285,11 +286,12 @@ final readonly class MetadataFactory
             if ($parameter->isVariadic()) {
                 throw new InvalidDefinition(sprintf('%s: variadic parameter $%s is not supported.', $key, $parameter->getName()), 1794700014);
             }
+            if ($parameter->isPassedByReference()) {
+                throw new InvalidDefinition(sprintf('%s: parameter $%s is passed by reference, which an API call cannot write back.', $key, $parameter->getName()), 1794700038);
+            }
             $metadata = $this->parameter($parameter, $placeholders, $key);
             if (ParameterKind::Path === $metadata->kind) {
-                if (!in_array($metadata->wireName, $placeholders, true)) {
-                    throw new InvalidDefinition(sprintf('%s: #[Path] "%s" has no placeholder in "%s".', $key, $metadata->wireName, $path), 1794700015);
-                }
+                self::validatePath($key, $path, $parameter, $metadata->wireName, $placeholders, $bound);
                 $bound[] = $metadata->wireName;
             }
             if (in_array($metadata->kind, [ParameterKind::Body, ParameterKind::Multipart], true)) {
@@ -351,6 +353,9 @@ final readonly class MetadataFactory
         $type = $method->getReturnType();
         if (null === $type) {
             throw new InvalidDefinition(sprintf('%s needs a return type.', $key), 1794700021);
+        }
+        if ($type instanceof ReflectionNamedType && 'never' === $type->getName()) {
+            throw new InvalidDefinition(sprintf('%s: an endpoint returns, so never is no valid return type.', $key), 1794700039);
         }
         $doc = self::docType((string) $method->getDocComment(), 'return');
         $resolvedDoc = null !== $doc ? $this->types->resolve($doc, $interface) : null;
@@ -447,6 +452,26 @@ final readonly class MetadataFactory
         $attributes = $reflector->getAttributes($attribute, ReflectionAttribute::IS_INSTANCEOF);
 
         return isset($attributes[0]) ? $attributes[0]->newInstance() : null;
+    }
+
+    /**
+     * @param list<string> $placeholders
+     * @param list<string> $bound
+     */
+    private static function validatePath(string $key, string $path, ReflectionParameter $parameter, string $name, array $placeholders, array $bound): void
+    {
+        if (!in_array($name, $placeholders, true)) {
+            throw new InvalidDefinition(sprintf('%s: #[Path] "%s" has no placeholder in "%s".', $key, $name, $path), 1794700015);
+        }
+        if (in_array($name, $bound, true)) {
+            throw new InvalidDefinition(sprintf('%s: placeholder {%s} is bound by more than one parameter.', $key, $name), 1794700042);
+        }
+        // Untyped and mixed parameters allow null as well, but are not declared nullable.
+        $type = $parameter->getType();
+        $nullable = $type instanceof ReflectionType && $type->allowsNull() && !($type instanceof ReflectionNamedType && 'mixed' === $type->getName());
+        if ($nullable || ($parameter->isDefaultValueAvailable() && null === $parameter->getDefaultValue())) {
+            throw new InvalidDefinition(sprintf('%s: path parameter $%s must not be nullable, an empty segment would change the URL.', $key, $parameter->getName()), 1794700043);
+        }
     }
 
     private static function isPositiveInterval(string $interval): bool

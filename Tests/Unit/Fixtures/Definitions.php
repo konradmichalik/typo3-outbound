@@ -171,3 +171,53 @@ interface CachedCatalogApi
     #[Outbound\Delete('/items/{id}')]
     public function remove(int $id): string;
 }
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+#[Outbound\Resource]
+interface ByReferenceApi extends BrokenApi
+{
+    #[Outbound\Get('/a')]
+    public function a(int &$id): string;
+}
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+#[Outbound\Resource]
+interface NeverReturnApi extends BrokenApi
+{
+    #[Outbound\Get('/a')]
+    public function a(): never;
+}
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+#[Outbound\Resource]
+interface DuplicatePathApi extends BrokenApi
+{
+    #[Outbound\Get('/a/{id}')]
+    public function a(int $id, #[Outbound\Path('id')] int $other): string;
+}
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+#[Outbound\Resource]
+interface NullablePathApi extends BrokenApi
+{
+    #[Outbound\Get('/a/{id}')]
+    public function a(?int $id = null): string;
+}
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+#[Outbound\Connection(baseUri: 'https://untyped.example.com')]
+interface UntypedPathApi
+{
+    #[Outbound\Get('/a/{id}')]
+    public function a($id): string;
+}
