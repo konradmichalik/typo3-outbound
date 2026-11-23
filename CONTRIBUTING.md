@@ -93,11 +93,11 @@ ddev all typo3 cache:flush
 
 Both instances install the fixture extension `outbound_petstore` as sitepackage, so the Petstore plugin renders on https://13.typo3-outbound.ddev.site and https://14.typo3-outbound.ddev.site. Set `OUTBOUND_PETSTORE_MOCK=1` in `.ddev/docker-compose.zz-project.yaml` to answer from the fixture responses instead of petstore3.swagger.io.
 
-The DDEV setup comes from the add-on [ddev-typo3-multi-version-extension][2]; update it with `ddev add-on get konradmichalik/ddev-typo3-multi-version-extension`. `config.yaml`, `docker-compose.zz-project.yaml`, `.setup/project.sh` and `.setup/hooks/` belong to this repository and survive updates. The `post-typo3-setup` hook removes the page TypoScript that `typo3 setup` creates, because it would hide the TypoScript of the Petstore site set.
+The DDEV setup comes from the add-on [ddev-typo3-multi-version-extension][2]; update it with `ddev add-on get konradmichalik/ddev-typo3-multi-version-extension`. `config.yaml`, `docker-compose.zz-project.yaml`, `.setup/project.sh`, `.setup/hooks/` and `commands/web/benchmark` belong to this repository and survive updates. The `post-typo3-setup` hook removes the page TypoScript that `typo3 setup` creates, because it would hide the TypoScript of the Petstore site set.
 
 ## Petstore demo
 
-The same Petstore frontend runs without TYPO3. Each page lists the requests it sent, so retries and cache hits are visible.
+The same Petstore frontend runs without TYPO3 and DDEV, with the PHP on your host. Each page lists the requests it sent, so retries and cache hits are visible.
 
 ```bash
 # http://localhost:8080 against petstore3.swagger.io, append ?mock=1 for the fixture responses
@@ -126,7 +126,7 @@ The report shows the median and p95 of `timing.total_ms` and the median query co
 # All steps
 Build/verify.sh
 
-# Without the calls to petstore3.swagger.io
+# Without the steps calling petstore3.swagger.io: live tests, outbound:health and the Petstore plugin
 Build/verify.sh --no-live
 ```
 

@@ -1,4 +1,4 @@
-# .ddev/.setup/project.sh - repo-owned customizations for `ddev install`.
+# .ddev/.setup/project.sh: repo-owned customizations for `ddev install`.
 # Sourced by utils.sh on every install; not managed by the add-on.
 
 # The Petstore fixture extension replaces the default test/sitepackage. Its site

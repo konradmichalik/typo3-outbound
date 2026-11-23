@@ -6,7 +6,19 @@
 composer require konradmichalik/typo3-outbound
 ```
 
-Interfaces with `#[Connection]` or `#[Resource]` below your `Services.yaml` resource are registered automatically. Interfaces outside it or in its `exclude` paths need `OutboundServices::discover()` in `Configuration/Services.php`. Invalid declarations fail the container build.
+Interfaces with `#[Connection]` or `#[Resource]` below your `Services.yaml` resource are registered automatically. Interfaces outside it or in its `exclude` paths need `OutboundServices::discover()` in `Configuration/Services.php`:
+
+```php
+use KonradMichalik\Typo3Outbound\DependencyInjection\OutboundServices;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+return static function (ContainerConfigurator $configurator, ContainerBuilder $builder): void {
+    OutboundServices::discover($builder, __DIR__.'/../Classes/Api');
+};
+```
+
+Invalid declarations fail the container build.
 
 ## Configuration
 
@@ -24,7 +36,11 @@ Use a shared backend such as Redis for `outbound_state` on multi-server setups. 
 
 ## Site context outside requests
 
-CLI, Scheduler and Messenger have no current site. Select one explicitly: `RequestContext::withSite('main', fn () => ...)` or `--site=main` on the commands.
+CLI, Scheduler and Messenger have no current site. Select one with `--site=main` on `outbound:call`, or in your own code with `withSite()` of the injected `RequestContext`:
+
+```php
+$contact = $this->requestContext->withSite('main', fn () => $this->contacts->find(42));
+```
 
 ## Commands
 
@@ -35,7 +51,7 @@ CLI, Scheduler and Messenger have no current site. Select one explicitly: `Reque
 | `outbound:call Key name=value [--site] [--dry-run]` | call an endpoint or show the redacted request; unknown argument names fail |
 | `outbound:health` | run `#[HealthCheck]` endpoints, report deprecations; exit code 1 on failure |
 | `outbound:cache:flush connection` | flush cached responses and pages of a connection |
-| `outbound:make:dto Class --from=sample.json` | DTO scaffolds from a sample |
+| `outbound:make:dto Class --from=sample.json --namespace=... --output=...` | DTO scaffolds from a sample |
 | `outbound:generate --from=openapi.yaml --name=X --namespace=... --output=...` | interfaces and DTOs from OpenAPI |
 
 Each command explains its arguments, examples and exit codes with `--help`, e.g. `vendor/bin/typo3 outbound:call --help`.

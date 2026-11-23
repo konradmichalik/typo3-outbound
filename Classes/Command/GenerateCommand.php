@@ -30,9 +30,6 @@ use function str_ends_with;
  *
  *     outbound:generate --from=openapi.yaml --name=Petstore --namespace='Vendor\Site\Petstore' --output=Classes/Petstore
  *
- * The counterpart of routing:openapi: where routing exports its own endpoints,
- * this imports a foreign API.
- *
  * @internal
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>

@@ -1,10 +1,13 @@
 # Features
 
-All examples extend this connection:
+All examples extend this connection and use these imports:
 
 ```php
 use KonradMichalik\Typo3Outbound\Attribute as Outbound;
-use KonradMichalik\Typo3Outbound\Value\{Secret, SiteSetting};
+use KonradMichalik\Typo3Outbound\Cache\CacheTags;
+use KonradMichalik\Typo3Outbound\Enum\PaginationStyle;
+use KonradMichalik\Typo3Outbound\Format\JsonApi;
+use KonradMichalik\Typo3Outbound\Value\{Deferred, FilePart, Secret, SiteSetting};
 
 #[Outbound\Connection(baseUri: new SiteSetting('crm.baseUri'), allowedHosts: ['crm.example.com'])]
 #[Outbound\Auth\Bearer(token: new Secret('crm.token'))]
@@ -29,8 +32,8 @@ interface ContactsApi extends CrmApi
 
 - Each attempt may take 3 s in web requests and 30 s in CLI; `#[Timeout]` overrides it. All calls of one web request share a budget of 8 s
 - `#[Retry]` backs off exponentially with jitter. A `Retry-After` above 1 s (web) or 60 s (CLI) gives up instead of blocking the page
-- A POST is only retried with `idempotencyKey: true` or `force: true`, so a timeout never creates a contact twice
-- After a 401 an OAuth token is refreshed once and the request resent
+- A POST is only retried with `idempotencyKey: true`, `idempotent: true` on the verb or `force: true` on `#[Retry]`, so a timeout never creates a contact twice
+- After a 401 an OAuth or login token is fetched again once and the request resent
 
 ## Caching
 

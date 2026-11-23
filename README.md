@@ -40,6 +40,7 @@ This extension lets you describe **external APIs as PHP interfaces with attribut
 
 * TYPO3 >= 13.4
 * PHP 8.2+
+* Symfony components 7.4
 
 ### Composer
 

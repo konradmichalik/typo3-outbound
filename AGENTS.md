@@ -8,7 +8,7 @@ TYPO3 extension `typo3_outbound` (`konradmichalik/typo3-outbound`). External API
 
 - Extension key: `typo3_outbound`
 - Namespace: `KonradMichalik\Typo3Outbound\`
-- PHP: `~8.2 || ~8.3 || ~8.4 || ~8.5`
+- PHP: `~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0`
 - TYPO3: `^13.4 || ^14.0`
 
 ## Structure

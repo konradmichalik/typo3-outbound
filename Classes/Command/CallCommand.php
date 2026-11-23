@@ -50,7 +50,7 @@ use const JSON_UNESCAPED_UNICODE;
  *     outbound:call PetApi::add 'pet={"name":"Rex"}' --dry-run
  *
  * With --dry-run the request is built (including authentication) and shown with
- * redacted credentials, but not sent; the counterpart of routing:match.
+ * redacted credentials, but not sent.
  *
  * @internal
  *

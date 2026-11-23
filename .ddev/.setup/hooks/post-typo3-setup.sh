@@ -1,4 +1,4 @@
-# .ddev/.setup/hooks/post-typo3-setup.sh - repo-owned, sourced by utils.sh after `typo3 setup`.
+# .ddev/.setup/hooks/post-typo3-setup.sh: repo-owned, sourced by utils.sh after `typo3 setup`.
 
 # `typo3 setup --create-site` adds its own page TypoScript: a sys_template record in
 # TYPO3 13, a site setup.typoscript in TYPO3 14. Either one hides the TypoScript of
