@@ -70,6 +70,19 @@ final class CallCommand extends Command
 
     protected function configure(): void
     {
+        $this->setHelp(<<<'HELP'
+            Calls one endpoint through the full runtime (authentication, retries, cache, limits)
+            and prints the mapped result as JSON. Arguments are name=value pairs named after the
+            method parameters; objects and lists are given as JSON. Each name may appear once, and
+            unknown names fail with the list of valid ones.
+
+              <info>%command.full_name% PetApi::find petId=10</info>
+              <info>%command.full_name% PetApi::find petId=10 --site=main</info>     site settings and secrets of a site
+              <info>%command.full_name% PetApi::add 'pet={"name":"Rex"}' --dry-run</info>
+
+            With --dry-run the request is built, including authentication, and shown with redacted
+            credentials, but not sent. Exit code 2 on invalid arguments.
+            HELP);
         $this->addArgument('endpoint', InputArgument::REQUIRED, 'Endpoint key, e.g. PetApi::find')
             ->addArgument('arguments', InputArgument::IS_ARRAY, 'name=value pairs; JSON values for objects and lists')
             ->addOption('site', null, InputOption::VALUE_REQUIRED, 'Site identifier for site settings and secrets')

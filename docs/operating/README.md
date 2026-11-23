@@ -38,6 +38,8 @@ CLI, Scheduler and Messenger have no current site. Select one explicitly: `Reque
 | `outbound:make:dto Class --from=sample.json` | DTO scaffolds from a sample |
 | `outbound:generate --from=openapi.yaml --name=X --namespace=... --output=...` | interfaces and DTOs from OpenAPI |
 
+Each command explains its arguments, examples and exit codes with `--help`, e.g. `vendor/bin/typo3 outbound:call --help`.
+
 ## Testing
 
 `MockTransport` answers by endpoint and arguments, never by URL; unexpected calls fail.

@@ -41,6 +41,18 @@ final class GenerateCommand extends Command
 {
     protected function configure(): void
     {
+        $this->setHelp(<<<'HELP'
+            Generates the connection interface, one resource interface per tag and DTOs and enums
+            from an OpenAPI 3 document in JSON or YAML. --name gives the connection interface
+            (Petstore becomes PetstoreApi, connection "petstore"); interfaces go to the \Api,
+            DTOs to the \Dto sub-namespace.
+
+              <info>%command.full_name% --from=openapi.yaml --name=Petstore --namespace='Vendor\Site\Petstore' --output=Classes/Petstore</info>
+
+            Without --force, existing files are skipped and the exit code is 1. Review the
+            generated code, especially authentication, pagination and caching, which OpenAPI does
+            not describe fully.
+            HELP);
         $this->addOption('from', null, InputOption::VALUE_REQUIRED, 'OpenAPI 3 document, JSON or YAML')
             ->addOption('name', null, InputOption::VALUE_REQUIRED, 'Name of the API, e.g. Petstore (gives PetstoreApi and connection "petstore")')
             ->addOption('namespace', null, InputOption::VALUE_REQUIRED, 'Root namespace; interfaces go to \\Api, DTOs to \\Dto')

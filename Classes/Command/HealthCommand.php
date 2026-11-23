@@ -47,6 +47,18 @@ final class HealthCommand extends Command
         parent::__construct();
     }
 
+    protected function configure(): void
+    {
+        $this->setHelp(<<<'HELP'
+            Calls every endpoint marked with #[HealthCheck], without arguments, and reports
+            deprecations the APIs announced through Deprecation and Sunset headers on earlier calls.
+
+              <info>%command.full_name%</info>
+
+            Exit code 1 if any health check fails, so it fits into monitoring after a deployment.
+            HELP);
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $failed = 0;

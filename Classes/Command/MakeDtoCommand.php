@@ -31,6 +31,16 @@ final class MakeDtoCommand extends Command
 {
     protected function configure(): void
     {
+        $this->setHelp(<<<'HELP'
+            Writes DTO classes for a saved sample response. Nested objects become DTOs of their
+            own, lists of objects get an item DTO, and the list properties carry the PHPDoc item
+            type Valinor needs. --camel turns snake_case keys into camelCase properties.
+
+              <info>%command.full_name% ContactDto --from=contact.json --namespace='Vendor\Site\Dto' --output=Classes/Dto --camel</info>
+
+            Without --force, existing files are skipped and the exit code is 1. The sample
+            shows one answer only, so review optional and nullable properties before committing.
+            HELP);
         $this->addArgument('class', InputArgument::REQUIRED, 'Name of the root DTO class')
             ->addOption('from', null, InputOption::VALUE_REQUIRED, 'JSON file with a sample response')
             ->addOption('namespace', null, InputOption::VALUE_REQUIRED, 'Namespace of the generated classes')

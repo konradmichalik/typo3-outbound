@@ -45,6 +45,15 @@ final class CacheFlushCommand extends Command
 
     protected function configure(): void
     {
+        $this->setHelp(<<<'HELP'
+            Flushes the cache tag outbound_<connection> in all caches: the cached responses of the
+            connection and every page that rendered its data. On TYPO3 14 this equals
+            <info>cache:flushtags outbound_<connection></info>.
+
+              <info>%command.full_name% petstore</info>
+
+            Connection names are listed by <info>outbound:debug</info>.
+            HELP);
         $this->addArgument('connection', InputArgument::REQUIRED, 'Connection name, see outbound:debug');
     }
 

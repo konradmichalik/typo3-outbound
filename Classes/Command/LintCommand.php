@@ -46,6 +46,16 @@ final class LintCommand extends Command
 
     protected function configure(): void
     {
+        $this->setHelp(<<<'HELP'
+            Reports declarations the container build accepts but that are probably unintended:
+            a base URI from an environment variable or site setting without allowedHosts, an HTTPS
+            proxy (the private network block cannot see behind it), verifyTls: false, an
+            #[InvalidatesCache] tag no #[Cache] sets, #[Retry] on an endpoint that is not
+            idempotent, and a high maxPages. Invalid declarations never get here, they fail the build.
+
+              <info>%command.full_name%</info>
+              <info>%command.full_name% --strict</info>            exit code 1 on any warning, for CI
+            HELP);
         $this->addOption('strict', null, InputOption::VALUE_NONE, 'Fail on warnings');
     }
 

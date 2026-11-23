@@ -49,6 +49,15 @@ final class DebugCommand extends Command
 
     protected function configure(): void
     {
+        $this->setHelp(<<<'HELP'
+            Lists every connection and endpoint with the settings that apply to it: HTTP method,
+            path, return type, retry, timeout and cache. Behind each setting it names where it comes
+            from: the method, the resource interface or the connection.
+
+              <info>%command.full_name%</info>
+              <info>%command.full_name% petstore</info>            only the endpoints of one connection
+              <info>%command.full_name% --format=json</info>       machine-readable, e.g. for checks in CI
+            HELP);
         $this->addArgument('connection', InputArgument::OPTIONAL, 'Only this connection')
             ->addOption('format', null, InputOption::VALUE_REQUIRED, 'text or json', 'text');
     }
