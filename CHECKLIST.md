@@ -108,7 +108,3 @@ Performance:
 
 - Comparison spike with Saloon (concept step 0): skipped on request
 
-- TYPO3 functional tests (no TYPO3 installation, Packagist not reachable): written, not executed
-- DDEV environment (no Docker): configured from the add-on's install.yaml, shell scripts syntax-checked, not started
-- CI workflows: configured, not executed
-- Live calls against petstore3.swagger.io: blocked by the sandbox proxy; unit tests use fixture responses, `composer test:live` and the demo call the real API
