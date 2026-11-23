@@ -32,7 +32,7 @@ CLI, Scheduler and Messenger have no current site. Select one explicitly: `Reque
 |---------|---------|
 | `outbound:debug [connection] [--format=json]` | endpoints with effective configuration and origin |
 | `outbound:lint [--strict]` | likely mistakes the build accepts |
-| `outbound:call Key name=value [--site] [--dry-run]` | call an endpoint or show the redacted request |
+| `outbound:call Key name=value [--site] [--dry-run]` | call an endpoint or show the redacted request; unknown argument names fail |
 | `outbound:health` | run `#[HealthCheck]` endpoints, report deprecations; exit code 1 on failure |
 | `outbound:cache:flush connection` | flush cached responses and pages of a connection |
 | `outbound:make:dto Class --from=sample.json` | DTO scaffolds from a sample |

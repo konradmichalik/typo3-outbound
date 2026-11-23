@@ -23,14 +23,20 @@ use Symfony\Component\Console\Input\{InputArgument, InputInterface, InputOption}
 use Symfony\Component\Console\Output\OutputInterface;
 use Traversable;
 
+use function array_diff;
 use function array_filter;
+use function array_key_exists;
+use function array_keys;
+use function array_map;
+use function count;
 use function explode;
+use function implode;
+use function in_array;
 use function is_string;
 use function iterator_to_array;
 use function json_decode;
 use function json_encode;
 use function sprintf;
-use function str_contains;
 
 use const JSON_PRETTY_PRINT;
 use const JSON_THROW_ON_ERROR;
@@ -76,8 +82,21 @@ final class CallCommand extends Command
         $endpoint = $this->endpoints->byKey(is_string($key) ? $key : '');
         $named = [];
         foreach ((array) $input->getArgument('arguments') as $pair) {
-            [$name, $value] = explode('=', is_string($pair) ? $pair : '', 2) + [1 => ''];
-            $named[$name] = str_contains('{[', $value[0] ?? '') ? json_decode($value, true, 512, JSON_THROW_ON_ERROR) : $value;
+            $parts = explode('=', is_string($pair) ? $pair : '', 2);
+            if (2 !== count($parts) || array_key_exists($parts[0], $named)) {
+                $output->writeln(sprintf('<error>Arguments are name=value pairs with each name once, got "%s".</error>', is_string($pair) ? $pair : ''));
+
+                return Command::INVALID;
+            }
+            [$name, $value] = $parts;
+            $named[$name] = in_array($value[0] ?? '', ['{', '['], true) ? json_decode($value, true, 512, JSON_THROW_ON_ERROR) : $value;
+        }
+        $known = array_map(static fn (ParameterMetadata $parameter): string => $parameter->name, $endpoint->parameters);
+        $unknown = array_diff(array_keys($named), $known);
+        if ([] !== $unknown) {
+            $output->writeln(sprintf('<error>Unknown argument %s. %s takes: %s</error>', implode(', ', $unknown), $endpoint->key, implode(', ', $known)));
+
+            return Command::INVALID;
         }
         $positional = [];
         foreach ($endpoint->parameters as $parameter) {
