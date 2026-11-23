@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Runtime;
 
 use KonradMichalik\Typo3Outbound\Auth\Authenticator;
-use KonradMichalik\Typo3Outbound\Exception\{ApiTransportFailed, BlockedRequest};
+use KonradMichalik\Typo3Outbound\Exception\{ApiRateLimited, ApiTransportFailed, ApiUnavailable, BlockedRequest};
 use KonradMichalik\Typo3Outbound\Resilience\{CircuitBreaker, RateLimitGuard, RetryPolicy};
 use KonradMichalik\Typo3Outbound\Support\{Clock, Redactor};
 use KonradMichalik\Typo3Outbound\Transport\{Call, Transport};
@@ -75,7 +75,7 @@ final readonly class Dispatcher
                 $status = $response->getStatusCode();
                 $headers = $response->getHeaders(false);
             } catch (TransportExceptionInterface $exception) {
-                if ($this->retry($policy, $retries + 1, null, null)) {
+                if ($this->retry($execution, $policy, $retries + 1, null, null)) {
                     ++$retries;
                     $response = $this->send($execution);
                     continue;
@@ -87,12 +87,12 @@ final readonly class Dispatcher
 
             $this->observer->observe($execution, $headers);
 
-            if (401 === $status && $this->authenticator->invalidate($execution->connection) && $execution->refreshCredentials()) {
+            if (401 === $status && $this->authenticator->invalidate($execution->connection) && $this->mayResend($execution) && $execution->refreshCredentials()) {
                 $response->cancel();
                 $response = $this->send($execution);
                 continue;
             }
-            if ($this->retry($policy, $retries + 1, $status, $headers['retry-after'][0] ?? null)) {
+            if ($this->retry($execution, $policy, $retries + 1, $status, $headers['retry-after'][0] ?? null)) {
                 $response->cancel();
                 ++$retries;
                 $response = $this->send($execution);
@@ -123,7 +123,7 @@ final readonly class Dispatcher
         return new Result($status, $headers, $body, $execution->request->url, $retries, false, $response);
     }
 
-    private function retry(RetryPolicy $policy, int $attempt, ?int $status, ?string $retryAfter): bool
+    private function retry(Execution $execution, RetryPolicy $policy, int $attempt, ?int $status, ?string $retryAfter): bool
     {
         if (!$policy->allows($attempt, $status)) {
             return false;
@@ -133,6 +133,23 @@ final readonly class Dispatcher
             return false;
         }
         $this->clock->sleep($delay);
+
+        // Checked after the backoff: a quota or breaker may have reset while waiting.
+        return $this->mayResend($execution);
+    }
+
+    /**
+     * Every resent request needs a closed breaker and a rate limit token like the first one.
+     * Without them the caller gets the original answer instead of a limit error hiding it.
+     */
+    private function mayResend(Execution $execution): bool
+    {
+        try {
+            $this->breaker->guard($execution->connection, $execution->endpoint->key);
+            $this->rateLimit->acquire($execution->connection, $execution->endpoint->key);
+        } catch (ApiRateLimited|ApiUnavailable) {
+            return false;
+        }
 
         return true;
     }
