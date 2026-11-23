@@ -41,7 +41,9 @@ final class MakeDtoCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $sample = json_decode((string) @file_get_contents((string) $input->getOption('from')), true);
+        $from = (string) $input->getOption('from');
+        $contents = is_file($from) && is_readable($from) ? (string) file_get_contents($from) : '';
+        $sample = json_decode($contents, true);
         if (null === $sample) {
             $output->writeln('<error>--from must point to a readable JSON file.</error>');
 
@@ -49,6 +51,6 @@ final class MakeDtoCommand extends Command
         }
         $files = (new DtoGenerator())->generate((string) $input->getOption('namespace'), (string) $input->getArgument('class'), $sample, true === $input->getOption('camel'));
 
-        return Writer::write($files, (string) $input->getOption('output'), true === $input->getOption('force'), $output, static fn(string $class): string => $class.'.php');
+        return Writer::write($files, (string) $input->getOption('output'), true === $input->getOption('force'), $output, static fn (string $class): string => $class.'.php');
     }
 }

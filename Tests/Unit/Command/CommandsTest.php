@@ -39,13 +39,14 @@ final class CommandsTest extends TestCase
         $tester = new CommandTester(new DebugCommand($registry, new EndpointLocator($registry)));
 
         $tester->execute(['--format' => 'json']);
-        $output = json_decode($tester->getDisplay(), true);
+        /** @var array{schemaVersion: int, endpoints: list<array{endpoint: string, path: string, retry: string}>} $output */
+        $output = json_decode($tester->getDisplay(), true, 512, \JSON_THROW_ON_ERROR);
 
         self::assertSame(1, $output['schemaVersion']);
-        $find = array_values(array_filter($output['endpoints'], static fn(array $row): bool => 'PetApi::find' === $row['endpoint']))[0];
+        $find = array_values(array_filter($output['endpoints'], static fn (array $row): bool => 'PetApi::find' === $row['endpoint']))[0];
         self::assertSame('/pet/{petId}', $find['path']);
         self::assertStringContainsString('PetstoreApi', $find['retry']);
-        self::assertStringContainsString('inactive', array_values(array_filter($output['endpoints'], static fn(array $row): bool => 'PetApi::add' === $row['endpoint']))[0]['retry']);
+        self::assertStringContainsString('inactive', array_values(array_filter($output['endpoints'], static fn (array $row): bool => 'PetApi::add' === $row['endpoint']))[0]['retry']);
     }
 
     #[Test]

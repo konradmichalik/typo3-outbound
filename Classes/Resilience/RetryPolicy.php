@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Resilience;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use KonradMichalik\Typo3Outbound\Attribute\Retry;
 use KonradMichalik\Typo3Outbound\Metadata\EndpointMetadata;
 
@@ -20,8 +22,7 @@ use function in_array;
 use function is_numeric;
 use function max;
 use function min;
-use function mt_getrandmax;
-use function mt_rand;
+use function random_int;
 use function time;
 use function trim;
 
@@ -38,6 +39,9 @@ use function trim;
  */
 final readonly class RetryPolicy
 {
+    // DateTimeInterface::RFC7231 has this value but is deprecated since PHP 8.5.
+    private const HTTP_DATE = 'D, d M Y H:i:s \G\M\T';
+
     public function __construct(
         private ?Retry $retry,
         private bool $idempotent,
@@ -74,7 +78,7 @@ final readonly class RetryPolicy
             }
         }
         $base = $retry->delayMs * ($retry->multiplier ** ($attempt - 1));
-        $jittered = $base * (0.5 + mt_rand() / mt_getrandmax() / 2);
+        $jittered = $base * (0.5 + random_int(0, 1000) / 1000 / 2);
 
         return min($jittered, $retry->maxDelayMs, $cap * 1000) / 1000;
     }
@@ -85,7 +89,7 @@ final readonly class RetryPolicy
         if (is_numeric($value)) {
             return max(0.0, (float) $value);
         }
-        $date = \DateTimeImmutable::createFromFormat(\DateTimeImmutable::RFC7231, $value, new \DateTimeZone('UTC'));
+        $date = DateTimeImmutable::createFromFormat(self::HTTP_DATE, $value, new DateTimeZone('UTC'));
         if (false === $date) {
             return null;
         }

@@ -59,9 +59,9 @@ final readonly class RequestBuilder
     ) {}
 
     /**
-     * @param array<string, mixed>  $arguments  Named call arguments
-     * @param array<string, scalar> $extraQuery Additional query parameters, e.g. for pagination
-     * @param string|null           $url        Absolute URL replacing path and query, e.g. a next-page link
+     * @param array<string, mixed>     $arguments  Named call arguments
+     * @param array<array-key, scalar> $extraQuery Additional query parameters, e.g. for pagination
+     * @param string|null              $url        Absolute URL replacing path and query, e.g. a next-page link
      */
     public function build(EndpointMetadata $endpoint, ConnectionMetadata $connection, array $arguments, Credentials $credentials, array $extraQuery = [], ?string $url = null): RequestSpec
     {

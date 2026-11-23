@@ -7,15 +7,12 @@ parameters:
 
 	scanDirectories:
 		- ../../vendor
+		- ../../Tests/Support
+		- ../../Tests/Functional/Fixtures/Extensions/outbound_petstore/Classes
 	paths:
 		- ../../Classes
 		- ../../Configuration
 		- ../../Tests/Unit
-
-	ignoreErrors:
-		-
-			identifier: trait.unused
-			path: ../../Classes/Testing/OutboundTestTrait.php
 
 	excludePaths:
 		- ../../Tests/Functional/Fixtures/Extensions/*/ext_emconf.php

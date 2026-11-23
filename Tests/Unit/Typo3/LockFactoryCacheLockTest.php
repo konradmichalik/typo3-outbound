@@ -46,7 +46,7 @@ final class LockFactoryCacheLockTest extends TestCase
     #[Test]
     public function aLockThatCouldNotBeTakenIsLeftAlone(): void
     {
-        $strategy = new RecordingStrategy(false);
+        $strategy = new RecordingStrategy(acquirable: false);
         $factory = $this->createMock(LockFactory::class);
         $factory->method('createLocker')->willReturn($strategy);
 
@@ -57,18 +57,21 @@ final class LockFactoryCacheLockTest extends TestCase
 
 /**
  * @internal
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 final class RecordingStrategy implements LockingStrategyInterface
 {
     /** @var list<string> */
     public array $calls = [];
 
-    private readonly bool $acquirable;
-
-    public function __construct($subject = true)
-    {
-        $this->acquirable = (bool) $subject;
-    }
+    /**
+     * @param string $subject
+     */
+    public function __construct(
+        $subject = 'test',
+        private readonly bool $acquirable = true,
+    ) {}
 
     public static function getCapabilities(): int
     {

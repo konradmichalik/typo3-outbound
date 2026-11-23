@@ -17,6 +17,7 @@ use KonradMichalik\Typo3Outbound\Exception\ApiConflict;
 use KonradMichalik\Typo3Outbound\Outbound;
 use KonradMichalik\Typo3Outbound\Proxy\FileProxyStore;
 use KonradMichalik\Typo3Outbound\Resilience\InMemoryStateStore;
+use KonradMichalik\Typo3Outbound\Runtime\ConventionObserver;
 use KonradMichalik\Typo3Outbound\Testing\MockTransport;
 use KonradMichalik\Typo3Outbound\Tests\Support\{FakeClock, RecordingLogger};
 use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\{DocumentDto, DocumentsApi};
@@ -69,7 +70,7 @@ final class ConventionsTest extends TestCase
         $token = $this->mock->calls()[0];
         self::assertSame('documents::token', $token->endpoint);
         self::assertSame('grant_type=client_credentials&client_id=client&client_secret=very-secret&scope=documents', $token->request->body);
-        self::assertCount(1, array_filter($this->mock->calls(), static fn(Call $call): bool => 'documents::token' === $call->endpoint));
+        self::assertCount(1, array_filter($this->mock->calls(), static fn (Call $call): bool => 'documents::token' === $call->endpoint));
         self::assertSame('Bearer token-1', $this->mock->calls(DocumentsApi::class, 'find')[1]->request->headers['Authorization']);
         self::assertGreaterThan(0.0, $token->options->maxDuration, 'the token request is bounded like every other call');
     }
@@ -159,9 +160,9 @@ final class ConventionsTest extends TestCase
         $api->update(1, new DocumentDto(1));
         $api->update(1, new DocumentDto(1));
 
-        $warnings = array_filter($this->logger->records, static fn(array $record): bool => 'warning' === $record['level'] && str_contains($record['message'], 'deprecated'));
+        $warnings = array_filter($this->logger->records, static fn (array $record): bool => 'warning' === $record['level'] && str_contains($record['message'], 'deprecated'));
         self::assertCount(1, $warnings);
-        self::assertSame('Wed, 01 Jul 2026 00:00:00 GMT', $this->store->get('deprecation_'.md5('DocumentsApi::update'))['sunset'] ?? null);
+        self::assertSame('Wed, 01 Jul 2026 00:00:00 GMT', $this->store->get(ConventionObserver::deprecationKey('DocumentsApi::update'))['sunset'] ?? null);
     }
 
     private function api(?Transport $transport = null): DocumentsApi

@@ -13,14 +13,17 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Proxy;
 
+use RuntimeException;
+
+use function bin2hex;
 use function file_put_contents;
 use function fileperms;
 use function is_dir;
 use function is_file;
 use function mkdir;
+use function random_bytes;
 use function rename;
 use function sprintf;
-use function uniqid;
 
 /**
  * FileProxyStore.
@@ -45,9 +48,9 @@ final readonly class FileProxyStore implements ProxyStore
     public function save(string $identifier, string $code): void
     {
         if (!is_dir($this->directory) && !mkdir($this->directory, 0o700, true) && !is_dir($this->directory)) {
-            throw new \RuntimeException(sprintf('Cannot create proxy directory "%s".', $this->directory), 1794700163);
+            throw new RuntimeException(sprintf('Cannot create proxy directory "%s".', $this->directory), 1794700163);
         }
-        $temporary = $this->path($identifier).'.'.uniqid('', true);
+        $temporary = $this->path($identifier).'.'.bin2hex(random_bytes(8));
         file_put_contents($temporary, $code);
         rename($temporary, $this->path($identifier));
     }
@@ -57,7 +60,7 @@ final readonly class FileProxyStore implements ProxyStore
         // The files are executed. A directory other users can write to would let them plant code.
         $permissions = fileperms($this->directory);
         if (false === $permissions || 0 !== ($permissions & 0o022)) {
-            throw new \RuntimeException(sprintf('Proxy directory "%s" is writable by group or others; refusing to load code from it.', $this->directory), 1794700164);
+            throw new RuntimeException(sprintf('Proxy directory "%s" is writable by group or others; refusing to load code from it.', $this->directory), 1794700164);
         }
 
         require_once $this->path($identifier);

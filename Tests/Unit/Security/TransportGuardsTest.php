@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Unit\Security;
 
+use Closure;
 use KonradMichalik\Typo3Outbound\Exception\{ApiException, ApiTransportFailed, BlockedRequest};
 use KonradMichalik\Typo3Outbound\Outbound;
 use KonradMichalik\Typo3Outbound\Proxy\FileProxyStore;
@@ -36,13 +37,13 @@ require_once __DIR__.'/../Fixtures/SecurityDefinitions.php';
 #[CoversClass(SymfonyTransport::class)]
 final class TransportGuardsTest extends TestCase
 {
-    /** @var list<array{method: string, url: string, options: array<string, mixed>}> */
+    /** @var list<array{method: string, url: string, options: array<mixed>}> */
     private array $requests = [];
 
     #[Test]
     public function aResponseOverTheLimitFailsAsATransportError(): void
     {
-        $api = $this->api(SmallLimitApi::class, static fn(): MockResponse => new MockResponse(str_repeat('a', 5000), ['response_headers' => ['content-type: text/plain']]));
+        $api = $this->api(SmallLimitApi::class, static fn (): MockResponse => new MockResponse(str_repeat('a', 5000), ['response_headers' => ['content-type: text/plain']]));
 
         $this->expectException(ApiTransportFailed::class);
         $api->blob();
@@ -51,7 +52,7 @@ final class TransportGuardsTest extends TestCase
     #[Test]
     public function aResponseWithinTheLimitIsReturned(): void
     {
-        $api = $this->api(SmallLimitApi::class, static fn(): MockResponse => new MockResponse(str_repeat('a', 50), ['response_headers' => ['content-type: text/plain']]));
+        $api = $this->api(SmallLimitApi::class, static fn (): MockResponse => new MockResponse(str_repeat('a', 50), ['response_headers' => ['content-type: text/plain']]));
 
         self::assertSame(str_repeat('a', 50), $api->blob());
     }
@@ -59,7 +60,7 @@ final class TransportGuardsTest extends TestCase
     #[Test]
     public function redirectsAreNeverFollowed(): void
     {
-        $api = $this->api(SmallLimitApi::class, static fn(): MockResponse => new MockResponse('', ['http_code' => 302, 'response_headers' => ['location: https://evil.example.org/']]));
+        $api = $this->api(SmallLimitApi::class, static fn (): MockResponse => new MockResponse('', ['http_code' => 302, 'response_headers' => ['location: https://evil.example.org/']]));
 
         try {
             $api->blob();
@@ -74,7 +75,7 @@ final class TransportGuardsTest extends TestCase
     #[Test]
     public function aPrivateAddressIsBlockedBeforeAnythingIsSent(): void
     {
-        $api = $this->api(PrivateAddressApi::class, static fn(): MockResponse => new MockResponse('secret', ['response_headers' => ['content-type: text/plain']]));
+        $api = $this->api(PrivateAddressApi::class, static fn (): MockResponse => new MockResponse('secret', ['response_headers' => ['content-type: text/plain']]));
 
         try {
             $api->a();
@@ -88,7 +89,7 @@ final class TransportGuardsTest extends TestCase
     #[Test]
     public function aConnectionCanOptOutForIntranetApis(): void
     {
-        $api = $this->api(IntranetApi::class, static fn(): MockResponse => new MockResponse('intranet', ['response_headers' => ['content-type: text/plain']]));
+        $api = $this->api(IntranetApi::class, static fn (): MockResponse => new MockResponse('intranet', ['response_headers' => ['content-type: text/plain']]));
 
         self::assertSame('intranet', $api->a());
     }
@@ -96,11 +97,12 @@ final class TransportGuardsTest extends TestCase
     /**
      * @template T of object
      *
-     * @param class-string<T> $interface
+     * @param class-string<T>         $interface
+     * @param Closure(): MockResponse $respond
      *
      * @return T
      */
-    private function api(string $interface, \Closure $respond): object
+    private function api(string $interface, Closure $respond): object
     {
         $client = new MockHttpClient(function (string $method, string $url, array $options) use ($respond): MockResponse {
             $this->requests[] = ['method' => $method, 'url' => $url, 'options' => $options];

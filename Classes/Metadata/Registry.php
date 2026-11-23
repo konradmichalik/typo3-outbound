@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Metadata;
 
 use KonradMichalik\Typo3Outbound\Exception\InvalidDefinition;
+use ReflectionClass;
 
 use function array_keys;
 use function serialize;
@@ -61,7 +62,7 @@ final class Registry
         $owners = [];
         $resourcesPerBase = [];
         foreach ($interfaces as $interfaceName) {
-            $interface = new \ReflectionClass($interfaceName);
+            $interface = new ReflectionClass($interfaceName);
             $base = $factory->baseOf($interface);
             $connection = $connections[$base->getName()] ??= $factory->connection($base);
             $other = $connectionInterfaces[$connection->name] ?? null;
@@ -76,7 +77,7 @@ final class Registry
             $owners[$interfaceName] = $connection->name;
         }
         foreach ($resourcesPerBase as $baseName => $resources) {
-            if ([] !== ($endpoints[$baseName] ?? []) || [] !== $factory->endpoints(new \ReflectionClass($baseName), $connections[$baseName])) {
+            if ([] !== ($endpoints[$baseName] ?? []) || [] !== $factory->endpoints(new ReflectionClass($baseName), $connections[$baseName])) {
                 throw new InvalidDefinition(sprintf('%s declares endpoints and is extended by resources (%s). Move its endpoints into resource interfaces, otherwise every resource inherits them.', $baseName, implode(', ', $resources)), 1794700025);
             }
         }
@@ -84,7 +85,7 @@ final class Registry
         $connectionChunks = [];
         foreach ($connections as $connection) {
             $tracksEtags = false;
-            foreach ($endpoints as $interfaceName => $list) {
+            foreach ($endpoints as $list) {
                 foreach ($list as $endpoint) {
                     $tracksEtags = $tracksEtags || ($endpoint->connection === $connection->name && $endpoint->verb->ifMatch);
                 }
@@ -149,9 +150,9 @@ final class Registry
         if (isset($this->endpoints[$interface])) {
             return $this->endpoints[$interface];
         }
+        /** @var list<EndpointMetadata> $list */
         $list = unserialize($this->endpointChunks[$interface] ?? throw new InvalidDefinition(sprintf('%s is not registered with typo3_outbound.', $interface), 1794700029));
 
-        /** @var list<EndpointMetadata> $list */
         return $this->endpoints[$interface] = $list;
     }
 

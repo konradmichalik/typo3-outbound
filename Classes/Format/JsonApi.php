@@ -83,7 +83,7 @@ final readonly class JsonApi implements ResponseFormat
         $included = $this->index($document);
 
         return array_map(
-            fn(mixed $resource): mixed => is_array($resource) ? $this->flatten($resource, $included, $this->includeDepth) : $resource,
+            fn (mixed $resource): mixed => is_array($resource) ? $this->flatten($resource, $included, $this->includeDepth) : $resource,
             $document['data'],
         );
     }
@@ -115,7 +115,7 @@ final readonly class JsonApi implements ResponseFormat
             $pointer = is_array($error['source'] ?? null) && is_string($error['source']['pointer'] ?? null) ? $error['source']['pointer'] : null;
             if (null !== $pointer) {
                 $segments = explode('/', trim($pointer, '/'));
-                $fieldErrors[(string) end($segments)][] = $message;
+                $fieldErrors[end($segments)][] = $message;
             }
         }
 
@@ -140,7 +140,7 @@ final readonly class JsonApi implements ResponseFormat
     }
 
     /**
-     * @param array<array-key, mixed>                    $resource
+     * @param array<array-key, mixed>                $resource
      * @param array<string, array<array-key, mixed>> $included
      *
      * @return array<array-key, mixed>
@@ -164,7 +164,7 @@ final readonly class JsonApi implements ResponseFormat
             $data = $relationship['data'];
             $flat[$name] = match (true) {
                 null === $data => null,
-                is_array($data) && array_is_list($data) => array_map(fn(mixed $identifier): mixed => $this->resolve($identifier, $included, $depth), $data),
+                is_array($data) && array_is_list($data) => array_map(fn (mixed $identifier): mixed => $this->resolve($identifier, $included, $depth), $data),
                 default => $this->resolve($data, $included, $depth),
             };
         }

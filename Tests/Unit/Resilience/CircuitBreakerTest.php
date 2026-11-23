@@ -18,6 +18,7 @@ use KonradMichalik\Typo3Outbound\Exception\ApiUnavailable;
 use KonradMichalik\Typo3Outbound\Metadata\ConnectionMetadata;
 use KonradMichalik\Typo3Outbound\Resilience\{CircuitBreaker, InMemoryStateStore};
 use KonradMichalik\Typo3Outbound\Tests\Support\{FakeClock, SwitchableCallContext};
+use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\MyCRMApi;
 use KonradMichalik\Typo3Outbound\Value\SiteSetting;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
@@ -119,7 +120,7 @@ final class CircuitBreakerTest extends TestCase
     #[Test]
     public function aConnectionWithoutBreakerIsNeverBlocked(): void
     {
-        $plain = new ConnectionMetadata('plain', 'Plain', new Connection('https://x'));
+        $plain = new ConnectionMetadata('plain', MyCRMApi::class, new Connection('https://x'));
 
         for ($i = 0; $i < 20; ++$i) {
             $this->breaker->failure($plain);
@@ -131,7 +132,7 @@ final class CircuitBreakerTest extends TestCase
 
     private function connection(string $name, ?Connection $definition = null): ConnectionMetadata
     {
-        return new ConnectionMetadata($name, ucfirst($name), $definition ?? new Connection('https://x'), circuitBreaker: new CircuitBreakerSettings(failureThreshold: 3, cooldown: 30));
+        return new ConnectionMetadata($name, MyCRMApi::class, $definition ?? new Connection('https://x'), circuitBreaker: new CircuitBreakerSettings(failureThreshold: 3, cooldown: 30));
     }
 
     private function recordFailures(ConnectionMetadata $connection, int $times): void

@@ -14,12 +14,13 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Proxy;
 
 use KonradMichalik\Typo3Outbound\Runtime\EndpointInvoker;
+use ReflectionClass;
 
 use function class_exists;
 use function filemtime;
 use function filesize;
+use function hash;
 use function is_string;
-use function sha1;
 use function substr;
 
 /**
@@ -51,7 +52,7 @@ final readonly class ProxyFactory
      */
     public function create(string $interface): object
     {
-        $reflection = new \ReflectionClass($interface);
+        $reflection = new ReflectionClass($interface);
         $identifier = self::identifier($reflection);
         $class = $identifier;
         if (!class_exists($class, false)) {
@@ -61,18 +62,20 @@ final readonly class ProxyFactory
             $this->store->load($identifier);
         }
 
-        /** @var T */
-        return new $class($this->invoker);
+        /** @var T $proxy */
+        $proxy = new $class($this->invoker);
+
+        return $proxy;
     }
 
     /**
-     * @param \ReflectionClass<object> $interface
+     * @param ReflectionClass<object> $interface
      */
-    public static function identifier(\ReflectionClass $interface): string
+    public static function identifier(ReflectionClass $interface): string
     {
         $file = $interface->getFileName();
         $fingerprint = is_string($file) ? filemtime($file).':'.filesize($file) : '';
 
-        return 'OutboundProxy_'.$interface->getShortName().'_'.substr(sha1($interface->getName().':'.$fingerprint.':'.ProxyGenerator::VERSION), 0, 12);
+        return 'OutboundProxy_'.$interface->getShortName().'_'.substr(hash('xxh128', $interface->getName().':'.$fingerprint.':'.ProxyGenerator::VERSION), 0, 12);
     }
 }

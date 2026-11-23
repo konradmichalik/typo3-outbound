@@ -19,6 +19,7 @@ use KonradMichalik\Typo3Outbound\Exception\ApiRateLimited;
 use KonradMichalik\Typo3Outbound\Metadata\ConnectionMetadata;
 use KonradMichalik\Typo3Outbound\Resilience\{InMemoryStateStore, RateLimitGuard, RetryPolicy};
 use KonradMichalik\Typo3Outbound\Tests\Support\{FakeClock, SwitchableCallContext};
+use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\MyCRMApi;
 use KonradMichalik\Typo3Outbound\Value\SiteSetting;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
@@ -54,7 +55,7 @@ final class ResilienceTest extends TestCase
     #[Test]
     public function exhaustedLimitFailsFastInWebAndWaitsInCli(): void
     {
-        $connection = new ConnectionMetadata('crm', 'Crm', new Connection('https://x'), rateLimit: new RateLimit(1, '1 minute'));
+        $connection = new ConnectionMetadata('crm', MyCRMApi::class, new Connection('https://x'), rateLimit: new RateLimit(1, '1 minute'));
 
         $clock = new FakeClock();
         $cli = new RateLimitGuard(new InMemoryStateStore(), new SapiExecutionContext(false), $clock);
@@ -74,7 +75,7 @@ final class ResilienceTest extends TestCase
     #[Test]
     public function announcedServerQuotaBlocksUntilReset(): void
     {
-        $connection = new ConnectionMetadata('crm', 'Crm', new Connection('https://x'));
+        $connection = new ConnectionMetadata('crm', MyCRMApi::class, new Connection('https://x'));
         $clock = new FakeClock();
         $guard = new RateLimitGuard(new InMemoryStateStore(), new SapiExecutionContext(true), $clock);
         $guard->record($connection, ['x-ratelimit-remaining' => ['0'], 'x-ratelimit-reset' => ['30']]);
@@ -92,7 +93,7 @@ final class ResilienceTest extends TestCase
     #[Test]
     public function aSiteSpecificConnectionKeepsItsQuotaAndLimitPerSite(): void
     {
-        $connection = new ConnectionMetadata('crm', 'Crm', new Connection(new SiteSetting('crm.baseUri'), allowedHosts: ['crm.example.com']), rateLimit: new RateLimit(1, '1 minute'));
+        $connection = new ConnectionMetadata('crm', MyCRMApi::class, new Connection(new SiteSetting('crm.baseUri'), allowedHosts: ['crm.example.com']), rateLimit: new RateLimit(1, '1 minute'));
         $context = new SwitchableCallContext('site_a');
         $guard = new RateLimitGuard(new InMemoryStateStore(), new SapiExecutionContext(true), new FakeClock(), calls: $context);
 
@@ -109,7 +110,7 @@ final class ResilienceTest extends TestCase
     #[Test]
     public function aQuotaOfOneBaseUriIsSharedByAllSites(): void
     {
-        $connection = new ConnectionMetadata('crm', 'Crm', new Connection('https://crm.example.com'));
+        $connection = new ConnectionMetadata('crm', MyCRMApi::class, new Connection('https://crm.example.com'));
         $context = new SwitchableCallContext('site_a');
         $guard = new RateLimitGuard(new InMemoryStateStore(), new SapiExecutionContext(true), new FakeClock(), calls: $context);
         $guard->record($connection, ['x-ratelimit-remaining' => ['0'], 'x-ratelimit-reset' => ['30']]);

@@ -70,8 +70,9 @@ final class FormatTest extends TestCase
     {
         $error = (new Hydra())->error(422, ['title' => 'Validation failed', 'violations' => [['propertyPath' => 'name', 'message' => 'blank']]]);
 
-        self::assertSame('Validation failed', $error?->title);
-        self::assertSame(['name' => ['blank']], $error?->fieldErrors);
+        self::assertNotNull($error);
+        self::assertSame('Validation failed', $error->title);
+        self::assertSame(['name' => ['blank']], $error->fieldErrors);
     }
 
     #[Test]
@@ -79,8 +80,9 @@ final class FormatTest extends TestCase
     {
         $error = (new PlainJson())->error(400, ['title' => 'Bad', 'detail' => 'x', 'errors' => ['email' => ['invalid']]]);
 
-        self::assertSame('Bad', $error?->title);
-        self::assertSame(['email' => ['invalid']], $error?->fieldErrors);
+        self::assertNotNull($error);
+        self::assertSame('Bad', $error->title);
+        self::assertSame(['email' => ['invalid']], $error->fieldErrors);
         self::assertNull((new PlainJson())->error(500, 'oops'));
     }
 }

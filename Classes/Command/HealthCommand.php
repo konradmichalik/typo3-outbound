@@ -14,14 +14,15 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Command;
 
 use KonradMichalik\Typo3Outbound\Resilience\StateStore;
-use KonradMichalik\Typo3Outbound\Runtime\EndpointInvoker;
+use KonradMichalik\Typo3Outbound\Runtime\{ConventionObserver, EndpointInvoker};
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
+use Traversable;
 
 use function is_string;
 use function iterator_to_array;
-use function md5;
 use function microtime;
 use function sprintf;
 
@@ -51,7 +52,7 @@ final class HealthCommand extends Command
         $failed = 0;
         $checks = 0;
         foreach ($this->endpoints->all() as $endpoint) {
-            $deprecation = $this->store->get('deprecation_'.md5($endpoint->key));
+            $deprecation = $this->store->get(ConventionObserver::deprecationKey($endpoint->key));
             if (null !== $deprecation) {
                 $output->writeln(sprintf('<comment>deprecated</comment> %s (Deprecation: %s, Sunset: %s)', $endpoint->key, is_string($deprecation['deprecation'] ?? null) ? $deprecation['deprecation'] : '-', is_string($deprecation['sunset'] ?? null) ? $deprecation['sunset'] : '-'));
             }
@@ -62,11 +63,11 @@ final class HealthCommand extends Command
             $started = microtime(true);
             try {
                 $result = $this->invoker->call($endpoint->interface, $endpoint->method, []);
-                if ($result instanceof \Traversable) {
+                if ($result instanceof Traversable) {
                     iterator_to_array($result, false);
                 }
                 $output->writeln(sprintf('<info>ok</info>     %s (%d ms)', $endpoint->key, (microtime(true) - $started) * 1000));
-            } catch (\Throwable $exception) {
+            } catch (Throwable $exception) {
                 ++$failed;
                 $output->writeln(sprintf('<error>failed</error> %s: %s', $endpoint->key, $exception->getMessage()));
             }

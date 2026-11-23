@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Tests\Unit\Performance;
 
 use CuyZ\Valinor\Cache\FileSystemCache;
-use KonradMichalik\OutboundPetstore\Api\{PetApi, StoreApi};
+use KonradMichalik\OutboundPetstore\Api\{PetApi, PetstoreApi, StoreApi};
 use KonradMichalik\OutboundPetstore\Dto\PetDto;
 use KonradMichalik\Typo3Outbound\Attribute\Connection;
 use KonradMichalik\Typo3Outbound\Mapping\ValinorMapper;
@@ -78,7 +78,7 @@ final class BackendAccessTest extends TestCase
     {
         $directory = sys_get_temp_dir().'/outbound-valinor-'.bin2hex(random_bytes(4));
         $mapper = new ValinorMapper(new FileSystemCache($directory));
-        $connection = new ConnectionMetadata('petstore', 'Petstore', new Connection('https://x'));
+        $connection = new ConnectionMetadata('petstore', PetstoreApi::class, new Connection('https://x'));
 
         $pet = $mapper->map(PetDto::class, ['name' => 'doggie', 'photoUrls' => []], $connection, null, 'PetApi::find');
 

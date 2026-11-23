@@ -29,7 +29,7 @@ use Symfony\Component\RateLimiter\Storage\{InMemoryStorage, StorageInterface};
 
 use function get_current_user;
 use function getmyuid;
-use function sha1;
+use function hash;
 use function substr;
 use function sys_get_temp_dir;
 
@@ -87,7 +87,7 @@ final class Outbound
             new SystemClock(),
             new NullLogger(),
             new Settings(),
-            new FileProxyStore(sys_get_temp_dir().'/typo3-outbound-proxies-'.substr(sha1(__DIR__.':'.get_current_user().':'.getmyuid()), 0, 12)),
+            new FileProxyStore(sys_get_temp_dir().'/typo3-outbound-proxies-'.substr(hash('xxh128', __DIR__.':'.get_current_user().':'.getmyuid()), 0, 12)),
             new ValinorMapper(),
             new InMemoryStorage(),
             new InMemoryCacheLock(),
@@ -165,8 +165,10 @@ final class Outbound
     {
         $this->proxies ??= new ProxyFactory($this->proxyStore, $this->invoker());
 
-        /** @var T */
-        return $this->instances[$interface] ??= $this->proxies->create($interface);
+        /** @var T $proxy */
+        $proxy = $this->instances[$interface] ??= $this->proxies->create($interface);
+
+        return $proxy;
     }
 
     public function registry(): Registry

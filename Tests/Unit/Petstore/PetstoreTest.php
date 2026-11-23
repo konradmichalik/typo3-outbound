@@ -114,9 +114,10 @@ final class PetstoreTest extends TestCase
         $request = $this->mock->calls()[0]->request;
         self::assertSame('POST', $request->method);
         self::assertSame('application/json', $request->headers['Content-Type']);
+        self::assertIsString($request->body);
         self::assertSame(
             ['name' => 'doggie', 'photoUrls' => ['https://example.org/doggie.jpg'], 'id' => null, 'category' => null, 'tags' => [], 'status' => 'pending'],
-            json_decode((string) $request->body, true),
+            json_decode($request->body, true),
         );
     }
 

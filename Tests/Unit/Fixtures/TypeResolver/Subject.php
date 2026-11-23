@@ -15,4 +15,9 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\TypeResolver;
 
 use Vendor\Other\Dto as Alias;
 
+/**
+ * Its imports are what TypeResolverTest resolves against, e.g. {@see Alias}.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 interface Subject {}

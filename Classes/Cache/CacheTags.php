@@ -13,18 +13,19 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Cache;
 
+use BackedEnum;
 use KonradMichalik\Typo3Outbound\Exception\InvalidDefinition;
 
 use function array_key_exists;
 use function array_unique;
 use function array_values;
+use function hash;
 use function is_int;
 use function is_string;
 use function preg_match;
 use function preg_match_all;
 use function preg_replace;
 use function preg_replace_callback;
-use function sha1;
 use function sprintf;
 use function substr;
 
@@ -58,7 +59,7 @@ final class CacheTags
     {
         $tag = (string) preg_replace_callback(
             self::PLACEHOLDER,
-            static fn(array $match): string => self::value($template, $match[1], $arguments),
+            static fn (array $match): string => self::value($template, $match[1], $arguments),
             $template,
         );
         if (1 !== preg_match(self::PATTERN, $tag)) {
@@ -91,13 +92,13 @@ final class CacheTags
         return 'outbound_'.$connection;
     }
 
-    public static function encode(int|string|\BackedEnum $value): string
+    public static function encode(int|string|BackedEnum $value): string
     {
-        $string = $value instanceof \BackedEnum ? (string) $value->value : (string) $value;
+        $string = $value instanceof BackedEnum ? (string) $value->value : (string) $value;
 
         return 1 === preg_match(self::PLAIN_VALUE, $string) && 1 !== preg_match(self::HASHED_VALUE, $string)
             ? $string
-            : 'h'.substr(sha1($string), 0, 16);
+            : 'h'.substr(hash('xxh128', $string), 0, 16);
     }
 
     /**
@@ -124,7 +125,7 @@ final class CacheTags
     private static function value(string $template, string $name, array $arguments): string
     {
         $value = array_key_exists($name, $arguments) ? $arguments[$name] : null;
-        if (!is_int($value) && !is_string($value) && !$value instanceof \BackedEnum) {
+        if (!is_int($value) && !is_string($value) && !$value instanceof BackedEnum) {
             throw new InvalidDefinition(sprintf('Cache tag "%s": placeholder {%s} has no int, string or backed enum value.', $template, $name), 1794700035);
         }
 

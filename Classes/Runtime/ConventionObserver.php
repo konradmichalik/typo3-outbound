@@ -16,7 +16,7 @@ namespace KonradMichalik\Typo3Outbound\Runtime;
 use KonradMichalik\Typo3Outbound\Resilience\{RateLimitGuard, StateStore};
 use Psr\Log\LoggerInterface;
 
-use function md5;
+use function hash;
 
 /**
  * ConventionObserver.
@@ -61,11 +61,16 @@ final class ConventionObserver
             'deprecation' => $deprecation ?? '-',
             'sunset' => $sunset ?? '-',
         ]);
-        $this->store->set('deprecation_'.md5($execution->endpoint->key), [
+        $this->store->set(self::deprecationKey($execution->endpoint->key), [
             'endpoint' => $execution->endpoint->key,
             'connection' => $execution->connection->name,
             'deprecation' => $deprecation,
             'sunset' => $sunset,
         ], self::DEPRECATION_TTL);
+    }
+
+    public static function deprecationKey(string $endpoint): string
+    {
+        return 'deprecation_'.hash('xxh128', $endpoint);
     }
 }

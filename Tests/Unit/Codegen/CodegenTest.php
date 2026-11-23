@@ -19,6 +19,10 @@ use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Yaml;
 
+use function dirname;
+use function is_array;
+use function strlen;
+
 /**
  * CodegenTest.
  *
@@ -31,12 +35,15 @@ final class CodegenTest extends TestCase
     #[Test]
     public function petstoreSpecGeneratesAValidApi(): void
     {
+        /** @var array<string, mixed> $spec */
         $spec = Yaml::parseFile(__DIR__.'/../../Fixtures/Petstore/openapi.yaml');
         $namespace = 'Generated\\Run'.bin2hex(random_bytes(4));
         $files = (new OpenApiGenerator())->generate($spec, $namespace, 'Petstore');
         $directory = sys_get_temp_dir().'/outbound-codegen-'.bin2hex(random_bytes(4));
         foreach ($files as $path => $code) {
-            @mkdir(dirname($directory.'/'.$path), 0o777, true);
+            if (!is_dir(dirname($directory.'/'.$path))) {
+                mkdir(dirname($directory.'/'.$path), 0o777, true);
+            }
             file_put_contents($directory.'/'.$path, $code);
         }
         spl_autoload_register(static function (string $class) use ($namespace, $directory): void {
@@ -45,12 +52,18 @@ final class CodegenTest extends TestCase
             }
         });
 
-        $registry = Registry::build([$namespace.'\\Api\\PetApi', $namespace.'\\Api\\StoreApi', $namespace.'\\Api\\UserApi']);
+        /** @var class-string $petApi */
+        $petApi = $namespace.'\\Api\\PetApi';
+        /** @var class-string $storeApi */
+        $storeApi = $namespace.'\\Api\\StoreApi';
+        /** @var class-string $userApi */
+        $userApi = $namespace.'\\Api\\UserApi';
+        $registry = Registry::build([$petApi, $storeApi, $userApi]);
 
         self::assertSame(['petstore'], $registry->connectionNames());
-        self::assertSame('/pet/findByStatus', $registry->endpoint($namespace.'\\Api\\PetApi', 'findPetsByStatus')->path);
-        self::assertSame('list<'.$namespace.'\\Dto\\Pet>', $registry->endpoint($namespace.'\\Api\\PetApi', 'findPetsByStatus')->returnType->signature);
-        self::assertSame('array<string, int>', $registry->endpoint($namespace.'\\Api\\StoreApi', 'getInventory')->returnType->signature);
+        self::assertSame('/pet/findByStatus', $registry->endpoint($petApi, 'findPetsByStatus')->path);
+        self::assertSame('list<'.$namespace.'\\Dto\\Pet>', $registry->endpoint($petApi, 'findPetsByStatus')->returnType->signature);
+        self::assertSame('array<string, int>', $registry->endpoint($storeApi, 'getInventory')->returnType->signature);
         self::assertStringContainsString("new Secret('petstore.apiKey')", $files['Api/PetstoreApi.php']);
     }
 
@@ -88,7 +101,7 @@ final class CodegenTest extends TestCase
 
         self::assertNotSame([], $files);
         foreach ($files as $path => $code) {
-            $calls = array_filter(token_get_all($code), static fn(mixed $token): bool => is_array($token) && \T_STRING === $token[0] && 'system' === $token[1]);
+            $calls = array_filter(token_get_all($code), static fn (mixed $token): bool => is_array($token) && \T_STRING === $token[0] && 'system' === $token[1]);
             self::assertSame([], $calls, $path.' contains injected code.');
             self::assertStringNotContainsString('<?php', substr($code, 5), $path);
         }

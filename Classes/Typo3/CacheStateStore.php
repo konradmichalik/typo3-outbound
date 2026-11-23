@@ -16,8 +16,8 @@ namespace KonradMichalik\Typo3Outbound\Typo3;
 use KonradMichalik\Typo3Outbound\Resilience\StateStore;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 
+use function hash;
 use function is_array;
-use function sha1;
 
 /**
  * CacheStateStore.
@@ -37,19 +37,19 @@ final readonly class CacheStateStore implements StateStore
 
     public function get(string $key): ?array
     {
-        $value = $this->cache->get(sha1($key));
+        /** @var array<string, mixed>|false $value */
+        $value = $this->cache->get(hash('xxh128', $key));
 
-        /** @var array<string, mixed>|null */
         return is_array($value) ? $value : null;
     }
 
     public function set(string $key, array $value, int $ttl): void
     {
-        $this->cache->set(sha1($key), $value, [], $ttl);
+        $this->cache->set(hash('xxh128', $key), $value, [], $ttl);
     }
 
     public function delete(string $key): void
     {
-        $this->cache->remove(sha1($key));
+        $this->cache->remove(hash('xxh128', $key));
     }
 }

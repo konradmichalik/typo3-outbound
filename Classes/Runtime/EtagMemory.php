@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Runtime;
 
+use function hash;
 use function parse_url;
-use function sha1;
 
 /**
  * EtagMemory.
@@ -32,6 +32,6 @@ final class EtagMemory
 
     public static function key(string $connection, string $url): string
     {
-        return 'etag_'.sha1($connection.' '.(string) parse_url($url, PHP_URL_HOST).(string) parse_url($url, PHP_URL_PATH));
+        return 'etag_'.hash('xxh128', $connection.' '.(string) parse_url($url, \PHP_URL_HOST).(string) parse_url($url, \PHP_URL_PATH));
     }
 }

@@ -17,17 +17,23 @@ use CuyZ\Valinor\Cache\Cache;
 use CuyZ\Valinor\Mapper\MappingError;
 use CuyZ\Valinor\Mapper\Source\Source;
 use CuyZ\Valinor\MapperBuilder;
+use DateTimeInterface;
 use KonradMichalik\Typo3Outbound\Attribute\MapKeys;
 use KonradMichalik\Typo3Outbound\Enum\KeyCase;
 use KonradMichalik\Typo3Outbound\Exception\ApiMappingFailed;
 use KonradMichalik\Typo3Outbound\Metadata\ConnectionMetadata;
+use Throwable;
 
 use function array_slice;
 use function count;
 use function implode;
 use function is_array;
+use function is_int;
+use function lcfirst;
 use function sprintf;
+use function str_replace;
 use function str_starts_with;
+use function ucwords;
 
 /**
  * ValinorMapper.
@@ -56,10 +62,7 @@ final class ValinorMapper implements ResponseMapper
     {
         $source = $data;
         if (is_array($data)) {
-            $source = Source::array($data);
-            if (KeyCase::Camel === $connection->definition->keyCase) {
-                $source = $source->camelCaseKeys();
-            }
+            $source = Source::array(KeyCase::Camel === $connection->definition->keyCase ? self::camelCaseKeys($data) : $data);
             if (null !== $mapKeys) {
                 $source = $source->map($mapKeys->map);
             }
@@ -74,7 +77,7 @@ final class ValinorMapper implements ResponseMapper
             }
 
             throw new ApiMappingFailed(sprintf('%s: the response does not match %s (%s%s).', $endpoint, $signature, implode('; ', array_slice($messages, 0, 3)), count($messages) > 3 ? '; ...' : ''), 1794700110, $endpoint, null, null, $error);
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             if (!str_starts_with($exception::class, 'CuyZ\\Valinor\\')) {
                 throw $exception;
             }
@@ -85,7 +88,34 @@ final class ValinorMapper implements ResponseMapper
 
     public function warmup(string ...$signatures): void
     {
-        $this->builder(\DateTimeInterface::ATOM)->warmupCacheFor(...$signatures);
+        $this->builder(DateTimeInterface::ATOM)->warmupCacheFor(...$signatures);
+    }
+
+    /**
+     * Mirrors Valinor's deprecated Source::camelCaseKeys(); the MapKeysToCamelCase
+     * configurator replacing it converts keys differently and after #[MapKeys].
+     *
+     * @param array<mixed> $source
+     *
+     * @return array<mixed>
+     */
+    private static function camelCaseKeys(array $source): array
+    {
+        $result = [];
+        foreach ($source as $key => $value) {
+            if (is_array($value)) {
+                $value = self::camelCaseKeys($value);
+            }
+            if (is_int($key)) {
+                $result[$key] = $value;
+
+                continue;
+            }
+            $camelCaseKey = lcfirst(str_replace([' ', '_', '-'], '', ucwords($key, ' _-')));
+            $result[$camelCaseKey] ??= $value;
+        }
+
+        return $result;
     }
 
     private function builder(string $dateFormat): MapperBuilder
@@ -96,7 +126,7 @@ final class ValinorMapper implements ResponseMapper
         $builder = (new MapperBuilder())
             ->allowSuperfluousKeys()
             ->allowUndefinedValues()
-            ->supportDateFormats('' !== $dateFormat ? $dateFormat : \DateTimeInterface::ATOM, \DateTimeInterface::ATOM, 'Y-m-d\TH:i:s.uP', 'Y-m-d', 'U');
+            ->supportDateFormats('' !== $dateFormat ? $dateFormat : DateTimeInterface::ATOM, DateTimeInterface::ATOM, 'Y-m-d\TH:i:s.uP', 'Y-m-d', 'U');
         if (null !== $this->cache) {
             $builder = $builder->withCache($this->cache);
         }

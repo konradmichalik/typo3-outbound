@@ -17,9 +17,9 @@ use Symfony\Component\RateLimiter\LimiterStateInterface;
 use Symfony\Component\RateLimiter\Storage\StorageInterface;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 
+use function hash;
 use function is_string;
 use function serialize;
-use function sha1;
 use function unserialize;
 
 /**
@@ -39,12 +39,12 @@ final readonly class RateLimiterStorage implements StorageInterface
 
     public function save(LimiterStateInterface $limiterState): void
     {
-        $this->cache->set('limiter_'.sha1($limiterState->getId()), serialize($limiterState), [], $limiterState->getExpirationTime());
+        $this->cache->set('limiter_'.hash('xxh128', $limiterState->getId()), serialize($limiterState), [], $limiterState->getExpirationTime());
     }
 
     public function fetch(string $limiterStateId): ?LimiterStateInterface
     {
-        $data = $this->cache->get('limiter_'.sha1($limiterStateId));
+        $data = $this->cache->get('limiter_'.hash('xxh128', $limiterStateId));
         if (!is_string($data)) {
             return null;
         }
@@ -55,6 +55,6 @@ final readonly class RateLimiterStorage implements StorageInterface
 
     public function delete(string $limiterStateId): void
     {
-        $this->cache->remove('limiter_'.sha1($limiterStateId));
+        $this->cache->remove('limiter_'.hash('xxh128', $limiterStateId));
     }
 }

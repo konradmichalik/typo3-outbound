@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Unit\Cache;
 
+use Closure;
 use KonradMichalik\Typo3Outbound\Cache\{CacheEntry, CacheKey, CacheLock, CacheLockHandle, CacheTags, InMemoryResponseCache, ResponseCache};
 use KonradMichalik\Typo3Outbound\Command\{EndpointLocator, LintCommand};
 use KonradMichalik\Typo3Outbound\Exception\{ApiTransportFailed, InvalidDefinition};
@@ -230,7 +231,7 @@ final class CacheBehaviourTest extends TestCase
         self::assertSame('t_a_b', CacheTags::tag('t_{v}', ['v' => 'a_b']));
         self::assertNotSame(CacheTags::tag('t_{v}', ['v' => 'a.b']), CacheTags::tag('t_{v}', ['v' => 'a_b']));
         self::assertMatchesRegularExpression('/^t_h[0-9a-f]{16}$/', CacheTags::tag('t_{v}', ['v' => 'a.b']));
-        $hashedLooking = 'h'.substr(sha1('a.b'), 0, 16);
+        $hashedLooking = 'h'.substr(hash('xxh128', 'a.b'), 0, 16);
         self::assertNotSame(CacheTags::tag('t_{v}', ['v' => 'a.b']), CacheTags::tag('t_{v}', ['v' => $hashedLooking]));
         self::assertSame('shelf_top', CacheTags::tag('shelf_{s}', ['s' => Shelf::Top]));
         self::assertSame('product_42', CacheTags::tag('product_{id}', ['id' => 42]));
@@ -307,6 +308,8 @@ final class CacheBehaviourTest extends TestCase
 
 /**
  * @internal
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 final class CountingCache implements ResponseCache
 {
@@ -334,6 +337,8 @@ final class CountingCache implements ResponseCache
 
 /**
  * @internal
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 final class RecordingLock implements CacheLock
 {
@@ -345,9 +350,9 @@ final class RecordingLock implements CacheLock
     public array $timeouts = [];
 
     /**
-     * @param (\Closure(string): void)|null $otherProcess Runs while "waiting", as if another process held the lock
+     * @param (Closure(string): void)|null $otherProcess Runs while "waiting", as if another process held the lock
      */
-    public function __construct(private readonly ?\Closure $otherProcess = null) {}
+    public function __construct(private readonly ?Closure $otherProcess = null) {}
 
     public function acquire(string $key, float $timeout): ?CacheLockHandle
     {

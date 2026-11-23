@@ -18,7 +18,7 @@ use KonradMichalik\Typo3Outbound\Support\Clock;
 use TYPO3\CMS\Core\Locking\Exception\LockAcquireWouldBlockException;
 use TYPO3\CMS\Core\Locking\{LockFactory, LockingStrategyInterface};
 
-use function sha1;
+use function hash;
 
 /**
  * LockFactoryCacheLock.
@@ -42,7 +42,7 @@ final readonly class LockFactoryCacheLock implements CacheLock
     public function acquire(string $key, float $timeout): ?CacheLockHandle
     {
         $mode = LockingStrategyInterface::LOCK_CAPABILITY_EXCLUSIVE | LockingStrategyInterface::LOCK_CAPABILITY_NOBLOCK;
-        $locker = $this->locks->createLocker('outbound_'.sha1($key), $mode);
+        $locker = $this->locks->createLocker('outbound_'.hash('xxh128', $key), $mode);
         $deadline = $this->clock->now() + $timeout;
         $waited = false;
         while (true) {
