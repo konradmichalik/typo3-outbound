@@ -108,9 +108,10 @@ final readonly class Dispatcher
             $this->breaker->success($execution->connection);
         }
 
-        $this->logger->debug('{method} {url} answered {status} in {duration} ms after {retries} retries ({endpoint}).', [
+        // The path template, not the URL: argument values in path and query may be personal data.
+        $this->logger->debug('{method} {path} answered {status} in {duration} ms after {retries} retries ({endpoint}).', [
             'method' => $execution->request->method,
-            'url' => Redactor::url($execution->request->url, $execution->request->sensitiveKeys),
+            'path' => $execution->endpoint->path,
             'status' => $status,
             'duration' => round(($this->clock->now() - $pending->startedAt) * 1000, 1),
             'retries' => $retries,

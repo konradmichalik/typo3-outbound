@@ -24,3 +24,13 @@ interface QueryCommandApi
     #[Outbound\Get('/search')]
     public function search(#[Outbound\Query] string $q): string;
 }
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+#[Outbound\Connection(baseUri: 'https://contacts.example.com')]
+interface ContactLookupApi
+{
+    #[Outbound\Get('/contacts/by-email/{email}')]
+    public function byEmail(string $email, #[Outbound\Query] string $note): string;
+}

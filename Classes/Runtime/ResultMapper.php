@@ -140,7 +140,8 @@ final readonly class ResultMapper
         if (null !== $error->detail) {
             $message .= ' ('.self::excerpt($error->detail).')';
         }
-        $this->logger->debug('{endpoint} error body: {body}', ['endpoint' => $key, 'body' => substr($result->body, 0, 500)]);
+        // Error answers often echo the submitted data, so only the shape of the body is logged.
+        $this->logger->debug('{endpoint} answered {status} with {bytes} bytes of {type}.', ['endpoint' => $key, 'status' => $status, 'bytes' => strlen($result->body), 'type' => $result->header('content-type') ?? 'no content type']);
 
         return match (true) {
             in_array($status, [400, 422], true) => new ApiValidationFailed($message, 1794700141, $key, $status, $requestId, $error->fieldErrors),
