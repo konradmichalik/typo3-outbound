@@ -6,7 +6,7 @@
 composer require konradmichalik/typo3-outbound
 ```
 
-Register your interfaces with `OutboundServices::discover()` in `Configuration/Services.php`. Invalid declarations fail the container build.
+Interfaces with `#[Connection]` or `#[Resource]` below your `Services.yaml` resource are registered automatically. Interfaces outside it or in its `exclude` paths need `OutboundServices::discover()` in `Configuration/Services.php`. Invalid declarations fail the container build.
 
 ## Configuration
 
@@ -42,7 +42,7 @@ CLI, Scheduler and Messenger have no current site. Select one explicitly: `Reque
 
 `MockTransport` answers by endpoint and arguments, never by URL; unexpected calls fail.
 
-In functional tests, `OutboundTestTrait` replaces the transport in the TYPO3 container:
+In functional tests, `OutboundTestTrait` routes all outbound calls to a `MockTransport`, including those of frontend subrequests:
 
 ```php
 final class ContactControllerTest extends FunctionalTestCase
@@ -59,7 +59,7 @@ final class ContactControllerTest extends FunctionalTestCase
 }
 ```
 
-Mock before the first request; services created earlier keep their transport. In unit tests, `Outbound::create([...])->withTransport($mock)->api(ContactsApi::class)` composes the runtime without a container.
+The mock is removed after each test. In unit tests, `Outbound::create([...])->withTransport($mock)->api(ContactsApi::class)` composes the runtime without a container.
 
 ## Local development with DDEV
 

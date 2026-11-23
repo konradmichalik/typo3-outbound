@@ -24,7 +24,7 @@ Scope: everything up to and including v1. Every ticked item is implemented and t
 - [x] Value objects `Env`, `SiteSetting`, `Secret`; `Decimal`, `RawResponse`
 - [x] Metadata factory: resolves `extends` chain, precedence method > resource > connection, validation with clear errors
 - [x] Naming: connection name derived from the base interface, endpoint key `Interface::method`
-- [x] Discovery: `OutboundServices::discover()` + compiler pass, metadata baked into the container
+- [x] Discovery: from the `Services.yaml` resource scan, `OutboundServices::discover()` as fallback, compiler pass, metadata baked into the container
 - [x] Proxy generator (no string interpolation of attribute values), proxies cached as PHP code, lazy pipeline
 - [x] Request builder: encoded path placeholders, query styles, JSON/form body, headers
 - [x] Mapping with Valinor: superfluous keys allowed, key case conversion, `#[MapKeys]`, unwrap, big integers as strings
@@ -38,7 +38,7 @@ Scope: everything up to and including v1. Every ticked item is implemented and t
 - [x] Commands `outbound:debug`, `outbound:lint`
 - [x] `outbound:make:dto` from a sample response
 - [x] Endpoint-based mocks: `MockTransport` (unit level)
-- [x] `OutboundTestTrait` for TYPO3 functional tests; replacing the public Transport alias verified on a dumped, compiled Symfony container
+- [x] `OutboundTestTrait` for TYPO3 functional tests; reaches frontend subrequests, verified by `PetstorePluginTest`
 
 ## 3. v1
 

@@ -115,7 +115,7 @@ final class CourseController extends ActionController
 
 1. **Inventory the calls.** List every URL, method, parameter and response the service uses. `outbound:make:dto` turns a saved response into DTO scaffolds; `outbound:generate` does the whole API if there is an OpenAPI document.
 2. **Move configuration.** Base URI into a site setting (`courses.baseUri`), the token into an environment variable referenced by a site setting (`courses.token: 'env:COURSES_TOKEN'`). Remove both from extension configuration.
-3. **Declare connection, resources and DTOs.** Register them with `OutboundServices::discover($builder, __DIR__.'/../Classes/Api')` in `Configuration/Services.php`.
+3. **Declare connection, resources and DTOs.** Place them below the folder your `Services.yaml` resource covers, not in an `exclude` path; they are registered automatically.
 4. **Decide the behaviour per endpoint.** Cache lifetime and tags, `staleOnError`, `#[OnStatus]` for expected statuses, `#[InvalidatesCache]` on writes. Run `outbound:debug` to see the effective configuration and `outbound:lint` for likely mistakes.
 5. **Replace the service.** Inject the resource interface where the service was used. Keep the old service as a thin adapter for a while if many places use it.
 6. **Make failures visible.** Catch `ApiException` (or a specific subclass) where a fallback makes sense; do not swallow errors into empty arrays.

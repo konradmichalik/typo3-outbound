@@ -33,6 +33,6 @@ Saloon offers a mature ecosystem with request classes. typo3-outbound trades tha
 
 ## Deviations from the concept
 
-- Discovery is explicit via `OutboundServices::discover()`, because Symfony's loader skips interfaces
+- Discovery reuses the `Services.yaml` resource scan: Symfony keeps scanned interfaces as abstract `container.excluded` definitions until its removing passes, and `OutboundCompilerPass` turns those with outbound attributes into services. Exclude paths are skipped, because their classes may not load. `OutboundServices::discover()` covers interfaces outside a resource or in an exclude path
 - A site is selected outside requests with `RequestContext::withSite()` instead of `$client->forSite()`, so interfaces stay free of framework methods
 - The comparison spike with Saloon (step 0) was skipped on request

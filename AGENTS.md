@@ -15,7 +15,7 @@ TYPO3 extension `typo3_outbound` (`konradmichalik/typo3-outbound`). External API
 
 - `Classes/Attribute/`: `#[Connection]`, `#[Resource]`, verbs (`Get`, `Post`, ...), parameter roles, `#[Retry]`, `#[Timeout]`, `#[Cache]`, `#[RateLimit]`, `#[CircuitBreaker]`, `#[Paginate]`, `#[MapKeys]`, `#[OnStatus]`, `#[HealthCheck]`, `#[InvalidatesCache]`, `Auth\*`
 - `Classes/Metadata/`: `MetadataFactory` (reflection, `extends` resolution, precedence method > resource > connection, validation), `Registry` (serialized chunks per interface), `Naming`
-- `Classes/DependencyInjection/`: `OutboundServices::discover()` registers interfaces, `OutboundCompilerPass` builds the registry at compile time and wires proxies
+- `Classes/DependencyInjection/`: `OutboundCompilerPass` registers interfaces from the resource scan (`OutboundServices::discover()` as fallback), builds the registry at compile time and wires proxies
 - `Classes/Proxy/`: proxy code generation and storage; generated code contains only reflection names and types, never attribute values
 - `Classes/Runtime/`: `EndpointInvoker` -> `CallFactory` (request, auth, idempotency key) -> `CacheLayer` -> `Dispatcher` (breaker, rate limit, budget, retries, 401 refresh, size limit) -> `ResultMapper` / `Paginator`
 - `Classes/Http/`, `Classes/Format/`, `Classes/Mapping/`, `Classes/Resilience/`, `Classes/Cache/`, `Classes/Auth/`, `Classes/Context/`, `Classes/Transport/`
@@ -29,7 +29,7 @@ TYPO3 extension `typo3_outbound` (`konradmichalik/typo3-outbound`). External API
 
 Gotchas:
 - PHP does not inherit attributes; the metadata factory walks the `extends` chain itself
-- The Symfony loader skips interfaces, hence `OutboundServices::discover()` instead of resource scanning
+- The Symfony loader keeps scanned interfaces only as `.abstract.<FQCN>` definitions tagged `container.excluded` (since symfony/dependency-injection 7.4, hence the `^7.4` requirement); `findTaggedServiceIds()` hides them, so the compiler pass walks `getDefinitions()`. Classes in `exclude` paths are skipped on purpose, they may not load
 - `NoPrivateNetworkHttpClient` throws synchronously and needs `symfony/http-foundation`
 - Valinor runs in strict mode: list and array properties need a PHPDoc item type
 
@@ -43,7 +43,7 @@ ddev install all              # TYPO3 13 and 14 under .Build/<version>
 ddev 14 typo3 outbound:debug  # TYPO3 CLI in one instance
 ```
 
-Quality tools live in `Tests/CGL/`, invoked via `composer cgl` (lint, fix, sca, migration). PHPStan runs on level max; `Tests/CGL/phpstan-baseline.neon` holds the remaining codegen findings on untyped YAML input.
+Quality tools live in `Tests/CGL/`, invoked via `composer cgl` (lint, fix, sca, migration). PHPStan runs on level max; `Tests/CGL/phpstan-baseline.neon` holds the codegen findings on untyped YAML input, the cognitive complexity findings and test-only `putenv`/`eval`/`exec`.
 
 ## Testing
 
