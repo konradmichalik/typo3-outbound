@@ -77,6 +77,15 @@ final class ValueResolverTest extends TestCase
     }
 
     #[Test]
+    public function anEmptyDefaultCountsAsMissing(): void
+    {
+        putenv('OUTBOUND_TEST_UNSET');
+
+        $this->expectExceptionCode(1794700052);
+        (new ValueResolver(new StaticCallContext()))->resolve(new Env('OUTBOUND_TEST_UNSET', ''));
+    }
+
+    #[Test]
     public function aSetVariableWinsOverTheDefault(): void
     {
         putenv('OUTBOUND_TEST_SET=real');

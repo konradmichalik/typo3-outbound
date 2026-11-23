@@ -61,14 +61,14 @@ final readonly class ValueResolver
         }
         // Values read from secret files usually end with a newline, which no header accepts.
         $value = is_string($value) ? rtrim($value, "\r\n") : null;
-        if ((null === $value || '' === $value) && null !== $env->default) {
+        if (null !== $value && '' !== $value) {
+            return $value;
+        }
+        if (null !== $env->default && '' !== $env->default) {
             return $env->default;
         }
-        if (null === $value || '' === $value) {
-            throw new MissingContext(sprintf('Environment variable "%s" is not set.', $name), 1794700052);
-        }
 
-        return $value;
+        throw new MissingContext(sprintf('Environment variable "%s" is not set.', $name), 1794700052);
     }
 
     private function setting(string $key): string
