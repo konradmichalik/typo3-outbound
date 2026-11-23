@@ -1,0 +1,37 @@
+#!/bin/bash
+
+## Description: Benchmark the Petstore plugin in three cache states (uses typo3-request-profiler).
+## Usage: benchmark [version] [count]
+## Example: "ddev benchmark" or "ddev benchmark 14" or "ddev benchmark 14 100"
+
+set -e
+
+. .ddev/.setup/scripts/utils.sh
+
+VERSION=${1}
+COUNT=${2:-50}
+
+if [ -z "$VERSION" ]; then
+    VERSION=$(get_lowest_supported_typo3_versions)
+elif ! check_typo3_version "$VERSION"; then
+    exit 1
+fi
+
+BASE_PATH="/var/www/html/.Build/$VERSION"
+TYPO3_BIN="$BASE_PATH/vendor/bin/typo3"
+
+if [ ! -d "$BASE_PATH" ]; then
+    message red "TYPO3 v${VERSION} is not installed. Run 'ddev install ${VERSION}' first."
+    exit 1
+fi
+
+if ! composer show -d "$BASE_PATH" konradmichalik/typo3-request-profiler >/dev/null 2>&1; then
+    message magenta "[TYPO3 v${VERSION}] Adding typo3-request-profiler"
+    # Its 1.0 release requires guzzlehttp/promises ^2, so -W moves Guzzle back to 7.x in this instance.
+    composer req --dev -W 'konradmichalik/typo3-request-profiler:^1.0' --no-progress -n -d "$BASE_PATH"
+fi
+
+message magenta "[TYPO3 v${VERSION}] Flushing caches"
+/usr/bin/php "$TYPO3_BIN" cache:flush >/dev/null
+
+/usr/bin/php /var/www/html/Build/benchmark.php "https://${VERSION}.${DDEV_SITENAME}.${DDEV_TLD}" "$COUNT" "$BASE_PATH/var/log/profiles" "$TYPO3_BIN"

@@ -8,3 +8,11 @@ page {
     pluginName = Pets
   }
 }
+
+# Uncached variant for `ddev benchmark`: the plugin runs on every request, the response cache of typo3_outbound stays in play.
+benchmark = PAGE
+benchmark {
+  typeNum = 1794
+  config.no_cache = 1
+  10 < page.10
+}

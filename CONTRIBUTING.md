@@ -93,6 +93,20 @@ ddev all typo3 cache:flush
 
 Both instances install the fixture extension `outbound_petstore` as sitepackage, so the Petstore plugin renders on the start page.
 
+## Performance benchmark
+
+`ddev benchmark` renders the Petstore plugin in one TYPO3 instance with fixture responses, so no network latency is involved, and aggregates the profiles of [`konradmichalik/typo3-request-profiler`][3]. On its first run in an instance it adds the profiler, which moves Guzzle back to 7.x there until [#73](https://github.com/konradmichalik/typo3-request-profiler/issues/73) is resolved. Three scenarios run one after another: a page cache hit, an uncached page with a response cache hit, and an uncached page with the response cache flushed before every request.
+
+```bash
+# Lowest supported TYPO3 version, 50 requests per scenario
+ddev benchmark
+
+# TYPO3 14, 100 requests per scenario
+ddev benchmark 14 100
+```
+
+The report shows the median and p95 of `timing.total_ms` and the median query count per scenario. Current figures are in [Background](docs/background/README.md#performance).
+
 ## Full verification
 
 `Build/verify.sh` runs every check that needs DDEV, a database or network access in one go: linters, static analysis, unit and functional tests, the console commands in both TYPO3 instances and the Petstore plugin. It never stops at the first failure and prints a summary at the end.
@@ -113,3 +127,4 @@ All mentioned code quality tools run automatically on every push. For more detai
 
 [1]: .github/workflows
 [2]: https://github.com/konradmichalik/ddev-typo3-multi-version-extension
+[3]: https://github.com/konradmichalik/typo3-request-profiler

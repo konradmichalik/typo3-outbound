@@ -21,6 +21,16 @@ The compiler pass reflects all registered interfaces once and stores their metad
 
 Measured with `Tests/Unit/Performance/OverheadTest` (PHP 8.3, mock transport, no network): about 0.18 ms per uncached call including request building, decoding and mapping, about 0.12 ms per cache hit. Reproduce with `OUTBOUND_BENCH_REPORT=1 composer test -- --filter OverheadTest`.
 
+In a TYPO3 instance, `ddev benchmark` measures the Petstore plugin with fixture responses and [typo3-request-profiler](https://github.com/konradmichalik/typo3-request-profiler) (50 requests, median, DDEV on Apple silicon):
+
+| Scenario | TYPO3 13 | TYPO3 14 |
+|----------|----------|----------|
+| Page cache hit | 5 queries | 5 queries |
+| Response cache hit, uncached page | 10.1 ms, 6 queries | 15.4 ms, 7 queries |
+| Response cache flushed before each request | 11.6 ms, 12 queries | 16.8 ms, 13 queries |
+
+Of the queries on an uncached page, a response cache hit adds one on `cache_outbound`; the others are TYPO3 rendering the page. A miss adds about 1.5 ms and six queries for the state store reads and the cache write, with the network call itself excluded. Times start at the profiler middleware, so the TYPO3 bootstrap is not included, and a page cache hit is answered almost entirely before it.
+
 Shared state is touched as little as possible, because in TYPO3 every access is a cache backend query. A successful call reads the circuit breaker once (if the connection has one); the announced quota is read at most every five seconds per process, an OAuth token once per process until it expires, and ETags are only stored for connections with an `ifMatch` endpoint. `Tests/Unit/Performance/BackendAccessTest` pins this: 4 store accesses for three calls, previously 12.
 
 Valinor's compiled type definitions are cached under `var/cache/code/outbound_valinor` (first mapping of a request about 21 ms instead of 33 ms in the measurement); in the Development context the cache watches the DTO files.
