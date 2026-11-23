@@ -35,7 +35,8 @@ final class LinkHeader
         if (null === $header || '' === trim($header)) {
             return null;
         }
-        foreach (explode(',', $header) as $link) {
+        // Links are separated by commas before "<"; a comma inside the URL belongs to it.
+        foreach (preg_split('/,(?=\s*<)/', $header) ?: [] as $link) {
             if (1 !== preg_match('/<([^>]+)>(.*)$/', trim($link), $match)) {
                 continue;
             }

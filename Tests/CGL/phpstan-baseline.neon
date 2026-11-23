@@ -181,7 +181,7 @@ parameters:
 			path: ../../Classes/DependencyInjection/OutboundServices.php
 
 		-
-			message: '#^Class cognitive complexity is 50, keep it under 40$#'
+			message: '#^Class cognitive complexity is 52, keep it under 40$#'
 			identifier: complexity.classLike
 			count: 1
 			path: ../../Classes/Format/JsonApi.php

@@ -43,6 +43,32 @@ final class HttpTest extends TestCase
     }
 
     #[Test]
+    public function repeatedValuesKeepTheirOrderBeyondTen(): void
+    {
+        $values = range(1, 12);
+
+        self::assertSame('id='.implode('&id=', $values), QuerySerializer::build([['id', $values, QueryStyle::Form]]));
+    }
+
+    #[Test]
+    public function aQueryOnlyLinkReplacesOnlyTheQuery(): void
+    {
+        self::assertSame('https://api.example.com/v1/items?page=2', HostGuard::absolute('?page=2', 'https://api.example.com/v1/items?page=1'));
+    }
+
+    #[Test]
+    public function aQueryOnlyLinkOnAnEmptyPathGetsTheRootPath(): void
+    {
+        self::assertSame('https://api.example.com/?page=2', HostGuard::absolute('?page=2', 'https://api.example.com?page=1'));
+    }
+
+    #[Test]
+    public function aCommaInsideTheNextLinkIsPartOfTheUrl(): void
+    {
+        self::assertSame('https://api.example.com/items?ids=1,2&page=2', LinkHeader::next('<https://api.example.com/items?ids=1,2&page=1>; rel="prev", <https://api.example.com/items?ids=1,2&page=2>; rel="next"'));
+    }
+
+    #[Test]
     public function hostGuardComparesThePortToo(): void
     {
         HostGuard::check('https://api.example.com:443/a', 'https://api.example.com', [], false, 'E');

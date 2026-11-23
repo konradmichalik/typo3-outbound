@@ -81,6 +81,9 @@ final class HostGuard
             return $origin.$link;
         }
         $path = (string) parse_url($current, \PHP_URL_PATH);
+        if (str_starts_with($link, '?')) {
+            return $origin.('' === $path ? '/' : $path).$link;
+        }
         $directory = substr($path, 0, (int) strrpos($path, '/') + 1);
 
         return $origin.('' === $directory ? '/' : $directory).$link;

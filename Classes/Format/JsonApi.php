@@ -68,6 +68,9 @@ final readonly class JsonApi implements ResponseFormat
 
     public function item(mixed $document): mixed
     {
+        if (is_array($document) && array_key_exists('data', $document) && null === $document['data']) {
+            return null;
+        }
         if (!is_array($document) || !is_array($document['data'] ?? null)) {
             return $document;
         }

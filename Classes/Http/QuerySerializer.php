@@ -20,11 +20,10 @@ use function array_map;
 use function implode;
 use function is_array;
 use function is_scalar;
-use function ksort;
 use function rawurlencode;
 use function str_replace;
-
-use const SORT_STRING;
+use function strcmp;
+use function usort;
 
 /**
  * QuerySerializer.
@@ -50,13 +49,10 @@ final class QuerySerializer
                 $pairs[] = $pair;
             }
         }
-        $sorted = [];
-        foreach ($pairs as $index => [$name, $value]) {
-            $sorted[$name."\0".$index] = self::encodeName($name).'='.rawurlencode($value);
-        }
-        ksort($sorted, SORT_STRING);
+        // Stable since PHP 8.0, so repeated names keep their order.
+        usort($pairs, static fn (array $a, array $b): int => strcmp($a[0], $b[0]));
 
-        return implode('&', $sorted);
+        return implode('&', array_map(static fn (array $pair): string => self::encodeName($pair[0]).'='.rawurlencode($pair[1]), $pairs));
     }
 
     /**

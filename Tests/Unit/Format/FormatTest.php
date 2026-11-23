@@ -45,6 +45,12 @@ final class FormatTest extends TestCase
     }
 
     #[Test]
+    public function jsonApiDataNullIsNull(): void
+    {
+        self::assertNull((new JsonApi())->item(['data' => null]));
+    }
+
+    #[Test]
     public function jsonApiErrorsBecomeFieldErrorsByPointer(): void
     {
         $error = (new JsonApi())->error(422, ['errors' => [['title' => 'Invalid', 'detail' => 'too short', 'source' => ['pointer' => '/data/attributes/title']]]]);
