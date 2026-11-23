@@ -13,13 +13,16 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Unit;
 
+use KonradMichalik\Outbound\Outbound;
 use PHPUnit\Framework\Attributes\{CoversNothing, Test};
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionClass;
 use SplFileInfo;
 
 use function count;
+use function dirname;
 
 /**
  * ExceptionCodeUniquenessTest.
@@ -30,16 +33,20 @@ use function count;
 final class ExceptionCodeUniquenessTest extends TestCase
 {
     #[Test]
-    public function everyExceptionCodeInClassesIsUsedOnce(): void
+    public function everyExceptionCodeIsUsedOnceAcrossTheExtensionAndTheCore(): void
     {
         $sites = [];
-        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__.'/../../Classes', RecursiveDirectoryIterator::SKIP_DOTS));
+        $directories = [__DIR__.'/../../Classes', dirname((string) (new ReflectionClass(Outbound::class))->getFileName())];
 
-        /** @var SplFileInfo $file */
-        foreach ($files as $file) {
-            preg_match_all('/\b1794\d{6}\b/', (string) file_get_contents($file->getPathname()), $matches);
-            foreach ($matches[0] as $code) {
-                $sites[$code][] = $file->getPathname();
+        foreach ($directories as $directory) {
+            $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS));
+
+            /** @var SplFileInfo $file */
+            foreach ($files as $file) {
+                preg_match_all('/\b1794\d{6}\b/', (string) file_get_contents($file->getPathname()), $matches);
+                foreach ($matches[0] as $code) {
+                    $sites[$code][] = $file->getPathname();
+                }
             }
         }
 

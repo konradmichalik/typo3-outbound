@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace KonradMichalik\OutboundPetstore\Api;
 
+use KonradMichalik\Outbound\Attribute as Outbound;
+use KonradMichalik\Outbound\Value\Deferred;
 use KonradMichalik\OutboundPetstore\Dto\{PetDto, PetStatus};
-use KonradMichalik\Typo3Outbound\Attribute as Outbound;
-use KonradMichalik\Typo3Outbound\Value\Deferred;
 
 /**
  * @author Konrad Michalik <hej@konradmichalik.dev>

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8d098b2bc118631e4f3e1dc61f707a10",
+    "content-hash": "7ae4d8e45695afe797f9109c4068426c",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1220,6 +1220,96 @@
                 }
             ],
             "time": "2026-11-22T00:00:35+00:00"
+        },
+        {
+            "name": "konradmichalik/php-outbound",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/konradmichalik/php-outbound.git",
+                "reference": "9ddb7f7e0a25515e642742aaf2651a4e2e7f3114"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/konradmichalik/php-outbound/zipball/9ddb7f7e0a25515e642742aaf2651a4e2e7f3114",
+                "reference": "9ddb7f7e0a25515e642742aaf2651a4e2e7f3114",
+                "shasum": ""
+            },
+            "require": {
+                "cuyz/valinor": "^2.7",
+                "ext-mbstring": "*",
+                "ext-tokenizer": "*",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+                "psr/log": "^2.0 || ^3.0",
+                "symfony/console": "^7.4",
+                "symfony/dependency-injection": "^7.4",
+                "symfony/http-client": "^7.4",
+                "symfony/http-client-contracts": "^3.5",
+                "symfony/http-foundation": "^7.4",
+                "symfony/mime": "^7.4",
+                "symfony/rate-limiter": "^7.4.23",
+                "symfony/yaml": "^7.4"
+            },
+            "require-dev": {
+                "armin/editorconfig-cli": "^2.0",
+                "ergebnis/composer-normalize": "^2.42",
+                "ergebnis/phpstan-rules": "^2.13",
+                "konradmichalik/php-cs-fixer-preset": "^0.3.0",
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^11.5 || ^12.0",
+                "psr/container": "^2.0",
+                "rector/rector": "^2.0",
+                "shipmonk/composer-dependency-analyser": "^1.8",
+                "spaze/phpstan-disallowed-calls": "^4.0",
+                "symfony/config": "^7.4",
+                "tomasvotruba/cognitive-complexity": "^1.0",
+                "tomasvotruba/type-coverage": "^2.5"
+            },
+            "suggest": {
+                "phpunit/phpunit": "Required for OutboundTestTrait."
+            },
+            "type": "library",
+            "extra": {
+                "konradmichalik/php-cs-fixer-preset": {
+                    "copyright": 2026
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "KonradMichalik\\Outbound\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Konrad Michalik",
+                    "email": "hej@konradmichalik.dev",
+                    "homepage": "https://konradmichalik.dev",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "Outbound - Declarative API clients for PHP: describe external APIs as interfaces with attributes, with retries, caching, rate limits and safe defaults.",
+            "homepage": "https://github.com/konradmichalik/php-outbound",
+            "keywords": [
+                "API-Client",
+                "attributes",
+                "declarative",
+                "http-client",
+                "openapi",
+                "outbound",
+                "rest"
+            ],
+            "support": {
+                "issues": "https://github.com/konradmichalik/php-outbound/issues",
+                "source": "https://github.com/konradmichalik/php-outbound"
+            },
+            "time": "2026-11-23T20:38:37+00:00"
         },
         {
             "name": "lolli42/finediff",
@@ -10571,13 +10661,11 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
-        "ext-mbstring": "*",
-        "ext-tokenizer": "*"
+        "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0"
     },
     "platform-dev": {},
     "platform-overrides": {
         "php": "8.2"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }

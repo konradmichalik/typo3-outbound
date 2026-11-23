@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\OutboundPetstore\Transport;
 
+use KonradMichalik\Outbound\Testing\MockTransport;
 use KonradMichalik\OutboundPetstore\Api\{PetApi, StoreApi, UserApi};
-use KonradMichalik\Typo3Outbound\Testing\MockTransport;
 
 /**
  * MockPetstore.

@@ -27,21 +27,14 @@
 	},
 	"require": {
 		"php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
-		"ext-mbstring": "*",
-		"ext-tokenizer": "*",
 		"cuyz/valinor": "^2.7",
+		"konradmichalik/php-outbound": "^0.1",
 		"psr/http-message": "^1.0 || ^2.0",
 		"psr/http-server-handler": "^1.0.2",
 		"psr/http-server-middleware": "^1.0.2",
-		"psr/log": "^2.0 || ^3.0",
-		"symfony/console": "^7.4",
 		"symfony/dependency-injection": "^7.4",
-		"symfony/http-client": "^7.4",
-		"symfony/http-client-contracts": "^3.5",
 		"symfony/http-foundation": "^7.4",
-		"symfony/mime": "^7.4",
 		"symfony/rate-limiter": "^7.4.23",
-		"symfony/yaml": "^7.4",
 		"typo3/cms-core": "^13.4 || ^14.0"
 	},
 	"require-dev": {
@@ -102,11 +95,9 @@
 			"@cgl install"
 		],
 		"cgl": "@composer -d Tests/CGL --",
-		"demo": "php -S localhost:8080 -t Tests/Demo/public",
 		"test": "@test:unit",
 		"test:coverage": "phpunit -c phpunit.xml",
 		"test:functional": "phpunit -c phpunit.functional.xml",
-		"test:live": "OUTBOUND_LIVE=1 phpunit -c phpunit.xml --testsuite Integration --no-coverage",
 		"test:unit": "phpunit -c phpunit.xml --no-coverage"
 	}
 }

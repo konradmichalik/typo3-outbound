@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\OutboundPetstore\Api;
 
+use KonradMichalik\Outbound\Attribute as Outbound;
 use KonradMichalik\OutboundPetstore\Dto\UserDto;
-use KonradMichalik\Typo3Outbound\Attribute as Outbound;
 
 /**
  * @author Konrad Michalik <hej@konradmichalik.dev>

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\OutboundPetstore\Api;
 
-use KonradMichalik\Typo3Outbound\Attribute as Outbound;
+use KonradMichalik\Outbound\Attribute as Outbound;
 
 /**
  * Connection to the public Swagger Petstore (https://petstore3.swagger.io).

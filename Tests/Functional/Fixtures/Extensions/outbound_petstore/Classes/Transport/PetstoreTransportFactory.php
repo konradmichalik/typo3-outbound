@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\OutboundPetstore\Transport;
 
-use KonradMichalik\Typo3Outbound\Transport\{SymfonyTransport, Transport};
+use KonradMichalik\Outbound\Transport\{SymfonyTransport, Transport};
 
 /**
  * @author Konrad Michalik <hej@konradmichalik.dev>
