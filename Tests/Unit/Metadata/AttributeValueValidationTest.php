@@ -74,6 +74,7 @@ final class AttributeValueValidationTest extends TestCase
         yield 'login body without field names' => [F\ListBodyLoginApi::class, 1794700237];
         yield 'login token field empty' => [F\EmptyTokenFieldLoginApi::class, 1794700238];
         yield 'login ttl 0' => [F\ZeroTtlLoginApi::class, 1794700239];
+        yield 'login ttl within the expiry margin' => [F\MarginTtlLoginApi::class, 1794700239];
         yield 'login URL over plain http' => [F\PlainHttpLoginApi::class, 1794700240];
         yield 'login URL from a site setting without allowedHosts' => [F\SiteLoginUrlWithoutHostsApi::class, 1794700241];
     }

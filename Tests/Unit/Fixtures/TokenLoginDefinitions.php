@@ -125,3 +125,14 @@ interface ConstantFirstFieldLoginApi
     #[Outbound\Get('/items/{id}')]
     public function find(int $id): string;
 }
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+#[Outbound\Connection(baseUri: 'https://login.example.com')]
+#[Outbound\Auth\TokenLogin(url: '/auth/token', body: ['username' => 'user'], ttl: 30)]
+interface MarginTtlLoginApi
+{
+    #[Outbound\Get('/a')]
+    public function a(): string;
+}

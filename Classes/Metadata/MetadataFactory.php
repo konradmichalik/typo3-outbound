@@ -18,10 +18,11 @@ use DateInterval;
 use DateTimeImmutable;
 use KonradMichalik\Typo3Outbound\Attribute\Auth\{Authentication, OAuth2ClientCredentials, TokenLogin};
 use KonradMichalik\Typo3Outbound\Attribute\{Body, Cache, CircuitBreaker, Connection, Endpoint, Header, HealthCheck, InvalidatesCache, MapKeys, Multipart, OnStatus, Paginate, Path, Query, RateLimit, Resource, Retry, Sensitive, Timeout};
+use KonradMichalik\Typo3Outbound\Auth\TokenProvider;
 use KonradMichalik\Typo3Outbound\Cache\CacheTags;
 use KonradMichalik\Typo3Outbound\Enum\PaginationStyle;
 use KonradMichalik\Typo3Outbound\Exception\InvalidDefinition;
-use KonradMichalik\Typo3Outbound\Value\{Deferred, RawResponse, SiteSetting, ValueSource};
+use KonradMichalik\Typo3Outbound\Value\{Deferred, RawResponse, SiteSetting};
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionIntersectionType;
@@ -34,6 +35,7 @@ use Reflector;
 use Throwable;
 
 use function array_filter;
+use function array_keys;
 use function count;
 use function in_array;
 use function is_int;
@@ -500,15 +502,18 @@ final readonly class MetadataFactory
 
     private static function validateTokenLogin(string $name, TokenLogin $login, Connection $definition): void
     {
-        $validField = static fn (mixed $value, int|string $key): bool => is_string($key) && '' !== $key && (is_string($value) || $value instanceof ValueSource);
-        if ([] === $login->body || count(array_filter($login->body, $validField, \ARRAY_FILTER_USE_BOTH)) !== count($login->body)) {
-            throw new InvalidDefinition(sprintf('Connection %s: #[TokenLogin] needs a body of named fields with string or value source values.', $name), 1794700237);
+        $valid = [] !== $login->body;
+        foreach (array_keys($login->body) as $field) {
+            $valid = $valid && is_string($field) && '' !== $field;
+        }
+        if (!$valid) {
+            throw new InvalidDefinition(sprintf('Connection %s: #[TokenLogin] needs a body of named fields.', $name), 1794700237);
         }
         if ('' === $login->tokenField) {
             throw new InvalidDefinition(sprintf('Connection %s: #[TokenLogin] needs a tokenField.', $name), 1794700238);
         }
-        if ($login->ttl < 1) {
-            throw new InvalidDefinition(sprintf('Connection %s: #[TokenLogin] needs a positive ttl.', $name), 1794700239);
+        if ($login->ttl <= TokenProvider::EXPIRY_MARGIN) {
+            throw new InvalidDefinition(sprintf('Connection %s: #[TokenLogin] needs a ttl above %d seconds, the token is renewed that long before it expires.', $name, TokenProvider::EXPIRY_MARGIN), 1794700239);
         }
         if (is_string($login->url) && !str_starts_with($login->url, '/') && !str_starts_with($login->url, 'https://')) {
             throw new InvalidDefinition(sprintf('Connection %s: the login URL must be a path or use https.', $name), 1794700240);
