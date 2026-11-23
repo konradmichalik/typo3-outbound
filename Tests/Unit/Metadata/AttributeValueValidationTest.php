@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Unit\Metadata;
 
+use KonradMichalik\Typo3Outbound\Attribute\Auth\TokenLogin;
 use KonradMichalik\Typo3Outbound\Exception\InvalidDefinition;
 use KonradMichalik\Typo3Outbound\Metadata\{MetadataFactory, Registry};
 use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures as F;
@@ -21,6 +22,7 @@ use PHPUnit\Framework\TestCase;
 
 require_once __DIR__.'/../Fixtures/InvalidValueDefinitions.php';
 require_once __DIR__.'/../Fixtures/CacheDefinitions.php';
+require_once __DIR__.'/../Fixtures/TokenLoginDefinitions.php';
 
 /**
  * AttributeValueValidationTest.
@@ -68,6 +70,21 @@ final class AttributeValueValidationTest extends TestCase
         yield 'placeholder that is not a name' => [F\BracedPathApi::class, 1794700235];
         yield 'rate limit interval that is garbage' => [F\GarbageIntervalLimitApi::class, 1794700009];
         yield 'rate limit interval of zero' => [F\ZeroIntervalLimitApi::class, 1794700009];
+        yield 'login body empty' => [F\EmptyBodyLoginApi::class, 1794700237];
+        yield 'login body without field names' => [F\ListBodyLoginApi::class, 1794700237];
+        yield 'login token field empty' => [F\EmptyTokenFieldLoginApi::class, 1794700238];
+        yield 'login ttl 0' => [F\ZeroTtlLoginApi::class, 1794700239];
+        yield 'login URL over plain http' => [F\PlainHttpLoginApi::class, 1794700240];
+        yield 'login URL from a site setting without allowedHosts' => [F\SiteLoginUrlWithoutHostsApi::class, 1794700241];
+    }
+
+    #[Test]
+    public function aValidTokenLoginBuilds(): void
+    {
+        $auth = Registry::build([F\TokenLoginApi::class])->connectionOf(F\TokenLoginApi::class)->auth;
+
+        self::assertInstanceOf(TokenLogin::class, $auth);
+        self::assertSame(600, $auth->ttl);
     }
 
     #[Test]

@@ -235,13 +235,13 @@ parameters:
 			path: ../../Classes/Metadata/MetadataFactory.php
 
 		-
-			message: '#^Class cognitive complexity is 126, keep it under 40$#'
+			message: '#^Class cognitive complexity is 137, keep it under 40$#'
 			identifier: complexity.classLike
 			count: 1
 			path: ../../Classes/Metadata/MetadataFactory.php
 
 		-
-			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\Metadata\\MetadataFactory\:\:connection\(\)" is 16, keep it under 10$#'
+			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\Metadata\\MetadataFactory\:\:connection\(\)" is 14, keep it under 10$#'
 			identifier: complexity.functionLike
 			count: 1
 			path: ../../Classes/Metadata/MetadataFactory.php

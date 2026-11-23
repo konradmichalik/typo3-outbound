@@ -16,12 +16,12 @@ namespace KonradMichalik\Typo3Outbound\Metadata;
 use BackedEnum;
 use DateInterval;
 use DateTimeImmutable;
-use KonradMichalik\Typo3Outbound\Attribute\Auth\{Authentication, OAuth2ClientCredentials};
+use KonradMichalik\Typo3Outbound\Attribute\Auth\{Authentication, OAuth2ClientCredentials, TokenLogin};
 use KonradMichalik\Typo3Outbound\Attribute\{Body, Cache, CircuitBreaker, Connection, Endpoint, Header, HealthCheck, InvalidatesCache, MapKeys, Multipart, OnStatus, Paginate, Path, Query, RateLimit, Resource, Retry, Sensitive, Timeout};
 use KonradMichalik\Typo3Outbound\Cache\CacheTags;
 use KonradMichalik\Typo3Outbound\Enum\PaginationStyle;
 use KonradMichalik\Typo3Outbound\Exception\InvalidDefinition;
-use KonradMichalik\Typo3Outbound\Value\{Deferred, RawResponse, SiteSetting};
+use KonradMichalik\Typo3Outbound\Value\{Deferred, RawResponse, SiteSetting, ValueSource};
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionIntersectionType;
@@ -33,6 +33,7 @@ use ReflectionUnionType;
 use Reflector;
 use Throwable;
 
+use function array_filter;
 use function count;
 use function in_array;
 use function is_int;
@@ -121,9 +122,7 @@ final readonly class MetadataFactory
             throw new InvalidDefinition(sprintf('Connection %s declares more than one authentication.', $name), 1794700008);
         }
         $authentication = isset($auth[0]) ? $auth[0]->newInstance() : null;
-        if ($authentication instanceof OAuth2ClientCredentials && $authentication->tokenUrl instanceof SiteSetting && [] === $definition->allowedHosts) {
-            throw new InvalidDefinition(sprintf('Connection %s: a token URL from a site setting needs allowedHosts that include its host.', $name), 1794700037);
-        }
+        self::validateAuthentication($name, $authentication, $definition);
         $rateLimit = $this->attribute($base, RateLimit::class);
         if ($rateLimit instanceof RateLimit && ($rateLimit->limit < 1 || !self::isPositiveInterval($rateLimit->per))) {
             throw new InvalidDefinition(sprintf('Connection %s: #[RateLimit] needs a positive limit and an interval like "1 minute".', $name), 1794700009);
@@ -489,6 +488,36 @@ final readonly class MetadataFactory
      * Values that would not fail but misbehave: a lifetime of 0 means "never expires" in the
      * database cache backend, a page size of 0 never advances.
      */
+    private static function validateAuthentication(string $name, ?Authentication $authentication, Connection $definition): void
+    {
+        if ($authentication instanceof OAuth2ClientCredentials && $authentication->tokenUrl instanceof SiteSetting && [] === $definition->allowedHosts) {
+            throw new InvalidDefinition(sprintf('Connection %s: a token URL from a site setting needs allowedHosts that include its host.', $name), 1794700037);
+        }
+        if ($authentication instanceof TokenLogin) {
+            self::validateTokenLogin($name, $authentication, $definition);
+        }
+    }
+
+    private static function validateTokenLogin(string $name, TokenLogin $login, Connection $definition): void
+    {
+        $validField = static fn (mixed $value, int|string $key): bool => is_string($key) && '' !== $key && (is_string($value) || $value instanceof ValueSource);
+        if ([] === $login->body || count(array_filter($login->body, $validField, \ARRAY_FILTER_USE_BOTH)) !== count($login->body)) {
+            throw new InvalidDefinition(sprintf('Connection %s: #[TokenLogin] needs a body of named fields with string or value source values.', $name), 1794700237);
+        }
+        if ('' === $login->tokenField) {
+            throw new InvalidDefinition(sprintf('Connection %s: #[TokenLogin] needs a tokenField.', $name), 1794700238);
+        }
+        if ($login->ttl < 1) {
+            throw new InvalidDefinition(sprintf('Connection %s: #[TokenLogin] needs a positive ttl.', $name), 1794700239);
+        }
+        if (is_string($login->url) && !str_starts_with($login->url, '/') && !str_starts_with($login->url, 'https://')) {
+            throw new InvalidDefinition(sprintf('Connection %s: the login URL must be a path or use https.', $name), 1794700240);
+        }
+        if ($login->url instanceof SiteSetting && [] === $definition->allowedHosts) {
+            throw new InvalidDefinition(sprintf('Connection %s: a login URL from a site setting needs allowedHosts that include its host.', $name), 1794700241);
+        }
+    }
+
     private static function validateValues(string $key, ?Retry $retry, ?Timeout $timeout, ?Cache $cache, ?Paginate $paginate): void
     {
         if ($cache instanceof Cache && ($cache->lifetime < 1 || $cache->staleOnError < 0)) {
