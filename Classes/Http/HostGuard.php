@@ -38,9 +38,10 @@ use function strtolower;
 final class HostGuard
 {
     /**
+     * @param string|null  $baseUri      null when the base URI comes from site settings; then only explicit ports count
      * @param list<string> $allowedHosts
      */
-    public static function check(string $url, string $baseUri, array $allowedHosts, bool $allowInsecure, string $endpoint): void
+    public static function check(string $url, ?string $baseUri, array $allowedHosts, bool $allowInsecure, string $endpoint): void
     {
         $scheme = parse_url($url, \PHP_URL_SCHEME);
         $host = parse_url($url, \PHP_URL_HOST);
@@ -51,9 +52,10 @@ final class HostGuard
         if ('https' !== $scheme && !('http' === $scheme && $allowInsecure)) {
             throw new BlockedRequest(sprintf('%s: only https URLs are allowed, got %s.', $endpoint, $scheme), 1794700061, $endpoint);
         }
-        $allowed = [] !== $allowedHosts ? $allowedHosts : [(string) parse_url($baseUri, \PHP_URL_HOST)];
+        // A base URI an editor can change (site settings) must not widen the allowed ports.
+        $allowed = [] !== $allowedHosts ? $allowedHosts : [(string) parse_url((string) $baseUri, \PHP_URL_HOST)];
         $port = self::port($url);
-        $basePort = self::port($baseUri);
+        $basePort = null !== $baseUri ? self::port($baseUri) : null;
         foreach ($allowed as $entry) {
             if (self::matches($entry, strtolower($host), $port, $basePort)) {
                 return;
@@ -87,13 +89,13 @@ final class HostGuard
     /**
      * An entry is "host" or "host:port". Without a port it allows the default ports and the port of the base URI.
      */
-    private static function matches(string $entry, string $host, int $port, int $basePort): bool
+    private static function matches(string $entry, string $host, int $port, ?int $basePort): bool
     {
         if (1 === preg_match('/^(\[[^\]]+\]|[^:]+):(\d+)$/', $entry, $match)) {
             return strtolower($match[1]) === $host && (int) $match[2] === $port;
         }
 
-        return strtolower($entry) === $host && in_array($port, [80, 443, $basePort], true);
+        return strtolower($entry) === $host && (in_array($port, [80, 443], true) || $port === $basePort);
     }
 
     private static function port(string $url): int

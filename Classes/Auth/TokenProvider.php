@@ -200,7 +200,9 @@ final class TokenProvider
     {
         $definition = $connection->definition;
         $allowedHosts = $auth instanceof TokenLogin || $auth->tokenUrl instanceof SiteSetting ? $definition->allowedHosts : [];
-        HostGuard::check($url, $hostReference, $allowedHosts, $definition->allowPrivateNetwork, $connection->name.' token');
+        // A relative login URL is resolved against the base URI, so that one decides whether its port is trusted.
+        $source = $url === $hostReference ? ($auth instanceof TokenLogin ? $auth->url : $auth->tokenUrl) : $definition->baseUri;
+        HostGuard::check($url, $source instanceof SiteSetting ? null : $hostReference, $allowedHosts, $definition->allowPrivateNetwork, $connection->name.' token');
     }
 
     /**

@@ -55,6 +55,13 @@ final class HttpTest extends TestCase
     }
 
     #[Test]
+    public function aTrustedBaseUriKeepsItsPort(): void
+    {
+        HostGuard::check('https://api.example.com:8443/a', 'https://api.example.com:8443', ['api.example.com'], false, 'E');
+        $this->addToAssertionCount(1);
+    }
+
+    #[Test]
     public function aPortInTheAllowListAlsoBindsUrlsWithoutExplicitPort(): void
     {
         $this->expectException(BlockedRequest::class);

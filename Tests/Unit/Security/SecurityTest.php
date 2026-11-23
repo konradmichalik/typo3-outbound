@@ -190,6 +190,36 @@ final class SecurityTest extends TestCase
     }
 
     #[Test]
+    public function aPortInATokenUrlFromSiteSettingsMustBeAllowed(): void
+    {
+        $mock = new MockTransport();
+        $context = new StaticCallContext('tenant', ['tenant.baseUri' => 'https://api.example.com', 'tenant.tokenUrl' => 'https://api.example.com:9999/token']);
+
+        try {
+            $this->outbound([TenantApi::class])->withTransport($mock)->withCallContext($context)->api(TenantApi::class)->a();
+            self::fail('Expected the token URL to be blocked.');
+        } catch (BlockedRequest $exception) {
+            self::assertStringContainsString(':9999', $exception->getMessage());
+        }
+        self::assertSame([], $mock->calls());
+    }
+
+    #[Test]
+    public function aPortInABaseUriFromSiteSettingsMustBeAllowed(): void
+    {
+        $mock = new MockTransport();
+        $mock->onKey('tenant::token')->respondWithJson(['access_token' => 't', 'expires_in' => 3600]);
+        $context = new StaticCallContext('tenant', ['tenant.baseUri' => 'https://api.example.com:9999', 'tenant.tokenUrl' => 'https://api.example.com/token']);
+
+        try {
+            $this->outbound([TenantApi::class])->withTransport($mock)->withCallContext($context)->api(TenantApi::class)->a();
+            self::fail('Expected the base URI to be blocked.');
+        } catch (BlockedRequest $exception) {
+            self::assertStringContainsString(':9999', $exception->getMessage());
+        }
+    }
+
+    #[Test]
     public function errorTextFromTheApiIsBoundedAndSingleLine(): void
     {
         $mock = new MockTransport();

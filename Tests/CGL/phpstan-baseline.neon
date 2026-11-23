@@ -205,7 +205,7 @@ parameters:
 			path: ../../Classes/Http/QuerySerializer.php
 
 		-
-			message: '#^Class cognitive complexity is 53, keep it under 40$#'
+			message: '#^Class cognitive complexity is 54, keep it under 40$#'
 			identifier: complexity.classLike
 			count: 1
 			path: ../../Classes/Http/RequestBuilder.php
@@ -217,7 +217,7 @@ parameters:
 			path: ../../Classes/Http/RequestBuilder.php
 
 		-
-			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\Http\\RequestBuilder\:\:build\(\)" is 20, keep it under 10$#'
+			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\Http\\RequestBuilder\:\:build\(\)" is 21, keep it under 10$#'
 			identifier: complexity.functionLike
 			count: 1
 			path: ../../Classes/Http/RequestBuilder.php
