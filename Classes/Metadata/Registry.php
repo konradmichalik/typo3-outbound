@@ -137,7 +137,7 @@ final class Registry
      */
     public function connectionOf(string $interface): ConnectionMetadata
     {
-        return $this->connection($this->interfaces[$interface] ?? throw new InvalidDefinition(sprintf('%s is not registered with typo3_outbound.', $interface), 1794700028));
+        return $this->connection($this->interfaces[$interface] ?? throw new InvalidDefinition(sprintf('%s is not registered with Outbound.', $interface), 1794700028));
     }
 
     /**
@@ -151,7 +151,7 @@ final class Registry
             return $this->endpoints[$interface];
         }
         /** @var list<EndpointMetadata> $list */
-        $list = unserialize($this->endpointChunks[$interface] ?? throw new InvalidDefinition(sprintf('%s is not registered with typo3_outbound.', $interface), 1794700029));
+        $list = unserialize($this->endpointChunks[$interface] ?? throw new InvalidDefinition(sprintf('%s is not registered with Outbound.', $interface), 1794700029));
 
         return $this->endpoints[$interface] = $list;
     }

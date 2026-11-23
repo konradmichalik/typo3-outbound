@@ -87,7 +87,7 @@ final class Outbound
             new SystemClock(),
             new NullLogger(),
             new Settings(),
-            new FileProxyStore(sys_get_temp_dir().'/typo3-outbound-proxies-'.substr(hash('xxh128', __DIR__.':'.get_current_user().':'.getmyuid()), 0, 12)),
+            new FileProxyStore(sys_get_temp_dir().'/outbound-proxies-'.substr(hash('xxh128', __DIR__.':'.get_current_user().':'.getmyuid()), 0, 12)),
             new ValinorMapper(),
             new InMemoryStorage(),
             new InMemoryCacheLock(),

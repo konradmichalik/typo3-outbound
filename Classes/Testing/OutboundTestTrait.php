@@ -23,7 +23,7 @@ use function sprintf;
 /**
  * OutboundTestTrait.
  *
- * Routes every outbound call of a TYPO3 functional test to a MockTransport, so
+ * Routes every outbound call of a functional test with a booted container to a MockTransport, so
  * the test mocks endpoints by interface and method, never by URL:
  *
  *     final class ContactControllerTest extends FunctionalTestCase
@@ -38,7 +38,8 @@ use function sprintf;
  *         }
  *     }
  *
- * The mock also reaches frontend subrequests, which boot their own container.
+ * The mock also reaches subrequests that boot their own container. The framework
+ * integration decorates the transport with SwitchableTransport in its test context.
  *
  * @api
  *
@@ -70,7 +71,7 @@ trait OutboundTestTrait
     {
         if (null === $this->outboundTransport) {
             if (!method_exists($this, 'getContainer')) {
-                throw new LogicException('OutboundTestTrait needs a TYPO3 functional test, e.g. typo3/testing-framework\'s FunctionalTestCase. In unit tests, compose the runtime with Outbound::create() and withTransport() with a MockTransport.', 1794700220);
+                throw new LogicException('OutboundTestTrait needs a functional test with a container, e.g. the TYPO3 testing framework\'s FunctionalTestCase. In unit tests, compose the runtime with Outbound::create() and withTransport() with a MockTransport.', 1794700220);
             }
             $this->outboundTransport = new MockTransport();
             SwitchableTransport::override($this->outboundTransport);
