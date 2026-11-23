@@ -1,5 +1,7 @@
 {
 	"symbol-whitelist": [
-		"TYPO3"
+		"TYPO3",
+		"PHPUnit\\Framework\\Assert",
+		"PHPUnit\\Framework\\Attributes\\After"
 	]
 }

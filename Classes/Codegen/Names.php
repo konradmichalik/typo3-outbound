@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Codegen;
 
 use function array_map;
-use function ctype_alpha;
 use function implode;
 use function in_array;
 use function is_numeric;
@@ -68,7 +67,7 @@ final class Names
     {
         $cases = [];
         foreach ($values as $value) {
-            $name = self::studly(ctype_alpha($value[0] ?? '') ? $value : 'value '.$value);
+            $name = self::studly(1 === preg_match('/^[A-Za-z]/', $value) ? $value : 'value '.$value);
             if ('class' === strtolower($name)) {
                 $name .= 'Value';
             }
