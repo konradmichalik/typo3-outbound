@@ -19,7 +19,7 @@ use KonradMichalik\Typo3Outbound\Enum\{BodyFormat, QueryStyle};
 use KonradMichalik\Typo3Outbound\Exception\BlockedRequest;
 use KonradMichalik\Typo3Outbound\Mapping\Normalizer;
 use KonradMichalik\Typo3Outbound\Metadata\{ConnectionMetadata, EndpointMetadata, ParameterKind};
-use KonradMichalik\Typo3Outbound\Value\{Env, FilePart, Secret, SiteSetting};
+use KonradMichalik\Typo3Outbound\Value\{Env, FilePart, Secret, Setting};
 use Symfony\Component\Mime\Header\HeaderInterface;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\Multipart\FormDataPart;
@@ -82,7 +82,7 @@ final readonly class RequestBuilder
         } elseif ([] !== $credentials->query) {
             $url .= (str_contains($url, '?') ? '&' : '?').http_build_query($credentials->query);
         }
-        HostGuard::check($url, $definition->baseUri instanceof SiteSetting ? null : $baseUri, $definition->allowedHosts, $definition->allowPrivateNetwork, $endpoint->key);
+        HostGuard::check($url, $definition->baseUri instanceof Setting ? null : $baseUri, $definition->allowedHosts, $definition->allowPrivateNetwork, $endpoint->key);
 
         $headers = ['Accept' => $definition->format->accept()];
         $secretHeaders = [];

@@ -10,7 +10,7 @@ Values from the environment are value objects, checked by IDE and PHPStan:
 |-------|-------------|
 | `new Env('NAME')` | an environment variable |
 | `new Env('NAME', default: 'https://api.example.com')` | the environment variable, or the default when it is missing or empty |
-| `new SiteSetting('crm.baseUri')` | a setting of the current site |
+| `new Setting('crm.baseUri')` | a setting of the current site |
 | `new Secret('crm.token')` | a site setting holding `env:NAME`, resolved from that environment variable; a plain value is rejected |
 
 A base URI, OAuth token URL or login URL from site settings needs `allowedHosts`; without it the container build fails, because whoever can edit the setting could redirect calls and credentials to any host. For a base URI from an environment variable `outbound:lint` warns.

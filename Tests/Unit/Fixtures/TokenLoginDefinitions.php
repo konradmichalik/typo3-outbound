@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures;
 
 use KonradMichalik\Typo3Outbound\Attribute as Outbound;
-use KonradMichalik\Typo3Outbound\Value\{Env, SiteSetting};
+use KonradMichalik\Typo3Outbound\Value\{Env, Setting};
 
 /**
  * @author Konrad Michalik <hej@konradmichalik.dev>
@@ -97,7 +97,7 @@ interface PlainHttpLoginApi
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 #[Outbound\Connection(baseUri: 'https://login.example.com')]
-#[Outbound\Auth\TokenLogin(url: new SiteSetting('auth.loginUrl'), body: ['username' => 'user'])]
+#[Outbound\Auth\TokenLogin(url: new Setting('auth.loginUrl'), body: ['username' => 'user'])]
 interface SiteLoginUrlWithoutHostsApi
 {
     #[Outbound\Get('/a')]

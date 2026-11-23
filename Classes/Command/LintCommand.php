@@ -48,7 +48,7 @@ final class LintCommand extends Command
     {
         $this->setHelp(<<<'HELP'
             Reports declarations the container build accepts but that are probably unintended:
-            a base URI from an environment variable or site setting without allowedHosts, an HTTPS
+            a base URI from an environment variable or setting without allowedHosts, an HTTPS
             proxy (the private network block cannot see behind it), verifyTls: false, an
             #[InvalidatesCache] tag no #[Cache] sets, #[Retry] on an endpoint that is not
             idempotent, and a high maxPages. Invalid declarations never get here, they fail the build.

@@ -58,7 +58,7 @@ Typical problems, all of them easy to miss in review:
 The connection and the resource:
 
 ```php
-#[Outbound\Connection(baseUri: new SiteSetting('courses.baseUri'), allowedHosts: ['api.courses.example'])]
+#[Outbound\Connection(baseUri: new Setting('courses.baseUri'), allowedHosts: ['api.courses.example'])]
 #[Outbound\Auth\Bearer(token: new Secret('courses.token'))]
 #[Outbound\Retry(maxRetries: 2)]
 interface CourseApi {}

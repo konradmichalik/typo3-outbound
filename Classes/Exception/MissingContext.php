@@ -18,8 +18,8 @@ use LogicException;
 /**
  * MissingContext.
  *
- * A value needs a context that is not available, typically a site setting in CLI
- * or a Messenger handler without an explicitly selected site.
+ * A value needs a context that is not available, typically a setting in the CLI
+ * or a Messenger handler without an explicitly selected scope.
  *
  * @api
  *

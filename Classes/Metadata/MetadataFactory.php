@@ -22,7 +22,7 @@ use KonradMichalik\Typo3Outbound\Auth\TokenProvider;
 use KonradMichalik\Typo3Outbound\Cache\CacheTags;
 use KonradMichalik\Typo3Outbound\Enum\PaginationStyle;
 use KonradMichalik\Typo3Outbound\Exception\InvalidDefinition;
-use KonradMichalik\Typo3Outbound\Value\{Deferred, RawResponse, SiteSetting};
+use KonradMichalik\Typo3Outbound\Value\{Deferred, RawResponse, Setting};
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionIntersectionType;
@@ -115,8 +115,8 @@ final readonly class MetadataFactory
             throw new InvalidDefinition(sprintf('Connection %s: the base URI must use https. Plain http is only accepted together with allowPrivateNetwork.', $name), 1794700007);
         }
 
-        if ($definition->baseUri instanceof SiteSetting && [] === $definition->allowedHosts) {
-            throw new InvalidDefinition(sprintf('Connection %s: a base URI from a site setting needs allowedHosts. Otherwise whoever can edit the setting can redirect calls and credentials to any host.', $name), 1794700036);
+        if ($definition->baseUri instanceof Setting && [] === $definition->allowedHosts) {
+            throw new InvalidDefinition(sprintf('Connection %s: a base URI from a setting needs allowedHosts. Otherwise whoever can edit the setting can redirect calls and credentials to any host.', $name), 1794700036);
         }
 
         $auth = $base->getAttributes(Authentication::class, ReflectionAttribute::IS_INSTANCEOF);
@@ -492,8 +492,8 @@ final readonly class MetadataFactory
      */
     private static function validateAuthentication(string $name, ?Authentication $authentication, Connection $definition): void
     {
-        if ($authentication instanceof OAuth2ClientCredentials && $authentication->tokenUrl instanceof SiteSetting && [] === $definition->allowedHosts) {
-            throw new InvalidDefinition(sprintf('Connection %s: a token URL from a site setting needs allowedHosts that include its host.', $name), 1794700037);
+        if ($authentication instanceof OAuth2ClientCredentials && $authentication->tokenUrl instanceof Setting && [] === $definition->allowedHosts) {
+            throw new InvalidDefinition(sprintf('Connection %s: a token URL from a setting needs allowedHosts that include its host.', $name), 1794700037);
         }
         if ($authentication instanceof TokenLogin) {
             self::validateTokenLogin($name, $authentication, $definition);
@@ -518,8 +518,8 @@ final readonly class MetadataFactory
         if (is_string($login->url) && !str_starts_with($login->url, '/') && !str_starts_with($login->url, 'https://')) {
             throw new InvalidDefinition(sprintf('Connection %s: the login URL must be a path or use https.', $name), 1794700240);
         }
-        if ($login->url instanceof SiteSetting && [] === $definition->allowedHosts) {
-            throw new InvalidDefinition(sprintf('Connection %s: a login URL from a site setting needs allowedHosts that include its host.', $name), 1794700241);
+        if ($login->url instanceof Setting && [] === $definition->allowedHosts) {
+            throw new InvalidDefinition(sprintf('Connection %s: a login URL from a setting needs allowedHosts that include its host.', $name), 1794700241);
         }
     }
 

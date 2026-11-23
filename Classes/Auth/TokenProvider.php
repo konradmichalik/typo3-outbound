@@ -22,7 +22,7 @@ use KonradMichalik\Typo3Outbound\Resilience\StateStore;
 use KonradMichalik\Typo3Outbound\Runtime\RequestBudget;
 use KonradMichalik\Typo3Outbound\Support\Clock;
 use KonradMichalik\Typo3Outbound\Transport\{Call, Transport, TransportOptions};
-use KonradMichalik\Typo3Outbound\Value\SiteSetting;
+use KonradMichalik\Typo3Outbound\Value\Setting;
 use Throwable;
 
 use function array_keys;
@@ -47,7 +47,7 @@ use const JSON_THROW_ON_ERROR;
  * TokenProvider.
  *
  * Client credentials grant or a login with credentials. One token per connection
- * and site, shared by all resources and kept until 30 seconds before it expires.
+ * and scope, shared by all resources and kept until 30 seconds before it expires.
  *
  * @internal
  *
@@ -199,10 +199,10 @@ final class TokenProvider
     private function guardHost(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth, string $url, string $hostReference): void
     {
         $definition = $connection->definition;
-        $allowedHosts = $auth instanceof TokenLogin || $auth->tokenUrl instanceof SiteSetting ? $definition->allowedHosts : [];
+        $allowedHosts = $auth instanceof TokenLogin || $auth->tokenUrl instanceof Setting ? $definition->allowedHosts : [];
         // A relative login URL is resolved against the base URI, so that one decides whether its port is trusted.
         $source = $url === $hostReference ? ($auth instanceof TokenLogin ? $auth->url : $auth->tokenUrl) : $definition->baseUri;
-        HostGuard::check($url, $source instanceof SiteSetting ? null : $hostReference, $allowedHosts, $definition->allowPrivateNetwork, $connection->name.' token');
+        HostGuard::check($url, $source instanceof Setting ? null : $hostReference, $allowedHosts, $definition->allowPrivateNetwork, $connection->name.' token');
     }
 
     /**
@@ -210,6 +210,6 @@ final class TokenProvider
      */
     private function key(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth, string $url): string
     {
-        return sprintf('token_%s_%s_%s', $connection->name, $this->context->siteIdentifier() ?? 'none', substr(hash('sha256', $url."\n".$this->principal($auth)), 0, 16));
+        return sprintf('token_%s_%s_%s', $connection->name, $this->context->scope() ?? 'none', substr(hash('sha256', $url."\n".$this->principal($auth)), 0, 16));
     }
 }

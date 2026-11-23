@@ -16,9 +16,11 @@ namespace KonradMichalik\Typo3Outbound\Context;
 /**
  * CallContext.
  *
- * What the current request knows about the site: its identifier, its settings
- * and its language. Without a request (CLI, Scheduler, Messenger) a site has to
- * be selected explicitly, see SiteScope.
+ * What the current request knows about its scope: an identifier (in TYPO3 the
+ * site), the runtime settings of that scope and the language. Without a request
+ * (CLI, scheduler, worker) a scope has to be selected explicitly, see ScopeRunner.
+ * The scope keeps circuit breaker, rate limit and token state apart when a
+ * connection points to a different API per scope.
  *
  * @api
  *
@@ -26,15 +28,15 @@ namespace KonradMichalik\Typo3Outbound\Context;
  */
 interface CallContext
 {
-    public function siteIdentifier(): ?string;
+    public function scope(): ?string;
 
     /**
-     * @throws \KonradMichalik\Typo3Outbound\Exception\MissingContext when no site is available
+     * @throws \KonradMichalik\Typo3Outbound\Exception\MissingContext when no scope is available
      */
     public function setting(string $key): mixed;
 
     /**
-     * BCP 47 language tag of the current site language, e.g. "de-DE".
+     * BCP 47 language tag of the current language, e.g. "de-DE".
      */
     public function language(): ?string;
 }

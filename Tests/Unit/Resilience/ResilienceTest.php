@@ -21,7 +21,7 @@ use KonradMichalik\Typo3Outbound\Resilience\{InMemoryStateStore, RateLimitGuard,
 use KonradMichalik\Typo3Outbound\Support\SystemClock;
 use KonradMichalik\Typo3Outbound\Tests\Support\{FakeClock, SwitchableCallContext};
 use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\MyCRMApi;
-use KonradMichalik\Typo3Outbound\Value\SiteSetting;
+use KonradMichalik\Typo3Outbound\Value\Setting;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 
@@ -112,7 +112,7 @@ final class ResilienceTest extends TestCase
     #[Test]
     public function aSiteSpecificConnectionKeepsItsQuotaAndLimitPerSite(): void
     {
-        $connection = new ConnectionMetadata('crm', MyCRMApi::class, new Connection(new SiteSetting('crm.baseUri'), allowedHosts: ['crm.example.com']), rateLimit: new RateLimit(1, '1 minute'));
+        $connection = new ConnectionMetadata('crm', MyCRMApi::class, new Connection(new Setting('crm.baseUri'), allowedHosts: ['crm.example.com']), rateLimit: new RateLimit(1, '1 minute'));
         $context = new SwitchableCallContext('site_a');
         $guard = new RateLimitGuard(new InMemoryStateStore(), new SapiExecutionContext(true), new FakeClock(), calls: $context);
 

@@ -39,7 +39,7 @@ final readonly class Connection
      * @param array<string, string|ValueSource>         $headers             Default headers sent with every request
      * @param list<string>                              $allowedHosts        Hosts the base URI and next-page links may point to; empty means the host of the base URI
      * @param bool                                      $allowPrivateNetwork Opt-out of the private network block, for intranet APIs
-     * @param bool                                      $sendLanguage        Send the language of the current site as Accept-Language
+     * @param bool                                      $sendLanguage        Send the language of the current context as Accept-Language
      * @param int|null                                  $maxResponseBytes    Overrides the global response size limit
      * @param bool                                      $verifyTls           Only effective in the Development context
      * @param array{remaining?: string, reset?: string} $rateLimitHeaders    Response headers announcing the remaining quota

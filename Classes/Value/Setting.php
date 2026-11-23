@@ -16,15 +16,16 @@ namespace KonradMichalik\Typo3Outbound\Value;
 use function sprintf;
 
 /**
- * SiteSetting.
+ * Setting.
  *
- * A setting of the current TYPO3 site. Never use it for secrets; see Secret.
+ * A setting from the runtime configuration of the current scope, in TYPO3 a site
+ * setting. Never use it for secrets; see Secret.
  *
  * @api
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-final readonly class SiteSetting implements ValueSource
+final readonly class Setting implements ValueSource
 {
     public function __construct(
         public string $key,
@@ -32,6 +33,6 @@ final readonly class SiteSetting implements ValueSource
 
     public function describe(): string
     {
-        return sprintf('site(%s)', $this->key);
+        return sprintf('setting(%s)', $this->key);
     }
 }

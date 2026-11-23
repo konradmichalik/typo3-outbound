@@ -17,10 +17,12 @@ use PHPUnit\Framework\Attributes\{CoversNothing, Test};
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 
 use function dirname;
 use function str_contains;
 use function str_starts_with;
+use function strlen;
 use function substr;
 
 /**
@@ -43,6 +45,7 @@ final class FrameworkBoundaryTest extends TestCase
         $violations = [];
         $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, RecursiveDirectoryIterator::SKIP_DOTS));
         foreach ($files as $file) {
+            self::assertInstanceOf(SplFileInfo::class, $file);
             $path = substr($file->getPathname(), strlen($root));
             if ('php' !== $file->getExtension() || $this->isIntegration($path)) {
                 continue;

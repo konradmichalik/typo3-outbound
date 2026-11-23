@@ -95,6 +95,6 @@ final class CircuitBreaker
 
     private function scope(ConnectionMetadata $connection): string
     {
-        return $connection->stateScope($this->context?->siteIdentifier());
+        return $connection->stateScope($this->context?->scope());
     }
 }

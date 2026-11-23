@@ -87,9 +87,9 @@ That's it: `temperatureIn('Dresden')` sends `GET https://api.weather.example.com
 Everything else is opt-in on top of that. A larger API splits into resources, takes its base URI and secret from the site configuration, maps responses to DTOs, retries, caches and maps a 404 to `null`, all declared with attributes:
 
 ```php
-use KonradMichalik\Typo3Outbound\Value\{Secret, SiteSetting};
+use KonradMichalik\Typo3Outbound\Value\{Secret, Setting};
 
-#[Outbound\Connection(baseUri: new SiteSetting('crm.baseUri'), allowedHosts: ['crm.example.com'])]
+#[Outbound\Connection(baseUri: new Setting('crm.baseUri'), allowedHosts: ['crm.example.com'])]
 #[Outbound\Auth\Bearer(token: new Secret('crm.token'))]
 #[Outbound\Retry(maxRetries: 2)]
 interface CrmApi {}

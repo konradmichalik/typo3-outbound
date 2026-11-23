@@ -41,14 +41,14 @@ final readonly class Authenticator
     public function credentials(ConnectionMetadata $connection, TransportOptions $options): Credentials
     {
         $auth = $connection->auth;
-        $site = $this->context->siteIdentifier() ?? 'none';
+        $scope = $this->context->scope() ?? 'none';
 
         return match (true) {
-            $auth instanceof Bearer => $this->bearer($this->values->resolve($auth->token), $site),
-            $auth instanceof Basic => $this->basic($this->values->resolve($auth->username), $this->values->resolve($auth->password), $site),
-            $auth instanceof ApiKey => $this->apiKey($auth, $this->values->resolve($auth->value), $site),
-            $auth instanceof OAuth2ClientCredentials, $auth instanceof TokenLogin => $this->bearer($this->tokens->token($connection, $auth, $options), $site, $this->tokens->principal($auth)),
-            default => new Credentials(identity: 'anonymous:'.$site),
+            $auth instanceof Bearer => $this->bearer($this->values->resolve($auth->token), $scope),
+            $auth instanceof Basic => $this->basic($this->values->resolve($auth->username), $this->values->resolve($auth->password), $scope),
+            $auth instanceof ApiKey => $this->apiKey($auth, $this->values->resolve($auth->value), $scope),
+            $auth instanceof OAuth2ClientCredentials, $auth instanceof TokenLogin => $this->bearer($this->tokens->token($connection, $auth, $options), $scope, $this->tokens->principal($auth)),
+            default => new Credentials(identity: 'anonymous:'.$scope),
         };
     }
 
@@ -57,25 +57,25 @@ final readonly class Authenticator
         return $this->tokens->invalidate($connection);
     }
 
-    private function bearer(string $token, string $site, ?string $principal = null): Credentials
+    private function bearer(string $token, string $scope, ?string $principal = null): Credentials
     {
-        return new Credentials(['Authorization' => 'Bearer '.$token], [], self::identity($site, $principal ?? $token));
+        return new Credentials(['Authorization' => 'Bearer '.$token], [], self::identity($scope, $principal ?? $token));
     }
 
-    private function basic(string $username, string $password, string $site): Credentials
+    private function basic(string $username, string $password, string $scope): Credentials
     {
-        return new Credentials(['Authorization' => 'Basic '.base64_encode($username.':'.$password)], [], self::identity($site, $username.':'.$password));
+        return new Credentials(['Authorization' => 'Basic '.base64_encode($username.':'.$password)], [], self::identity($scope, $username.':'.$password));
     }
 
-    private function apiKey(ApiKey $auth, string $value, string $site): Credentials
+    private function apiKey(ApiKey $auth, string $value, string $scope): Credentials
     {
         return ApiKeyLocation::Query === $auth->in
-            ? new Credentials([], [$auth->name => $value], self::identity($site, $value), [$auth->name])
-            : new Credentials([$auth->name => $value], [], self::identity($site, $value), [$auth->name]);
+            ? new Credentials([], [$auth->name => $value], self::identity($scope, $value), [$auth->name])
+            : new Credentials([$auth->name => $value], [], self::identity($scope, $value), [$auth->name]);
     }
 
-    private static function identity(string $site, string $secret): string
+    private static function identity(string $scope, string $secret): string
     {
-        return $site.':'.substr(hash('sha256', $secret), 0, 16);
+        return $scope.':'.substr(hash('sha256', $secret), 0, 16);
     }
 }

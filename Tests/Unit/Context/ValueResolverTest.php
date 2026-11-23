@@ -15,7 +15,7 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Context;
 
 use KonradMichalik\Typo3Outbound\Context\{StaticCallContext, ValueResolver};
 use KonradMichalik\Typo3Outbound\Exception\MissingContext;
-use KonradMichalik\Typo3Outbound\Value\{Env, Secret, SiteSetting};
+use KonradMichalik\Typo3Outbound\Value\{Env, Secret, Setting};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 
@@ -40,7 +40,7 @@ final class ValueResolverTest extends TestCase
         $resolver = new ValueResolver(new StaticCallContext('main', ['crm.token' => 'env:OUTBOUND_TEST_TOKEN', 'crm.baseUri' => 'https://crm.example.com']));
 
         self::assertSame('s3cret', $resolver->resolve(new Secret('crm.token')));
-        self::assertSame('https://crm.example.com', $resolver->resolve(new SiteSetting('crm.baseUri')));
+        self::assertSame('https://crm.example.com', $resolver->resolve(new Setting('crm.baseUri')));
         self::assertSame('s3cret', $resolver->resolve(new Env('OUTBOUND_TEST_TOKEN')));
     }
 
@@ -97,6 +97,6 @@ final class ValueResolverTest extends TestCase
     public function siteSettingsNeedASite(): void
     {
         $this->expectException(MissingContext::class);
-        (new ValueResolver(new StaticCallContext()))->resolve(new SiteSetting('crm.baseUri'));
+        (new ValueResolver(new StaticCallContext()))->resolve(new Setting('crm.baseUri'));
     }
 }

@@ -28,7 +28,7 @@ final class SwitchableCallContext implements CallContext
         public ?string $site = null,
     ) {}
 
-    public function siteIdentifier(): ?string
+    public function scope(): ?string
     {
         return $this->site;
     }

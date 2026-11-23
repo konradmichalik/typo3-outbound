@@ -19,7 +19,7 @@ use KonradMichalik\Typo3Outbound\Metadata\ConnectionMetadata;
 use KonradMichalik\Typo3Outbound\Resilience\{CircuitBreaker, InMemoryStateStore};
 use KonradMichalik\Typo3Outbound\Tests\Support\{FakeClock, SwitchableCallContext};
 use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\MyCRMApi;
-use KonradMichalik\Typo3Outbound\Value\SiteSetting;
+use KonradMichalik\Typo3Outbound\Value\Setting;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
@@ -97,7 +97,7 @@ final class CircuitBreakerTest extends TestCase
     #[Test]
     public function aConnectionWithASiteSpecificBaseUriTripsOnlyForItsSite(): void
     {
-        $perSite = $this->connection('crm', new Connection(new SiteSetting('crm.baseUri'), allowedHosts: ['crm.example.com']));
+        $perSite = $this->connection('crm', new Connection(new Setting('crm.baseUri'), allowedHosts: ['crm.example.com']));
         $this->recordFailures($perSite, 3);
 
         $this->assertBlocked($perSite);

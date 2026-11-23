@@ -18,9 +18,9 @@ use function sprintf;
 /**
  * Secret.
  *
- * A site setting that holds a reference of the form `env:NAME` instead of the
+ * A setting that holds a reference of the form `env:NAME` instead of the
  * secret itself. The secret is read from the environment variable, so it never
- * lands in a site's settings.yaml, in Git or in TypoScript.
+ * lands in a settings file, in Git or in TypoScript.
  *
  * @api
  *

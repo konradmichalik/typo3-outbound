@@ -15,7 +15,7 @@ namespace KonradMichalik\Typo3Outbound\Metadata;
 
 use KonradMichalik\Typo3Outbound\Attribute\Auth\Authentication;
 use KonradMichalik\Typo3Outbound\Attribute\{Cache, CircuitBreaker, Connection, RateLimit, Retry, Timeout};
-use KonradMichalik\Typo3Outbound\Value\SiteSetting;
+use KonradMichalik\Typo3Outbound\Value\Setting;
 
 /**
  * ConnectionMetadata.
@@ -44,12 +44,12 @@ final readonly class ConnectionMetadata
 
     /**
      * Key for state that belongs to the API behind the connection, such as the circuit breaker
-     * or a quota. A base URI from a site setting points to a different API per site, so those
-     * sites must not share it; one base URI is one API for all sites.
+     * or a quota. A base URI from a setting points to a different API per scope, so those
+     * scopes must not share it; one base URI is one API for all scopes.
      */
-    public function stateScope(?string $site): string
+    public function stateScope(?string $scope): string
     {
-        return $this->definition->baseUri instanceof SiteSetting && null !== $site ? $this->name.'@'.$site : $this->name;
+        return $this->definition->baseUri instanceof Setting && null !== $scope ? $this->name.'@'.$scope : $this->name;
     }
 
     /**

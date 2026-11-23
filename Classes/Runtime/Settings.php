@@ -17,7 +17,7 @@ namespace KonradMichalik\Typo3Outbound\Runtime;
  * Settings.
  *
  * Global defaults of the installation. Values of a single connection never live
- * here; they belong to its interface and to Env or site settings.
+ * here; they belong to its interface and to Env or settings.
  *
  * @internal
  *

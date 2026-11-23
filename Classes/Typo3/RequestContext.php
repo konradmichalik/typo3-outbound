@@ -81,14 +81,14 @@ final class RequestContext implements CallContext, ScopeRunner
         return $this->withSite($scope, $callback);
     }
 
-    public function siteIdentifier(): ?string
+    public function scope(): ?string
     {
         return $this->site()?->getIdentifier();
     }
 
     public function setting(string $key): mixed
     {
-        $site = $this->site() ?? throw new MissingContext(sprintf('Site setting "%s" needs a site. Outside a request, select one with RequestContext::withSite() or --scope.', $key), 1794700190);
+        $site = $this->site() ?? throw new MissingContext(sprintf('Setting "%s" needs a site. Outside a request, select one with RequestContext::withSite() or --scope.', $key), 1794700190);
 
         return $site->getSettings()->get($key);
     }

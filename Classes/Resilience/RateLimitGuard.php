@@ -124,6 +124,6 @@ final class RateLimitGuard
 
     private function scope(ConnectionMetadata $connection): string
     {
-        return $connection->stateScope($this->calls?->siteIdentifier());
+        return $connection->stateScope($this->calls?->scope());
     }
 }

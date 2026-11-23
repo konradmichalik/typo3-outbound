@@ -15,7 +15,7 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures;
 
 use KonradMichalik\Typo3Outbound\Attribute as Outbound;
 use KonradMichalik\Typo3Outbound\Enum\ApiKeyLocation;
-use KonradMichalik\Typo3Outbound\Value\{Env, SiteSetting};
+use KonradMichalik\Typo3Outbound\Value\{Env, Setting};
 
 /**
  * @author Konrad Michalik <hej@konradmichalik.dev>
@@ -37,7 +37,7 @@ interface KeyedApi
 /**
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-#[Outbound\Connection(baseUri: new SiteSetting('unsafe.baseUri'))]
+#[Outbound\Connection(baseUri: new Setting('unsafe.baseUri'))]
 interface SiteUriWithoutHostsApi {}
 
 /**
@@ -54,7 +54,7 @@ interface SiteUriWithoutHostsResource extends SiteUriWithoutHostsApi
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 #[Outbound\Connection(baseUri: 'https://api.example.com')]
-#[Outbound\Auth\OAuth2ClientCredentials(tokenUrl: new SiteSetting('auth.tokenUrl'), clientId: 'id', clientSecret: 'secret')]
+#[Outbound\Auth\OAuth2ClientCredentials(tokenUrl: new Setting('auth.tokenUrl'), clientId: 'id', clientSecret: 'secret')]
 interface SiteTokenUrlWithoutHostsApi
 {
     #[Outbound\Get('/a')]
@@ -64,8 +64,8 @@ interface SiteTokenUrlWithoutHostsApi
 /**
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-#[Outbound\Connection(baseUri: new SiteSetting('tenant.baseUri'), allowedHosts: ['api.example.com'])]
-#[Outbound\Auth\OAuth2ClientCredentials(tokenUrl: new SiteSetting('tenant.tokenUrl'), clientId: 'id', clientSecret: 'secret')]
+#[Outbound\Connection(baseUri: new Setting('tenant.baseUri'), allowedHosts: ['api.example.com'])]
+#[Outbound\Auth\OAuth2ClientCredentials(tokenUrl: new Setting('tenant.tokenUrl'), clientId: 'id', clientSecret: 'secret')]
 interface TenantApi
 {
     #[Outbound\Get('/a')]

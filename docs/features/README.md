@@ -7,9 +7,9 @@ use KonradMichalik\Typo3Outbound\Attribute as Outbound;
 use KonradMichalik\Typo3Outbound\Cache\CacheTags;
 use KonradMichalik\Typo3Outbound\Enum\PaginationStyle;
 use KonradMichalik\Typo3Outbound\Format\JsonApi;
-use KonradMichalik\Typo3Outbound\Value\{Deferred, FilePart, Secret, SiteSetting};
+use KonradMichalik\Typo3Outbound\Value\{Deferred, FilePart, Secret, Setting};
 
-#[Outbound\Connection(baseUri: new SiteSetting('crm.baseUri'), allowedHosts: ['crm.example.com'])]
+#[Outbound\Connection(baseUri: new Setting('crm.baseUri'), allowedHosts: ['crm.example.com'])]
 #[Outbound\Auth\Bearer(token: new Secret('crm.token'))]
 interface CrmApi {}
 ```

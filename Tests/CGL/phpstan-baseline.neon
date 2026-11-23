@@ -133,7 +133,7 @@ parameters:
 			path: ../../Classes/Codegen/OpenApiGenerator.php
 
 		-
-			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\Command\\CallCommand\:\:execute\(\)" is 31, keep it under 10$#'
+			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\Command\\CallCommand\:\:execute\(\)" is 32, keep it under 10$#'
 			identifier: complexity.functionLike
 			count: 1
 			path: ../../Classes/Command/CallCommand.php

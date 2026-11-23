@@ -21,7 +21,7 @@ use function sprintf;
 /**
  * StaticCallContext.
  *
- * A fixed context, used in tests and outside TYPO3.
+ * A fixed context, used in tests and outside a framework.
  *
  * @api
  *
@@ -33,20 +33,20 @@ final readonly class StaticCallContext implements CallContext
      * @param array<string, mixed> $settings
      */
     public function __construct(
-        private ?string $site = null,
+        private ?string $scope = null,
         private array $settings = [],
         private ?string $language = null,
     ) {}
 
-    public function siteIdentifier(): ?string
+    public function scope(): ?string
     {
-        return $this->site;
+        return $this->scope;
     }
 
     public function setting(string $key): mixed
     {
-        if (null === $this->site) {
-            throw new MissingContext(sprintf('Site setting "%s" needs a site. Select one explicitly outside a web request.', $key), 1794700050);
+        if (null === $this->scope) {
+            throw new MissingContext(sprintf('Setting "%s" needs a scope. Select one explicitly outside a web request.', $key), 1794700050);
         }
 
         return array_key_exists($key, $this->settings) ? $this->settings[$key] : null;

@@ -17,7 +17,7 @@ namespace KonradMichalik\Typo3Outbound\Value;
  * ValueSource.
  *
  * A value that is resolved at call time instead of being written into the
- * attribute: an environment variable, a site setting or a secret.
+ * attribute: an environment variable, a setting or a secret.
  *
  * @api
  *

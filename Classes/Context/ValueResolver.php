@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Context;
 
 use KonradMichalik\Typo3Outbound\Exception\MissingContext;
-use KonradMichalik\Typo3Outbound\Value\{Env, Secret, SiteSetting, ValueSource};
+use KonradMichalik\Typo3Outbound\Value\{Env, Secret, Setting, ValueSource};
 
 use function getenv;
 use function is_scalar;
@@ -27,7 +27,7 @@ use function substr;
 /**
  * ValueResolver.
  *
- * Resolves Env, SiteSetting and Secret at call time. A Secret's site setting must
+ * Resolves Env, Setting and Secret at call time. A Secret's setting must
  * hold a reference `env:NAME`; anything else is rejected, so a secret written
  * into settings.yaml by mistake fails loudly instead of being used.
  *
@@ -46,7 +46,7 @@ final readonly class ValueResolver
         return match (true) {
             is_string($value) => $value,
             $value instanceof Env => $this->env($value),
-            $value instanceof SiteSetting => $this->setting($value->key),
+            $value instanceof Setting => $this->setting($value->key),
             $value instanceof Secret => $this->secret($value),
             default => throw new MissingContext(sprintf('Unsupported value source %s.', $value::class), 1794700051),
         };
@@ -75,7 +75,7 @@ final readonly class ValueResolver
     {
         $value = $this->context->setting($key);
         if (!is_scalar($value) || '' === (string) $value) {
-            throw new MissingContext(sprintf('Site setting "%s" is empty for site "%s".', $key, $this->context->siteIdentifier() ?? '-'), 1794700053);
+            throw new MissingContext(sprintf('Setting "%s" is empty for scope "%s".', $key, $this->context->scope() ?? '-'), 1794700053);
         }
 
         return (string) $value;
@@ -85,7 +85,7 @@ final readonly class ValueResolver
     {
         $reference = $this->setting($secret->key);
         if (!str_starts_with($reference, 'env:')) {
-            throw new MissingContext(sprintf('Site setting "%s" must reference an environment variable as "env:NAME", not hold the secret itself.', $secret->key), 1794700054);
+            throw new MissingContext(sprintf('Setting "%s" must reference an environment variable as "env:NAME", not hold the secret itself.', $secret->key), 1794700054);
         }
 
         return $this->env(new Env(substr($reference, 4)));
