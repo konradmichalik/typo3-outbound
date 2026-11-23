@@ -52,10 +52,7 @@ services:
 
   KonradMichalik\Typo3Outbound\Transport\SymfonyTransport:
     factory: ['KonradMichalik\Typo3Outbound\Transport\SymfonyTransport', 'create']
-  # Public so OutboundTestTrait can replace it with a MockTransport in functional tests.
-  KonradMichalik\Typo3Outbound\Transport\Transport:
-    alias: KonradMichalik\Typo3Outbound\Transport\SymfonyTransport
-    public: true
+  KonradMichalik\Typo3Outbound\Transport\Transport: '@KonradMichalik\Typo3Outbound\Transport\SymfonyTransport'
 
   KonradMichalik\Typo3Outbound\Runtime\Settings:
     factory: ['@KonradMichalik\Typo3Outbound\Typo3\SettingsFactory', 'create']

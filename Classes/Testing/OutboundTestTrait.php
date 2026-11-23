@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Testing;
 
-use KonradMichalik\Typo3Outbound\Transport\Transport;
+use LogicException;
 use PHPUnit\Framework\Assert;
-use Psr\Container\ContainerInterface;
+use PHPUnit\Framework\Attributes\After;
 
 use function method_exists;
 use function sprintf;
@@ -23,8 +23,8 @@ use function sprintf;
 /**
  * OutboundTestTrait.
  *
- * Replaces the transport in the TYPO3 container with a MockTransport, so a
- * functional test mocks endpoints by interface and method, never by URL:
+ * Routes every outbound call of a TYPO3 functional test to a MockTransport, so
+ * the test mocks endpoints by interface and method, never by URL:
  *
  *     final class ContactControllerTest extends FunctionalTestCase
  *     {
@@ -38,8 +38,7 @@ use function sprintf;
  *         }
  *     }
  *
- * Call mockEndpoint() before the first request: the transport is replaced the
- * first time the trait is used, and services created earlier keep theirs.
+ * The mock also reaches frontend subrequests, which boot their own container.
  *
  * @api
  *
@@ -69,19 +68,21 @@ trait OutboundTestTrait
 
     protected function outboundTransport(): MockTransport
     {
-        if (null !== $this->outboundTransport) {
-            return $this->outboundTransport;
+        if (null === $this->outboundTransport) {
+            if (!method_exists($this, 'getContainer')) {
+                throw new LogicException('OutboundTestTrait needs a TYPO3 functional test, e.g. typo3/testing-framework\'s FunctionalTestCase. In unit tests, compose the runtime with Outbound::create() and withTransport() with a MockTransport.', 1794700220);
+            }
+            $this->outboundTransport = new MockTransport();
+            SwitchableTransport::override($this->outboundTransport);
         }
-        if (!method_exists($this, 'getContainer')) {
-            throw new \LogicException('OutboundTestTrait needs a test case with getContainer(), e.g. typo3/testing-framework\'s FunctionalTestCase. In unit tests, compose the runtime with Outbound::create() and a MockTransport.', 1794700220);
-        }
-        $container = $this->getContainer();
-        if (!$container instanceof ContainerInterface || !method_exists($container, 'set')) {
-            throw new \LogicException('The container does not allow replacing services.', 1794700221);
-        }
-        $this->outboundTransport = new MockTransport();
-        $container->set(Transport::class, $this->outboundTransport);
 
         return $this->outboundTransport;
+    }
+
+    #[After]
+    protected function resetOutboundTransport(): void
+    {
+        SwitchableTransport::override(null);
+        $this->outboundTransport = null;
     }
 }

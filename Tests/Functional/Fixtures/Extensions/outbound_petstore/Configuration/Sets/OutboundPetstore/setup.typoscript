@@ -7,5 +7,4 @@ page {
     extensionName = OutboundPetstore
     pluginName = Pets
   }
-  includeCSS.petstore = EXT:outbound_petstore/Resources/Public/Css/petstore.css
 }

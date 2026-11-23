@@ -13,63 +13,112 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Unit\Testing;
 
-use KonradMichalik\Typo3Outbound\Testing\{MockTransport, OutboundTestTrait};
-use KonradMichalik\Typo3Outbound\Transport\{SymfonyTransport, Transport};
+use KonradMichalik\Typo3Outbound\Http\RequestSpec;
+use KonradMichalik\Typo3Outbound\Testing\{MockTransport, OutboundTestTrait, SwitchableTransport};
+use KonradMichalik\Typo3Outbound\Transport\{Call, SymfonyTransport, Transport, TransportOptions};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\{ContainerBuilder, Reference};
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
-use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * OutboundTestTraitTest.
  *
- * Proves on a dumped, compiled Symfony container (as TYPO3 uses it) that
- * replacing the public Transport alias reaches services created afterwards.
+ * TYPO3 functional tests boot a fresh container for every frontend subrequest,
+ * so the mock has to reach containers that did not exist when it was installed.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 #[CoversClass(OutboundTestTrait::class)]
+#[CoversClass(SwitchableTransport::class)]
 final class OutboundTestTraitTest extends TestCase
 {
     use OutboundTestTrait;
 
-    private ContainerInterface $container;
-
     #[Test]
-    public function mockReplacesTheTransportOfLaterCreatedServices(): void
+    public function mockReachesAContainerBuiltAfterwards(): void
     {
-        $this->container = self::compiledContainer();
+        $mock = $this->outboundTransport();
 
-        $this->outboundTransport();
-
-        $consumer = $this->container->get('consumer');
+        $consumer = self::compiledContainer()->get('consumer');
         self::assertInstanceOf(TransportConsumer::class, $consumer);
-        self::assertInstanceOf(MockTransport::class, $consumer->transport);
+        $this->expectExceptionCode(1794700170);
+
+        try {
+            $consumer->transport->request(self::call());
+        } finally {
+            self::assertCount(1, $mock->calls());
+        }
     }
 
-    protected function getContainer(): ContainerInterface
+    #[Test]
+    public function theInnerTransportIsUsedOnceTheMockIsRemoved(): void
     {
-        return $this->container;
+        $this->outboundTransport();
+        $this->resetOutboundTransport();
+        $inner = new MockTransport();
+
+        $this->expectExceptionCode(1794700170);
+
+        try {
+            (new SwitchableTransport($inner))->request(self::call());
+        } finally {
+            self::assertCount(1, $inner->calls());
+        }
+    }
+
+    #[Test]
+    public function outsideAContainerBasedTestTheTraitRefusesToMock(): void
+    {
+        $test = new class {
+            use OutboundTestTrait;
+
+            public function mock(): MockTransport
+            {
+                return $this->outboundTransport();
+            }
+        };
+
+        $this->expectExceptionCode(1794700220);
+        $test->mock();
+    }
+
+    private function getContainer(): ContainerInterface
+    {
+        return self::compiledContainer();
+    }
+
+    private static function call(): Call
+    {
+        return new Call('PetApi::find', [], new RequestSpec('GET', 'https://api.example.com/pets/1'), new TransportOptions(5.0, 1024));
     }
 
     private static function compiledContainer(): ContainerInterface
     {
         $builder = new ContainerBuilder();
         $builder->register(SymfonyTransport::class, SymfonyTransport::class)->setFactory([SymfonyTransport::class, 'create']);
-        $builder->setAlias(Transport::class, SymfonyTransport::class)->setPublic(true);
+        $builder->setAlias(Transport::class, SymfonyTransport::class);
+        $builder->register(SwitchableTransport::class, SwitchableTransport::class)
+            ->setDecoratedService(Transport::class)
+            ->addArgument(new Reference('.inner'));
         $builder->register('consumer', TransportConsumer::class)->addArgument(new Reference(Transport::class))->setPublic(true);
         $builder->compile();
         $class = 'OutboundTraitContainer'.bin2hex(random_bytes(4));
-        eval('?>'.(new PhpDumper($builder))->dump(['class' => $class]));
+        $code = (new PhpDumper($builder))->dump(['class' => $class]);
+        self::assertIsString($code);
+        eval('?>'.$code);
+        $container = new $class();
+        self::assertInstanceOf(ContainerInterface::class, $container);
 
-        return new $class();
+        return $container;
     }
 }
 
 /**
  * @internal
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 final readonly class TransportConsumer
 {

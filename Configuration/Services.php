@@ -12,9 +12,17 @@ declare(strict_types=1);
  */
 
 use KonradMichalik\Typo3Outbound\DependencyInjection\OutboundCompilerPass;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+use KonradMichalik\Typo3Outbound\Testing\SwitchableTransport;
+use KonradMichalik\Typo3Outbound\Transport\Transport;
+use Symfony\Component\DependencyInjection\{ContainerBuilder, Reference};
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use TYPO3\CMS\Core\Core\Environment;
 
 return static function (ContainerConfigurator $configurator, ContainerBuilder $containerBuilder): void {
     $containerBuilder->addCompilerPass(new OutboundCompilerPass());
+
+    // Lets OutboundTestTrait reach frontend subrequests, which boot their own container.
+    if (Environment::getContext()->isTesting()) {
+        $configurator->services()->set(SwitchableTransport::class)->decorate(Transport::class)->args([new Reference('.inner')]);
+    }
 };

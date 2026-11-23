@@ -41,6 +41,11 @@ final class PetstorePluginTest extends FunctionalTestCase
         __DIR__.'/Fixtures/Extensions/outbound_petstore',
     ];
 
+    // Plugin actions are addressed by plain query parameters, without a cHash.
+    protected array $configurationToUseInTestInstance = [
+        'FE' => ['cacheHash' => ['enforceValidation' => false]],
+    ];
+
     protected function setUp(): void
     {
         parent::setUp();
