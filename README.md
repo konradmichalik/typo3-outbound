@@ -18,6 +18,8 @@ This extension lets you describe **external APIs as PHP interfaces with attribut
 
 > [!NOTE]
 > The goal is to replace the hand-written service wrapper per API: you declare what an API offers, and timeouts, retries, caching and security come as safe defaults.
+>
+> *Outbound* as in outgoing requests: your site calls the API.
 
 > [!WARNING]
 > This extension is at an early stage. Attributes and APIs may still change before 1.0, so try it in a pilot before relying on it in production.
