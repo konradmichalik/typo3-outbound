@@ -50,6 +50,7 @@ Scope: everything up to and including v1. Every ticked item is implemented and t
 - [x] `#[Paginate]`: page, offset, cursor, `Link` header, format links; next links checked against allowed hosts
 - [x] `Deferred<T>` for parallel calls
 - [x] OAuth2 client credentials with token cache
+- [x] Token login with user and password (`#[Auth\TokenLogin]`), sharing the token cache
 - [x] Format profiles JSON:API and Hydra, `ResponseFormat` interface
 - [x] Site language as `Accept-Language`
 - [x] ETags (`If-None-Match` revalidation, `If-Match` on updates)

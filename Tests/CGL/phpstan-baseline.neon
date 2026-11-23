@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\Auth\\TokenProvider\:\:token\(\)" is 11, keep it under 10$#'
-			identifier: complexity.functionLike
-			count: 1
-			path: ../../Classes/Auth/TokenProvider.php
-
-		-
 			message: '#^Parameter \#1 \$items of method KonradMichalik\\Typo3Outbound\\Codegen\\DtoGenerator\:\:merge\(\) expects list\<mixed\>, non\-empty\-array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -407,6 +401,12 @@ parameters:
 			identifier: disallowed.function
 			count: 7
 			path: ../Unit/Context/ValueResolverTest.php
+
+		-
+			message: '#^Calling putenv\(\) is forbidden, might overwrite existing variables\.$#'
+			identifier: disallowed.function
+			count: 2
+			path: ../Unit/Auth/TokenLoginTest.php
 
 		-
 			message: '#^Calling putenv\(\) is forbidden, might overwrite existing variables\.$#'

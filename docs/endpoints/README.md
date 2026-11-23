@@ -13,7 +13,29 @@ Values from the environment are value objects, checked by IDE and PHPStan:
 | `new SiteSetting('crm.baseUri')` | a setting of the current site |
 | `new Secret('crm.token')` | a site setting holding `env:NAME`, resolved from that environment variable; a plain value is rejected |
 
-A base URI or OAuth token URL from site settings needs `allowedHosts`; without it the container build fails, because whoever can edit the setting could redirect calls and credentials to any host. For a base URI from an environment variable `outbound:lint` warns.
+A base URI, OAuth token URL or login URL from site settings needs `allowedHosts`; without it the container build fails, because whoever can edit the setting could redirect calls and credentials to any host. For a base URI from an environment variable `outbound:lint` warns.
+
+A connection carries at most one authentication attribute:
+
+| Attribute | Sends |
+|-----------|-------|
+| `#[Auth\Bearer(token: …)]` | `Authorization: Bearer <token>` |
+| `#[Auth\Basic(username: …, password: …)]` | HTTP basic authentication |
+| `#[Auth\ApiKey(name: …, value: …)]` | the key as header or query parameter |
+| `#[Auth\OAuth2ClientCredentials(tokenUrl: …, clientId: …, clientSecret: …)]` | a bearer token from the client credentials grant, cached until shortly before `expires_in` |
+| `#[Auth\TokenLogin(url: …, body: […], tokenField: 'token', ttl: 3600)]` | a bearer token from a login endpoint: the body goes out as JSON, the token is read from `tokenField` and cached for `ttl` seconds |
+
+`TokenLogin` covers APIs that exchange user and password for a token:
+
+```php
+#[Outbound\Auth\TokenLogin(
+    url: '/api/auth/token',
+    body: ['username' => new Env('CRM_USER'), 'password' => new Env('CRM_PASSWORD')],
+    ttl: 43200,
+)]
+```
+
+A url starting with `/` is resolved against the base URI. Every body value is treated as sensitive. Both token types are shared by all resources of the connection, and a 401 discards the token and logs in once more before the call is repeated.
 
 Values that would misbehave at runtime also fail the container build: a `#[Cache]` lifetime below 1 (the database backend treats 0 as "never expires"), a non-positive `#[Timeout]`, a `#[Retry]` with a negative `maxRetries`, `delayMs` or `maxDelayMs`, a multiplier below 1 or status codes outside 100 to 599, a `#[Paginate]` size or `maxPages` below 1 or the `Cursor` style without `cursorPath`, a `#[CircuitBreaker]` threshold or cooldown below 1, a `#[RateLimit]` interval that is not a positive duration, and path braces that are not a `{name}` placeholder.
 
