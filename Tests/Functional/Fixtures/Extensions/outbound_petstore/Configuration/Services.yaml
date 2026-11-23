@@ -10,7 +10,7 @@ services:
       - '../Classes/Dto/*'
 
   # OUTBOUND_PETSTORE_MOCK=1 answers from the fixture responses instead of calling petstore3.swagger.io.
-  KonradMichalik\Typo3Outbound\Transport\Transport:
-    class: KonradMichalik\Typo3Outbound\Transport\Transport
+  KonradMichalik\Outbound\Transport\Transport:
+    class: KonradMichalik\Outbound\Transport\Transport
     factory: ['KonradMichalik\OutboundPetstore\Transport\PetstoreTransportFactory', 'create']
     public: true

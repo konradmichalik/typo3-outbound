@@ -14,9 +14,9 @@ declare(strict_types=1);
 namespace KonradMichalik\OutboundPetstore\Controller;
 
 use Closure;
+use KonradMichalik\Outbound\Exception\ApiException;
 use KonradMichalik\OutboundPetstore\Api\{PetApi, StoreApi};
 use KonradMichalik\OutboundPetstore\Dto\{CategoryDto, PetDto, PetStatus};
-use KonradMichalik\Typo3Outbound\Exception\ApiException;
 use Psr\Http\Message\ResponseInterface;
 use ReflectionClass;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;

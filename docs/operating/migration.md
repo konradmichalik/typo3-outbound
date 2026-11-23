@@ -58,7 +58,7 @@ Typical problems, all of them easy to miss in review:
 The connection and the resource:
 
 ```php
-#[Outbound\Connection(baseUri: new SiteSetting('courses.baseUri'), allowedHosts: ['api.courses.example'])]
+#[Outbound\Connection(baseUri: new Setting('courses.baseUri'), allowedHosts: ['api.courses.example'])]
 #[Outbound\Auth\Bearer(token: new Secret('courses.token'))]
 #[Outbound\Retry(maxRetries: 2)]
 interface CourseApi {}
@@ -120,4 +120,20 @@ final class CourseController extends ActionController
 5. **Replace the service.** Inject the resource interface where the service was used. Keep the old service as a thin adapter for a while if many places use it.
 6. **Make failures visible.** Catch `ApiException` (or a specific subclass) where a fallback makes sense; do not swallow errors into empty arrays.
 7. **Test by endpoint.** `OutboundTestTrait::mockEndpoint()` in functional tests, `MockTransport` in unit tests.
-8. **Check the request and the page.** `outbound:call CoursesApi::list category=yoga --site=main --dry-run` shows the request with the settings of site `main`; a page using the data must carry the `courses` tag in its page cache entry.
+8. **Check the request and the page.** `outbound:call CoursesApi::list category=yoga --scope=main --dry-run` shows the request with the settings of site `main`; a page using the data must carry the `courses` tag in its page cache entry.
+
+## Upgrading from 0.1 to 0.2
+
+The framework-agnostic parts moved into the package [`konradmichalik/php-outbound`](https://github.com/konradmichalik/php-outbound), which this extension now requires. Composer installs it with the extension, and the TER artefact bundles it. The classes of 0.1 are not aliased.
+
+| 0.1 | 0.2 |
+|-----|-----|
+| `KonradMichalik\Typo3Outbound\{Attribute, Auth, Cache, Codegen, Command, Context, DependencyInjection, Enum, Exception, Format, Http, Mapping, Metadata, Proxy, Resilience, Runtime, Support, Testing, Transport, Value}\…`, except the TYPO3 adapters below | `KonradMichalik\Outbound\…` |
+| `KonradMichalik\Typo3Outbound\Outbound` | `KonradMichalik\Outbound\Outbound` |
+| `KonradMichalik\Typo3Outbound\Value\SiteSetting` | `KonradMichalik\Outbound\Value\Setting` |
+| `CallContext::siteIdentifier()` | `CallContext::scope()`, only relevant for your own `CallContext` implementations |
+| `StaticCallContext(site: …)` | `StaticCallContext(scope: …)` |
+| `KonradMichalik\Typo3Outbound\Typo3\RequestContext` and the other adapters | `KonradMichalik\Typo3Outbound\Context\RequestContext`; the adapters now live in `Cache`, `Context`, `Resilience`, `Proxy`, `Mapping` and `Configuration` below `KonradMichalik\Typo3Outbound` |
+| `outbound:call … --site=main` | `outbound:call … --scope=main` |
+
+Exception codes, attributes and their parameters stay the same. Replace the namespaces with a search and replace over your code, then flush all caches so the generated proxies and the container are rebuilt.

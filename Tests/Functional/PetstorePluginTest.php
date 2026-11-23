@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Functional;
 
+use KonradMichalik\Outbound\Testing\OutboundTestTrait;
 use KonradMichalik\OutboundPetstore\Api\{PetApi, StoreApi};
-use KonradMichalik\Typo3Outbound\Testing\OutboundTestTrait;
 use PHPUnit\Framework\Attributes\{CoversNothing, Test};
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;

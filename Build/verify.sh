@@ -74,7 +74,6 @@ for version in 13 14; do
     step "TYPO3 $version: outbound:call --dry-run" ddev "$version" typo3 outbound:call PetApi::find petId=10 --dry-run
 done
 if [[ "$LIVE" -eq 1 ]]; then
-    step "live tests (petstore3.swagger.io)" ddev composer test:live
     step "TYPO3 14: outbound:health" ddev 14 typo3 outbound:health
     for version in 13 14; do
         step "TYPO3 $version: Petstore plugin" frontend "$version"

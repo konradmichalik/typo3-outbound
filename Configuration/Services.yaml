@@ -7,55 +7,38 @@ services:
   KonradMichalik\Typo3Outbound\:
     resource: '../Classes/*'
     exclude:
-      - '../Classes/Attribute/*'
-      - '../Classes/Codegen/*'
-      - '../Classes/Enum/*'
-      - '../Classes/Exception/*'
-      - '../Classes/Format/*'
-      - '../Classes/Metadata/{ConnectionMetadata,EndpointMetadata,ParameterMetadata,ReturnType,Naming,TypeResolver,MetadataFactory}.php'
-      - '../Classes/Value/*'
-      - '../Classes/Outbound.php'
-      - '../Classes/Testing/*'
-      - '../Classes/Http/{RequestSpec,QuerySerializer,HostGuard,LinkHeader}.php'
-      - '../Classes/Cache/{CacheEntry,CacheKey,CacheTags,CacheLockHandle,InMemoryCacheLock,InMemoryResponseCache,NullCacheTagReporter,ResponseCacheInvalidator}.php'
-      - '../Classes/Resilience/{InMemoryStateStore,RetryPolicy}.php'
-      - '../Classes/Runtime/{Execution,Flight,Result,Pending,EtagMemory}.php'
-      - '../Classes/Transport/{Call,TransportOptions}.php'
-      - '../Classes/Auth/Credentials.php'
-      - '../Classes/Context/{SapiExecutionContext,StaticCallContext}.php'
-      - '../Classes/Support/{DotPath,Redactor}.php'
-      - '../Classes/Mapping/Normalizer.php'
-      - '../Classes/Typo3/{Configuration,ValinorCacheFactory}.php'
+      - '../Classes/{Configuration/Configuration,Mapping/ValinorCacheFactory}.php'
 
   # Arguments are injected at container compile time by OutboundCompilerPass.
-  KonradMichalik\Typo3Outbound\Metadata\Registry:
+  KonradMichalik\Outbound\Metadata\Registry:
     arguments:
       $connectionChunks: []
       $endpointChunks: []
       $interfaces: []
 
-  KonradMichalik\Typo3Outbound\Typo3\RequestContext:
+  KonradMichalik\Typo3Outbound\Context\RequestContext:
     public: true
-  KonradMichalik\Typo3Outbound\Context\CallContext: '@KonradMichalik\Typo3Outbound\Typo3\RequestContext'
-  KonradMichalik\Typo3Outbound\Context\ExecutionContext: '@KonradMichalik\Typo3Outbound\Typo3\Typo3ExecutionContext'
-  KonradMichalik\Typo3Outbound\Support\Clock: '@KonradMichalik\Typo3Outbound\Support\SystemClock'
+  KonradMichalik\Outbound\Context\CallContext: '@KonradMichalik\Typo3Outbound\Context\RequestContext'
+  KonradMichalik\Outbound\Context\ScopeRunner: '@KonradMichalik\Typo3Outbound\Context\RequestContext'
+  KonradMichalik\Outbound\Context\ExecutionContext: '@KonradMichalik\Typo3Outbound\Context\Typo3ExecutionContext'
+  KonradMichalik\Outbound\Support\Clock: '@KonradMichalik\Outbound\Support\SystemClock'
   outbound.valinor_cache:
     class: CuyZ\Valinor\Cache\Cache
-    factory: ['KonradMichalik\Typo3Outbound\Typo3\ValinorCacheFactory', 'create']
-  KonradMichalik\Typo3Outbound\Mapping\ValinorMapper:
+    factory: ['KonradMichalik\Typo3Outbound\Mapping\ValinorCacheFactory', 'create']
+  KonradMichalik\Outbound\Mapping\ValinorMapper:
     arguments:
       $cache: '@outbound.valinor_cache'
-  KonradMichalik\Typo3Outbound\Mapping\ResponseMapper: '@KonradMichalik\Typo3Outbound\Mapping\ValinorMapper'
-  KonradMichalik\Typo3Outbound\Cache\CacheTagReporter: '@KonradMichalik\Typo3Outbound\Typo3\PageCacheTagReporter'
-  KonradMichalik\Typo3Outbound\Cache\CacheInvalidator: '@KonradMichalik\Typo3Outbound\Typo3\CacheManagerInvalidator'
-  KonradMichalik\Typo3Outbound\Cache\CacheLock: '@KonradMichalik\Typo3Outbound\Typo3\LockFactoryCacheLock'
+  KonradMichalik\Outbound\Mapping\ResponseMapper: '@KonradMichalik\Outbound\Mapping\ValinorMapper'
+  KonradMichalik\Outbound\Cache\CacheTagReporter: '@KonradMichalik\Typo3Outbound\Cache\PageCacheTagReporter'
+  KonradMichalik\Outbound\Cache\CacheInvalidator: '@KonradMichalik\Typo3Outbound\Cache\CacheManagerInvalidator'
+  KonradMichalik\Outbound\Cache\CacheLock: '@KonradMichalik\Typo3Outbound\Cache\LockFactoryCacheLock'
 
-  KonradMichalik\Typo3Outbound\Transport\SymfonyTransport:
-    factory: ['KonradMichalik\Typo3Outbound\Transport\SymfonyTransport', 'create']
-  KonradMichalik\Typo3Outbound\Transport\Transport: '@KonradMichalik\Typo3Outbound\Transport\SymfonyTransport'
+  KonradMichalik\Outbound\Transport\SymfonyTransport:
+    factory: ['KonradMichalik\Outbound\Transport\SymfonyTransport', 'create']
+  KonradMichalik\Outbound\Transport\Transport: '@KonradMichalik\Outbound\Transport\SymfonyTransport'
 
-  KonradMichalik\Typo3Outbound\Runtime\Settings:
-    factory: ['@KonradMichalik\Typo3Outbound\Typo3\SettingsFactory', 'create']
+  KonradMichalik\Outbound\Runtime\Settings:
+    factory: ['@KonradMichalik\Typo3Outbound\Configuration\SettingsFactory', 'create']
 
   KonradMichalik\Typo3Outbound\Middleware\RequestContextMiddleware:
     public: true
@@ -73,34 +56,34 @@ services:
     factory: ['@TYPO3\CMS\Core\Cache\CacheManager', 'getCache']
     arguments: ['outbound_proxies']
 
-  KonradMichalik\Typo3Outbound\Typo3\CacheResponseCache:
+  KonradMichalik\Typo3Outbound\Cache\CacheResponseCache:
     arguments: ['@cache.outbound']
-  KonradMichalik\Typo3Outbound\Cache\ResponseCache: '@KonradMichalik\Typo3Outbound\Typo3\CacheResponseCache'
-  KonradMichalik\Typo3Outbound\Typo3\CacheStateStore:
+  KonradMichalik\Outbound\Cache\ResponseCache: '@KonradMichalik\Typo3Outbound\Cache\CacheResponseCache'
+  KonradMichalik\Typo3Outbound\Resilience\CacheStateStore:
     arguments: ['@cache.outbound_state']
-  KonradMichalik\Typo3Outbound\Resilience\StateStore: '@KonradMichalik\Typo3Outbound\Typo3\CacheStateStore'
-  KonradMichalik\Typo3Outbound\Typo3\RateLimiterStorage:
+  KonradMichalik\Outbound\Resilience\StateStore: '@KonradMichalik\Typo3Outbound\Resilience\CacheStateStore'
+  KonradMichalik\Typo3Outbound\Resilience\RateLimiterStorage:
     arguments: ['@cache.outbound_state']
-  KonradMichalik\Typo3Outbound\Resilience\RateLimitGuard:
+  KonradMichalik\Outbound\Resilience\RateLimitGuard:
     arguments:
-      $storage: '@KonradMichalik\Typo3Outbound\Typo3\RateLimiterStorage'
-  KonradMichalik\Typo3Outbound\Typo3\PhpCacheProxyStore:
+      $storage: '@KonradMichalik\Typo3Outbound\Resilience\RateLimiterStorage'
+  KonradMichalik\Typo3Outbound\Proxy\PhpCacheProxyStore:
     arguments: ['@cache.outbound_proxies']
-  KonradMichalik\Typo3Outbound\Proxy\ProxyStore: '@KonradMichalik\Typo3Outbound\Typo3\PhpCacheProxyStore'
-  KonradMichalik\Typo3Outbound\Proxy\ProxyFactory:
+  KonradMichalik\Outbound\Proxy\ProxyStore: '@KonradMichalik\Typo3Outbound\Proxy\PhpCacheProxyStore'
+  KonradMichalik\Outbound\Proxy\ProxyFactory:
     public: true
 
-  KonradMichalik\Typo3Outbound\Command\DebugCommand:
+  KonradMichalik\Outbound\Command\DebugCommand:
     tags: [{ name: console.command, command: 'outbound:debug', description: 'List connections and endpoints with their effective configuration' }]
-  KonradMichalik\Typo3Outbound\Command\LintCommand:
+  KonradMichalik\Outbound\Command\LintCommand:
     tags: [{ name: console.command, command: 'outbound:lint', description: 'Audit API declarations for likely mistakes' }]
-  KonradMichalik\Typo3Outbound\Command\CallCommand:
+  KonradMichalik\Outbound\Command\CallCommand:
     tags: [{ name: console.command, command: 'outbound:call', description: 'Call an endpoint, or show the request with --dry-run' }]
-  KonradMichalik\Typo3Outbound\Command\HealthCommand:
+  KonradMichalik\Outbound\Command\HealthCommand:
     tags: [{ name: console.command, command: 'outbound:health', description: 'Run all #[HealthCheck] endpoints and report deprecations' }]
-  KonradMichalik\Typo3Outbound\Command\CacheFlushCommand:
+  KonradMichalik\Outbound\Command\CacheFlushCommand:
     tags: [{ name: console.command, command: 'outbound:cache:flush', description: 'Flush cached responses and pages of a connection' }]
-  KonradMichalik\Typo3Outbound\Command\MakeDtoCommand:
+  KonradMichalik\Outbound\Command\MakeDtoCommand:
     tags: [{ name: console.command, command: 'outbound:make:dto', description: 'Generate DTO scaffolds from a sample response' }]
-  KonradMichalik\Typo3Outbound\Command\GenerateCommand:
+  KonradMichalik\Outbound\Command\GenerateCommand:
     tags: [{ name: console.command, command: 'outbound:generate', description: 'Generate interfaces and DTOs from an OpenAPI document' }]

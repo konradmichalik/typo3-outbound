@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Support;
 
-use KonradMichalik\Typo3Outbound\Support\Clock;
+use KonradMichalik\Outbound\Support\Clock;
 
 /**
  * FakeClock.
