@@ -12,18 +12,20 @@ The MVP is accepted when one real integration runs in production through typo3-o
 
 | Metric | Baseline | typo3-outbound | Saloon + bridge | How to measure |
 |--------|----------|----------------|-----------------|----------------|
-| Lines of code (integration incl. DTOs) | | | | `cloc` on the integration's files |
-| Lines of code per additional endpoint | | | | add one endpoint, diff |
-| PHPStan level max without `@var` | | | | `composer cgl sca` |
-| Test setup lines per test | | | | count |
-| Page cache carries API tags | | | | inspect cache_pages tags for a page using the data |
-| Write invalidates affected pages | | | | update, reload page |
-| Behaviour on 503 / timeout | | | | stop the API or point to a slow mock |
-| Behaviour on 429 with Retry-After: 60 | | | | mock response |
-| Secrets outside Git and TypoScript | | | | review |
-| Request overhead | | | | `outbound:call` timing, profiler |
-| Time to implement | | | | hours |
-| Open issues found in production (4 weeks) | | | | issue tracker |
+| Lines of code (integration incl. DTOs) | 292 in 11 classes (client 144), tests 397 | | | `cloc` on the integration's files |
+| Lines of code per additional endpoint | about 8 (public method plus path helper) | | | add one endpoint, diff |
+| PHPStan level max without `@var` | level 6 in the project, no `@var` | | | `composer cgl sca` |
+| Test setup lines per test | 61 shared lines (Guzzle mock stack, cache and throttle stubs) for 16 tests | | | count |
+| Page cache carries API tags | n/a, the sync renders no pages | | | inspect cache_pages tags for a page using the data |
+| Write invalidates affected pages | n/a, read only | | | update, reload page |
+| Behaviour on 503 / timeout | exception, no retry, sync keeps the last state | | | stop the API or point to a slow mock |
+| Behaviour on 429 with Retry-After: 60 | exception, header ignored | | | mock response |
+| Secrets outside Git and TypoScript | yes, environment variables | | | review |
+| Request overhead | not measured | | | `outbound:call` timing, profiler |
+| Time to implement | unknown | | | hours |
+| Open issues found in production (4 weeks) | open | | | issue tracker |
+
+Baseline of the first pilot: the Immomio sync of the Neuland website (`packages/immomio`), login with user and password, paged estate search, media list and download. Lines counted without blank and comment lines, `cloc` was not available.
 
 ## Decision
 
