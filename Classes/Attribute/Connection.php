@@ -43,6 +43,7 @@ final readonly class Connection
      * @param int|null                                  $maxResponseBytes    Overrides the global response size limit
      * @param bool                                      $verifyTls           Only effective in the Development context
      * @param array{remaining?: string, reset?: string} $rateLimitHeaders    Response headers announcing the remaining quota
+     * @param bool                                      $permissiveTypes     Allows `mixed` in mapped types, for responses handed on as raw arrays
      */
     public function __construct(
         public string|ValueSource $baseUri,
@@ -60,5 +61,6 @@ final readonly class Connection
         public string $idempotencyHeader = 'Idempotency-Key',
         public bool $quoteIdempotencyKey = true,
         public array $rateLimitHeaders = ['remaining' => 'X-RateLimit-Remaining', 'reset' => 'X-RateLimit-Reset'],
+        public bool $permissiveTypes = false,
     ) {}
 }

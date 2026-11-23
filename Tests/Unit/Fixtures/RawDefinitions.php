@@ -35,3 +35,43 @@ interface SmallDownloadsApi
     #[Outbound\Get('/files/{id}')]
     public function download(int $id): RawResponse;
 }
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+final readonly class RawPage
+{
+    /**
+     * @param list<array<string, mixed>> $content
+     */
+    public function __construct(
+        public array $content,
+        public int $totalPages,
+    ) {}
+}
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+#[Outbound\Connection(baseUri: 'https://raw.example.com', permissiveTypes: true)]
+interface RawArraysApi
+{
+    #[Outbound\Get('/search')]
+    public function search(): RawPage;
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[Outbound\Get('/object')]
+    public function object(): array;
+}
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+#[Outbound\Connection(baseUri: 'https://strict.example.com')]
+interface StrictRawArraysApi
+{
+    #[Outbound\Get('/search')]
+    public function search(): RawPage;
+}

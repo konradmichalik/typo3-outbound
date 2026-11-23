@@ -58,7 +58,7 @@ Verb options: `unwrap: 'data'` for envelopes, `idempotent: true` for safe POSTs 
 
 ## DTOs
 
-Plain `final readonly` classes; Valinor fills them through the constructor. They need no attributes and no dependency on this extension. Superfluous response fields are ignored, missing nullable values become null. Lists need an item type in PHPDoc (`@param list<string> $tags`); Valinor's strict mode rejects untyped arrays and `ApiMappingFailed` says so.
+Plain `final readonly` classes; Valinor fills them through the constructor. They need no attributes and no dependency on this extension. Superfluous response fields are ignored, missing nullable values become null. Lists need an item type in PHPDoc (`@param list<string> $tags`); Valinor's strict mode rejects untyped arrays and `ApiMappingFailed` says so. When a response is handed on unchanged to existing code, `#[Connection(permissiveTypes: true)]` allows `mixed`, e.g. `@param list<array<string, mixed>> $content`, for that connection only.
 
 Differences between API and DTO are declared on the interface: `keyCase: KeyCase::Camel` on the connection, `#[MapKeys(['towns.*.label' => 'name'])]` on a method, `unwrap` on the verb.
 

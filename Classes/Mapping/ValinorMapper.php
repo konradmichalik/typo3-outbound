@@ -69,7 +69,7 @@ final class ValinorMapper implements ResponseMapper
         }
 
         try {
-            return $this->builder($connection->definition->dateFormat)->mapper()->map($signature, $source);
+            return $this->builder($connection->definition->dateFormat, $connection->definition->permissiveTypes)->mapper()->map($signature, $source);
         } catch (MappingError $error) {
             $messages = [];
             foreach ($error->messages()->errors() as $message) {
@@ -118,19 +118,23 @@ final class ValinorMapper implements ResponseMapper
         return $result;
     }
 
-    private function builder(string $dateFormat): MapperBuilder
+    private function builder(string $dateFormat, bool $permissive = false): MapperBuilder
     {
-        if (isset($this->builders[$dateFormat])) {
-            return $this->builders[$dateFormat];
+        $key = $dateFormat.($permissive ? '|permissive' : '');
+        if (isset($this->builders[$key])) {
+            return $this->builders[$key];
         }
         $builder = (new MapperBuilder())
             ->allowSuperfluousKeys()
             ->allowUndefinedValues()
             ->supportDateFormats('' !== $dateFormat ? $dateFormat : DateTimeInterface::ATOM, DateTimeInterface::ATOM, 'Y-m-d\TH:i:s.uP', 'Y-m-d', 'U');
+        if ($permissive) {
+            $builder = $builder->allowPermissiveTypes();
+        }
         if (null !== $this->cache) {
             $builder = $builder->withCache($this->cache);
         }
 
-        return $this->builders[$dateFormat] = $builder;
+        return $this->builders[$key] = $builder;
     }
 }
