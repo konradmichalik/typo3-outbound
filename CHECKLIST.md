@@ -74,8 +74,6 @@ Scope: everything up to and including v1. Every ticked item is implemented and t
 - [x] Middleware names and the position of the frontend cache collector verified against TYPO3 14.3.11 sources
 - [x] `Build/verify.sh`: all checks needing DDEV, a database or network in one run, with summary and logs
 - [x] Migration guide with a typical service wrapper before and after
-- [x] Wrapper audit template
-- [x] Pilot evaluation template (incl. optional Saloon comparison)
 
 ## 3c. Security and performance review
 

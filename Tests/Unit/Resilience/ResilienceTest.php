@@ -36,7 +36,7 @@ final class ResilienceTest extends TestCase
 {
     /**
      * symfony/rate-limiter before 7.4.22 reported a retry time that had already passed,
-     * so a burst in the CLI gave up instead of waiting (Immomio pilot).
+     * so a burst in the CLI gave up instead of waiting.
      */
     #[Test]
     public function aBurstInTheCliWaitsForEverySecondTokenInsteadOfFailing(): void
