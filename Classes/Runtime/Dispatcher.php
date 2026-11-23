@@ -197,8 +197,13 @@ final readonly class Dispatcher
 
     private function content(Execution $execution, ResponseInterface $response, int $status): string
     {
-        if (304 === $status || 'raw' === $execution->endpoint->returnType->kind->value) {
+        $raw = 'raw' === $execution->endpoint->returnType->kind->value;
+        // A raw endpoint hands its body to the caller as stream; an error answer is read for its details.
+        if (304 === $status || ($raw && $status < 400)) {
             return '';
+        }
+        if ($raw) {
+            return $this->errorDetails($response, $execution->options->maxResponseBytes);
         }
         try {
             $body = $response->getContent(false);
@@ -212,5 +217,19 @@ final readonly class Dispatcher
         }
 
         return $body;
+    }
+
+    /**
+     * Details only: an error body that fails to load or exceeds the limit leaves the status to speak for itself.
+     */
+    private function errorDetails(ResponseInterface $response, int $limit): string
+    {
+        try {
+            $body = $response->getContent(false);
+        } catch (TransportExceptionInterface) {
+            return '';
+        }
+
+        return strlen($body) > $limit ? '' : $body;
     }
 }
