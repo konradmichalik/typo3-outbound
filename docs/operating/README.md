@@ -9,7 +9,7 @@ composer require konradmichalik/typo3-outbound
 Interfaces with `#[Connection]` or `#[Resource]` below your `Services.yaml` resource are registered automatically. Interfaces outside it or in its `exclude` paths need `OutboundServices::discover()` in `Configuration/Services.php`:
 
 ```php
-use KonradMichalik\Typo3Outbound\DependencyInjection\OutboundServices;
+use KonradMichalik\Outbound\DependencyInjection\OutboundServices;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
