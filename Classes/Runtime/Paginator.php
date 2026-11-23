@@ -60,6 +60,7 @@ final readonly class Paginator
         $offset = 0;
         $cursor = null;
         $url = null;
+        $previousItems = null;
 
         for ($index = 0; $index < $pagination->maxPages; ++$index) {
             $extra = match ($pagination->style) {
@@ -81,26 +82,22 @@ final readonly class Paginator
             $items = null !== $pagination->itemsPath
                 ? DotPath::get($data, $pagination->itemsPath)
                 : ($format instanceof PlainJson ? $data : $format->collection($data));
-            if (!is_array($items) || [] === $items) {
+            // Some APIs answer a page beyond the end with the last page again.
+            if (!is_array($items) || [] === $items || $items === $previousItems) {
                 return;
             }
+            $previousItems = $items;
             foreach ($items as $item) {
                 yield $this->results->mapItem($item, $execution);
             }
 
-            $count = count($items);
             switch ($pagination->style) {
+                // A short page is no proof of the end: servers cap the page size silently. Only an empty page ends.
                 case PaginationStyle::Page:
-                    if ($count < $pagination->size) {
-                        return;
-                    }
                     ++$page;
                     break;
                 case PaginationStyle::Offset:
-                    if ($count < $pagination->size) {
-                        return;
-                    }
-                    $offset += $count;
+                    $offset += count($items);
                     break;
                 case PaginationStyle::Cursor:
                     $previous = $cursor;

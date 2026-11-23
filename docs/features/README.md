@@ -30,7 +30,7 @@ The rate limit, the announced quota and the circuit breaker are shared by all si
 
 `#[Paginate(style: ...)]` with `Page`, `Offset`, `Cursor` (`cursorPath`), `LinkHeader` (RFC 8288) or `Format` (next link from JSON:API/Hydra). `maxPages` bounds the requests. Next-page links pass the host guard like every other URL.
 
-With `Page` and `Offset`, a page with fewer items than `size` is the last one. Keep `size` at or below the page size limit of the API: a server that silently returns fewer items per page ends the iteration early. An unchanged cursor or a next link to the page just loaded also ends it, instead of repeating that page until `maxPages`.
+With `Page` and `Offset`, only an empty page ends the iteration, because servers often cap the page size without saying so; a short page is no proof of the end. This costs one request for the empty page after the last items. An unchanged cursor or a next link to the page just loaded also ends it, instead of repeating that page until `maxPages`.
 
 ## Formats
 

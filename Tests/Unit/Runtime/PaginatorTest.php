@@ -33,18 +33,41 @@ require_once __DIR__.'/../Fixtures/Definitions.php';
 final class PaginatorTest extends TestCase
 {
     #[Test]
-    public function pagesAreLoadedLazilyUntilAShortPage(): void
+    public function pagesAreLoadedLazilyUntilAnEmptyPage(): void
     {
         $mock = new MockTransport();
-        $mock->on(ItemsApi::class, 'pages')->respondWithJson([['id' => 1], ['id' => 2]])->respondWithJson([['id' => 3]]);
+        $mock->on(ItemsApi::class, 'pages')->respondWithJson([['id' => 1], ['id' => 2]])->respondWithJson([['id' => 3]])->respondWithJson([]);
         $items = $this->api($mock)->pages();
 
         self::assertSame(0, $mock->count(ItemsApi::class, 'pages'));
         $ids = array_map(static fn (ItemDto $item): int => $item->id, iterator_to_array($items, false));
 
         self::assertSame([1, 2, 3], $ids);
-        self::assertSame(2, $mock->count(ItemsApi::class, 'pages'));
+        self::assertSame(3, $mock->count(ItemsApi::class, 'pages'));
         self::assertStringEndsWith('?page=2&size=2', $mock->calls()[1]->request->url);
+    }
+
+    #[Test]
+    public function aServerRepeatingTheLastPageEndsTheIteration(): void
+    {
+        $mock = new MockTransport();
+        $mock->on(ItemsApi::class, 'pages')->respondWithJson([['id' => 1]])->respondWithJson([['id' => 1]])->respondWithJson([['id' => 1]]);
+
+        $ids = array_map(static fn (ItemDto $item): int => $item->id, iterator_to_array($this->api($mock)->pages(), false));
+
+        self::assertSame([1], $ids);
+        self::assertSame(2, $mock->count(ItemsApi::class, 'pages'));
+    }
+
+    #[Test]
+    public function aServerCappingThePageSizeLosesNoItems(): void
+    {
+        $mock = new MockTransport();
+        $mock->on(ItemsApi::class, 'pages')->respondWithJson([['id' => 1]])->respondWithJson([['id' => 2]])->respondWithJson([['id' => 3]])->respondWithJson([]);
+
+        $ids = array_map(static fn (ItemDto $item): int => $item->id, iterator_to_array($this->api($mock)->pages(), false));
+
+        self::assertSame([1, 2, 3], $ids);
     }
 
     #[Test]
