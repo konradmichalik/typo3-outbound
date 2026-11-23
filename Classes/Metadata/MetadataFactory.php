@@ -13,12 +13,31 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Metadata;
 
+use BackedEnum;
+use DateInterval;
+use DateTimeImmutable;
 use KonradMichalik\Typo3Outbound\Attribute\Auth\{Authentication, OAuth2ClientCredentials};
 use KonradMichalik\Typo3Outbound\Attribute\{Body, Cache, CircuitBreaker, Connection, Endpoint, Header, HealthCheck, InvalidatesCache, MapKeys, Multipart, OnStatus, Paginate, Path, Query, RateLimit, Resource, Retry, Sensitive, Timeout};
 use KonradMichalik\Typo3Outbound\Cache\CacheTags;
 use KonradMichalik\Typo3Outbound\Enum\PaginationStyle;
 use KonradMichalik\Typo3Outbound\Exception\InvalidDefinition;
 use KonradMichalik\Typo3Outbound\Value\{Deferred, RawResponse, SiteSetting};
+use ReflectionAttribute;
+use ReflectionClass;
+use ReflectionIntersectionType;
+use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionParameter;
+use ReflectionUnionType;
+use Reflector;
+use Throwable;
+
+use function count;
+use function in_array;
+use function is_int;
+use function is_string;
+use function sprintf;
+use function strlen;
 
 /**
  * MetadataFactory.
@@ -31,23 +50,24 @@ use KonradMichalik\Typo3Outbound\Value\{Deferred, RawResponse, SiteSetting};
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-final class MetadataFactory
+final readonly class MetadataFactory
 {
     private const IDEMPOTENT_METHODS = ['GET', 'HEAD', 'PUT', 'DELETE', 'OPTIONS', 'QUERY'];
+    private const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS', 'QUERY'];
     private const BODYLESS_METHODS = ['GET', 'HEAD'];
 
     public function __construct(
-        private readonly TypeResolver $types = new TypeResolver(),
+        private TypeResolver $types = new TypeResolver(),
     ) {}
 
     /**
      * Returns the interface carrying #[Connection] for a base or resource interface.
      *
-     * @param \ReflectionClass<object> $interface
+     * @param ReflectionClass<object> $interface
      *
-     * @return \ReflectionClass<object>
+     * @return ReflectionClass<object>
      */
-    public function baseOf(\ReflectionClass $interface): \ReflectionClass
+    public function baseOf(ReflectionClass $interface): ReflectionClass
     {
         if (!$interface->isInterface()) {
             throw new InvalidDefinition(sprintf('%s must be an interface.', $interface->getName()), 1794700001);
@@ -65,7 +85,7 @@ final class MetadataFactory
 
         $bases = array_values(array_filter(
             $interface->getInterfaces(),
-            fn(\ReflectionClass $parent): bool => null !== $this->attribute($parent, Connection::class),
+            fn (ReflectionClass $parent): bool => null !== $this->attribute($parent, Connection::class),
         ));
         if (1 !== count($bases)) {
             throw new InvalidDefinition(sprintf('Resource %s must extend exactly one interface with #[Connection], found %d.', $interface->getName(), count($bases)), 1794700004);
@@ -75,9 +95,9 @@ final class MetadataFactory
     }
 
     /**
-     * @param \ReflectionClass<object> $base
+     * @param ReflectionClass<object> $base
      */
-    public function connection(\ReflectionClass $base): ConnectionMetadata
+    public function connection(ReflectionClass $base): ConnectionMetadata
     {
         $definition = $this->attribute($base, Connection::class);
         if (!$definition instanceof Connection) {
@@ -95,7 +115,7 @@ final class MetadataFactory
             throw new InvalidDefinition(sprintf('Connection %s: a base URI from a site setting needs allowedHosts. Otherwise whoever can edit the setting can redirect calls and credentials to any host.', $name), 1794700036);
         }
 
-        $auth = $base->getAttributes(Authentication::class, \ReflectionAttribute::IS_INSTANCEOF);
+        $auth = $base->getAttributes(Authentication::class, ReflectionAttribute::IS_INSTANCEOF);
         if (count($auth) > 1) {
             throw new InvalidDefinition(sprintf('Connection %s declares more than one authentication.', $name), 1794700008);
         }
@@ -128,11 +148,11 @@ final class MetadataFactory
     /**
      * Endpoints declared directly on the given interface.
      *
-     * @param \ReflectionClass<object> $interface
+     * @param ReflectionClass<object> $interface
      *
      * @return list<EndpointMetadata>
      */
-    public function endpoints(\ReflectionClass $interface, ConnectionMetadata $connection): array
+    public function endpoints(ReflectionClass $interface, ConnectionMetadata $connection): array
     {
         $resource = $this->attribute($interface, Resource::class);
         $prefix = $resource instanceof Resource ? $resource->prefix : '';
@@ -147,13 +167,47 @@ final class MetadataFactory
         return $endpoints;
     }
 
+    public static function joinPath(string $prefix, string $path): string
+    {
+        $joined = trim($prefix, '/').'/'.trim($path, '/');
+        $joined = trim($joined, '/');
+
+        return '' === $joined ? '' : '/'.$joined;
+    }
+
     /**
-     * @param \ReflectionClass<object> $interface
+     * Extracts the type of a PHPDoc tag, keeping generics and shapes intact.
      */
-    private function endpoint(\ReflectionClass $interface, \ReflectionMethod $method, ConnectionMetadata $connection, string $prefix): EndpointMetadata
+    public static function docType(string $docComment, string $tag): ?string
+    {
+        if (1 !== preg_match('/@'.$tag.'\s+(.+)$/m', $docComment, $match)) {
+            return null;
+        }
+        $line = trim($match[1]);
+        $depth = 0;
+        $type = '';
+        foreach (str_split($line) as $char) {
+            if (0 === $depth && (' ' === $char || '*' === $char) && '' !== $type && !str_ends_with($type, ':') && !str_ends_with($type, ',') && !str_ends_with($type, '|')) {
+                break;
+            }
+            $depth += match ($char) {
+                '<', '{', '(' => 1,
+                '>', '}', ')' => -1,
+                default => 0,
+            };
+            $type .= $char;
+        }
+
+        return '' === trim($type) ? null : trim($type);
+    }
+
+    /**
+     * @param ReflectionClass<object> $interface
+     */
+    private function endpoint(ReflectionClass $interface, ReflectionMethod $method, ConnectionMetadata $connection, string $prefix): EndpointMetadata
     {
         $key = Naming::endpointKey($interface->getShortName(), $method->getName());
-        $verbs = $method->getAttributes(Endpoint::class, \ReflectionAttribute::IS_INSTANCEOF);
+        $verbs = $method->getAttributes(Endpoint::class, ReflectionAttribute::IS_INSTANCEOF);
         if (1 !== count($verbs)) {
             throw new InvalidDefinition(sprintf('%s needs exactly one verb attribute (#[Get], #[Post], ...), found %d.', $key, count($verbs)), 1794700010);
         }
@@ -171,6 +225,11 @@ final class MetadataFactory
         $retry = $this->effective(Retry::class, $method, $interface, $connection->retry, $connection->interface, $origins);
         $timeout = $this->effective(Timeout::class, $method, $interface, $connection->timeout, $connection->interface, $origins);
         $cache = $this->effective(Cache::class, $method, $interface, $connection->cache, $connection->interface, $origins);
+        if ($cache instanceof Cache && null === $this->attribute($method, Cache::class) && !in_array($verb->method(), self::SAFE_METHODS, true)) {
+            // An inherited #[Cache] is a default for the reads of the scope; PUT or DELETE are idempotent, but no reads.
+            $cache = null;
+            unset($origins['Cache']);
+        }
         if ($cache instanceof Cache && !$idempotent) {
             throw new InvalidDefinition(sprintf('%s: #[Cache] needs an idempotent endpoint. Mark it with idempotent: true if the request is safe to repeat.', $key), 1794700012);
         }
@@ -201,7 +260,7 @@ final class MetadataFactory
             cache: $cache,
             mapKeys: $this->attribute($method, MapKeys::class),
             paginate: $paginate,
-            onStatus: array_map(static fn(\ReflectionAttribute $attribute): OnStatus => $attribute->newInstance(), $method->getAttributes(OnStatus::class)),
+            onStatus: array_map(static fn (ReflectionAttribute $attribute): OnStatus => $attribute->newInstance(), $method->getAttributes(OnStatus::class)),
             healthCheck: $healthCheck,
             origins: $origins,
             invalidates: $invalidates,
@@ -211,7 +270,7 @@ final class MetadataFactory
     /**
      * @return list<ParameterMetadata>
      */
-    private function parameters(\ReflectionMethod $method, string $key, string $path, string $httpMethod): array
+    private function parameters(ReflectionMethod $method, string $key, string $path, string $httpMethod): array
     {
         preg_match_all('/\{([A-Za-z_]\w*)\}/', $path, $matches);
         $placeholders = $matches[1];
@@ -255,7 +314,7 @@ final class MetadataFactory
     /**
      * @param list<string> $placeholders
      */
-    private function parameter(\ReflectionParameter $parameter, array $placeholders, string $key): ParameterMetadata
+    private function parameter(ReflectionParameter $parameter, array $placeholders, string $key): ParameterMetadata
     {
         $name = $parameter->getName();
         $sensitive = null !== $this->attribute($parameter, Sensitive::class);
@@ -285,9 +344,9 @@ final class MetadataFactory
     }
 
     /**
-     * @param \ReflectionClass<object> $interface
+     * @param ReflectionClass<object> $interface
      */
-    private function returnType(\ReflectionClass $interface, \ReflectionMethod $method, string $key): ReturnType
+    private function returnType(ReflectionClass $interface, ReflectionMethod $method, string $key): ReturnType
     {
         $type = $method->getReturnType();
         if (null === $type) {
@@ -296,12 +355,12 @@ final class MetadataFactory
         $doc = self::docType((string) $method->getDocComment(), 'return');
         $resolvedDoc = null !== $doc ? $this->types->resolve($doc, $interface) : null;
 
-        if ($type instanceof \ReflectionUnionType) {
-            $names = array_map(static fn(\ReflectionNamedType|\ReflectionIntersectionType $t): string => (string) $t, $type->getTypes());
+        if ($type instanceof ReflectionUnionType) {
+            $names = array_map(static fn (ReflectionNamedType|ReflectionIntersectionType $t): string => (string) $t, $type->getTypes());
 
             return new ReturnType(ReturnKind::Mapped, $resolvedDoc ?? implode('|', $names), $type->allowsNull());
         }
-        if (!$type instanceof \ReflectionNamedType) {
+        if (!$type instanceof ReflectionNamedType) {
             throw new InvalidDefinition(sprintf('%s: intersection return types are not supported.', $key), 1794700022);
         }
 
@@ -324,7 +383,7 @@ final class MetadataFactory
      *
      * @param list<string> $templates
      */
-    private function validateTags(string $key, string $attribute, array $templates, \ReflectionMethod $method): void
+    private function validateTags(string $key, string $attribute, array $templates, ReflectionMethod $method): void
     {
         $parameters = [];
         foreach ($method->getParameters() as $parameter) {
@@ -337,9 +396,9 @@ final class MetadataFactory
             foreach (CacheTags::placeholders($template) as $name) {
                 $parameter = $parameters[$name] ?? throw new InvalidDefinition(sprintf('%s: %s tag "%s" uses {%s}, but the method has no such parameter.', $key, $attribute, $template, $name), 1794700032);
                 $type = $parameter->getType();
-                $valid = $type instanceof \ReflectionNamedType
+                $valid = $type instanceof ReflectionNamedType
                     && !$type->allowsNull()
-                    && (in_array($type->getName(), ['int', 'string'], true) || is_subclass_of($type->getName(), \BackedEnum::class));
+                    && (in_array($type->getName(), ['int', 'string'], true) || is_subclass_of($type->getName(), BackedEnum::class));
                 if (!$valid) {
                     throw new InvalidDefinition(sprintf('%s: %s tag placeholder {%s} needs a non-nullable int, string or backed enum parameter.', $key, $attribute, $name), 1794700033);
                 }
@@ -350,14 +409,14 @@ final class MetadataFactory
     /**
      * @template T of object
      *
-     * @param class-string<T>                                         $attribute
-     * @param \ReflectionClass<object>                                 $interface
-     * @param T|null                                                  $connectionValue
-     * @param array<string, string>                                   $origins
+     * @param class-string<T>         $attribute
+     * @param ReflectionClass<object> $interface
+     * @param T|null                  $connectionValue
+     * @param array<string, string>   $origins
      *
      * @return T|null
      */
-    private function effective(string $attribute, \ReflectionMethod $method, \ReflectionClass $interface, ?object $connectionValue, string $connectionInterface, array &$origins): ?object
+    private function effective(string $attribute, ReflectionMethod $method, ReflectionClass $interface, ?object $connectionValue, string $connectionInterface, array &$origins): ?object
     {
         $short = substr($attribute, (int) strrpos($attribute, '\\') + 1);
         foreach ([[$method, $interface->getShortName().'::'.$method->getName()], [$interface, $interface->getName()]] as [$reflector, $origin]) {
@@ -378,61 +437,27 @@ final class MetadataFactory
     /**
      * @template T of object
      *
-     * @param \ReflectionClass<object>|\ReflectionMethod|\ReflectionParameter $reflector
-     * @param class-string<T>                                             $attribute
+     * @param ReflectionClass<object>|ReflectionMethod|ReflectionParameter $reflector
+     * @param class-string<T>                                              $attribute
      *
      * @return T|null
      */
-    private function attribute(\Reflector $reflector, string $attribute): ?object
+    private function attribute(Reflector $reflector, string $attribute): ?object
     {
-        $attributes = $reflector->getAttributes($attribute, \ReflectionAttribute::IS_INSTANCEOF);
+        $attributes = $reflector->getAttributes($attribute, ReflectionAttribute::IS_INSTANCEOF);
 
         return isset($attributes[0]) ? $attributes[0]->newInstance() : null;
-    }
-
-    public static function joinPath(string $prefix, string $path): string
-    {
-        $joined = trim($prefix, '/').'/'.trim($path, '/');
-        $joined = trim($joined, '/');
-
-        return '' === $joined ? '' : '/'.$joined;
-    }
-
-    /**
-     * Extracts the type of a PHPDoc tag, keeping generics and shapes intact.
-     */
-    public static function docType(string $docComment, string $tag): ?string
-    {
-        if (!preg_match('/@'.$tag.'\s+(.+)$/m', $docComment, $match)) {
-            return null;
-        }
-        $line = trim($match[1]);
-        $depth = 0;
-        $type = '';
-        foreach (str_split($line) as $char) {
-            if (0 === $depth && (' ' === $char || '*' === $char) && '' !== $type && !str_ends_with($type, ':') && !str_ends_with($type, ',') && !str_ends_with($type, '|')) {
-                break;
-            }
-            $depth += match ($char) {
-                '<', '{', '(' => 1,
-                '>', '}', ')' => -1,
-                default => 0,
-            };
-            $type .= $char;
-        }
-
-        return '' === trim($type) ? null : trim($type);
     }
 
     private static function isPositiveInterval(string $interval): bool
     {
         try {
-            $parsed = @\DateInterval::createFromDateString($interval);
-        } catch (\Throwable) {
+            $parsed = @DateInterval::createFromDateString($interval);
+        } catch (Throwable) {
             return false;
         }
 
-        return $parsed instanceof \DateInterval && (new \DateTimeImmutable('@0'))->add($parsed)->getTimestamp() > 0;
+        return $parsed instanceof DateInterval && (new DateTimeImmutable('@0'))->add($parsed)->getTimestamp() > 0;
     }
 
     /**
@@ -448,7 +473,7 @@ final class MetadataFactory
             throw new InvalidDefinition(sprintf('%s: #[Timeout] needs a positive number of seconds.', $key), 1794700231);
         }
         if ($retry instanceof Retry) {
-            $badStatus = array_filter($retry->statusCodes, static fn(mixed $status): bool => !is_int($status) || $status < 100 || $status > 599);
+            $badStatus = array_filter($retry->statusCodes, static fn (mixed $status): bool => !is_int($status) || $status < 100 || $status > 599);
             if ($retry->maxRetries < 0 || $retry->delayMs < 0 || $retry->maxDelayMs < 0 || $retry->multiplier < 1.0 || [] !== $badStatus) {
                 throw new InvalidDefinition(sprintf('%s: #[Retry] needs maxRetries, delayMs and maxDelayMs of 0 or more, a multiplier of at least 1 and HTTP status codes between 100 and 599.', $key), 1794700232);
             }
@@ -469,7 +494,7 @@ final class MetadataFactory
      */
     private static function genericArgument(?string $doc, string $key, string $expected, bool $generator = false): string
     {
-        if (null === $doc || !preg_match('/<(.+)>$/s', $doc, $match)) {
+        if (null === $doc || 1 !== preg_match('/<(.+)>$/s', $doc, $match)) {
             throw new InvalidDefinition(sprintf('%s: declare the item type in PHPDoc as @return %s.', $key, $expected), 1794700023);
         }
         $arguments = [];

@@ -6,7 +6,7 @@ Each attempt has a total duration (Symfony `max_duration`): 3 s in web requests,
 
 ## Caching
 
-`#[Cache(lifetime, tags, staleOnError)]` on idempotent endpoints. Keys include site, language, principal, request body and `#[Header]` parameters. Endpoints with a multipart body are never cached. Bodies are cached as raw JSON, never as serialized objects.
+`#[Cache(lifetime, tags, staleOnError)]` on idempotent endpoints. On a connection or resource it is the default for the reading endpoints there (GET, HEAD, OPTIONS, QUERY); writes, PUT and DELETE included, stay uncached. Keys include site, language, principal, request body and `#[Header]` parameters. Endpoints with a multipart body are never cached. Bodies are cached as raw JSON, never as serialized objects.
 
 - **Page cache:** tags and the *remaining* lifetime go to the page cache (a hit 45 s into a 60 s entry reports 15 s), so `outbound:cache:flush crm` (or `cache:flushtags outbound_crm` on TYPO3 14) clears data and pages together.
 - **Misses:** one cache read per miss. Calls for the same key within one request are coalesced into one API call, parallel `Deferred` calls stay parallel. Other processes wait for a per-key lock (at most 2 s in web requests, capped by the time budget) and use the entry the lock holder stored; if a usable stale entry exists, it is served instead of waiting.

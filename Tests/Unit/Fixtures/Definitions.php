@@ -16,16 +16,25 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures;
 use KonradMichalik\Typo3Outbound\Attribute as Outbound;
 use KonradMichalik\Typo3Outbound\Enum\PaginationStyle;
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 final readonly class ItemDto
 {
     public function __construct(public int $id, public string $name = '') {}
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://api.example.com/v1', allowedHosts: ['api.example.com', 'cdn.example.com'])]
 #[Outbound\Retry(maxRetries: 1)]
 #[Outbound\Timeout(4)]
 interface MyCRMApi {}
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource('/items')]
 #[Outbound\Timeout(2)]
 interface ItemsApi extends MyCRMApi
@@ -50,12 +59,21 @@ interface ItemsApi extends MyCRMApi
     public function linked(): iterable;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'http://insecure.example.com')]
 interface InsecureApi {}
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface OrphanApi {}
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://a.example.com')]
 interface WithEndpointsApi
 {
@@ -63,6 +81,9 @@ interface WithEndpointsApi
     public function ping(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource('/x')]
 interface ExtendsWithEndpointsApi extends WithEndpointsApi
 {
@@ -70,9 +91,15 @@ interface ExtendsWithEndpointsApi extends WithEndpointsApi
     public function x(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://b.example.com')]
 interface BrokenApi {}
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface NoRoleApi extends BrokenApi
 {
@@ -80,6 +107,9 @@ interface NoRoleApi extends BrokenApi
     public function a(int $id): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface UnboundPlaceholderApi extends BrokenApi
 {
@@ -87,13 +117,22 @@ interface UnboundPlaceholderApi extends BrokenApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface BodyOnGetApi extends BrokenApi
 {
+    /**
+     * @param array<string, mixed> $body
+     */
     #[Outbound\Get('/a')]
     public function a(#[Outbound\Body] array $body): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface CachedPostApi extends BrokenApi
 {
@@ -102,10 +141,33 @@ interface CachedPostApi extends BrokenApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface PaginateWithoutIterableApi extends BrokenApi
 {
+    /**
+     * @return array<mixed>
+     */
     #[Outbound\Get('/a')]
     #[Outbound\Paginate]
     public function a(): array;
+}
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+#[Outbound\Connection(baseUri: 'https://catalog.example.com')]
+#[Outbound\Cache(lifetime: 60)]
+interface CachedCatalogApi
+{
+    #[Outbound\Get('/items/{id}')]
+    public function find(int $id): string;
+
+    #[Outbound\Post('/items')]
+    public function create(#[Outbound\Body] string $item): string;
+
+    #[Outbound\Delete('/items/{id}')]
+    public function remove(int $id): string;
 }

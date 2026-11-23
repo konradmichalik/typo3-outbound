@@ -15,7 +15,7 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Metadata;
 
 use KonradMichalik\Typo3Outbound\Exception\InvalidDefinition;
 use KonradMichalik\Typo3Outbound\Metadata\{Naming, Registry, ReturnKind};
-use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\{BodyOnGetApi, CachedPostApi, GeneratorApi, ExtendsWithEndpointsApi, InsecureApi, ItemDto, ItemsApi, NoRoleApi, OrphanApi, PaginateWithoutIterableApi, UnboundPlaceholderApi};
+use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\{BodyOnGetApi, CachedCatalogApi, CachedPostApi, ExtendsWithEndpointsApi, GeneratorApi, InsecureApi, ItemDto, ItemsApi, NoRoleApi, OrphanApi, PaginateWithoutIterableApi, UnboundPlaceholderApi};
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 
@@ -104,6 +104,19 @@ final class MetadataFactoryTest extends TestCase
         yield 'body on GET' => [BodyOnGetApi::class, 1794700016];
         yield 'cache on POST' => [CachedPostApi::class, 1794700012];
         yield 'paginate without iterable' => [PaginateWithoutIterableApi::class, 1794700011];
+    }
+
+    #[Test]
+    public function anInheritedCacheCoversOnlySafeMethods(): void
+    {
+        $registry = Registry::build([CachedCatalogApi::class]);
+
+        self::assertSame(60, $registry->endpoint(CachedCatalogApi::class, 'find')->cache?->lifetime);
+        foreach (['create', 'remove'] as $write) {
+            $endpoint = $registry->endpoint(CachedCatalogApi::class, $write);
+            self::assertNull($endpoint->cache, $write);
+            self::assertArrayNotHasKey('Cache', $endpoint->origins, $write);
+        }
     }
 
     #[Test]
