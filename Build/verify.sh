@@ -64,7 +64,7 @@ step "unit tests" ddev composer test
 step "cgl install" ddev composer cgl install
 step "cgl lint" ddev composer cgl lint
 step "cgl sca (PHPStan level max)" ddev composer cgl sca
-step "cgl migration (Rector, dry run)" ddev composer cgl migration
+step "cgl migration (Rector, dry run)" ddev composer cgl migration -- --dry-run
 step "cgl dependencies" ddev composer cgl analyze:dependencies
 step "functional tests (SQLite)" ddev exec env typo3DatabaseDriver=pdo_sqlite composer test:functional
 step "install TYPO3 13 and 14" ddev install all
