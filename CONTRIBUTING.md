@@ -91,7 +91,7 @@ ddev 13 composer install
 ddev all typo3 cache:flush
 ```
 
-Both instances install the fixture extension `outbound_petstore` as sitepackage, so the Petstore plugin renders on https://13.typo3-outbound.ddev.site and https://14.typo3-outbound.ddev.site. Set `OUTBOUND_PETSTORE_MOCK=1` in `.ddev/docker-compose.zz-project.yaml` to answer from the fixture responses instead of petstore3.swagger.io.
+Both instances install the fixture extension `outbound_petstore` as sitepackage, so the Petstore plugin renders on https://13.typo3-outbound.ddev.site and https://14.typo3-outbound.ddev.site. Set `OUTBOUND_PETSTORE_MOCK=1` in `.ddev/docker-compose.zz-project.yaml` to answer from the fixture responses instead of petstore3.swagger.io. The public Petstore is writable by anyone and often returns broken data (a tag as a string, a pet without a name, HTTP 500), which fails with `ApiMappingFailed` or makes the live tests red. That is not a bug in the extension: use the mock for a stable result.
 
 The DDEV setup comes from the add-on [ddev-typo3-multi-version-extension][2]; update it with `ddev add-on get konradmichalik/ddev-typo3-multi-version-extension`. `config.yaml`, `docker-compose.zz-project.yaml`, `.setup/project.sh`, `.setup/hooks/` and `commands/web/benchmark` belong to this repository and survive updates. The `post-typo3-setup` hook removes the page TypoScript that `typo3 setup` creates, because it would hide the TypoScript of the Petstore site set.
 
