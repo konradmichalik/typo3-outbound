@@ -21,5 +21,5 @@ ExtensionUtility::configurePlugin(
     'Pets',
     [PetsController::class => 'list, show, new, create, inventory'],
     [PetsController::class => 'new, create'],
-    \TYPO3\CMS\Extbase\Utility\ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT,
+    ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT,
 );
