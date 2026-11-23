@@ -128,12 +128,12 @@ The framework-agnostic parts moved into the package [`konradmichalik/php-outboun
 
 | 0.1 | 0.2 |
 |-----|-----|
-| `KonradMichalik\Typo3Outbound\{Attribute, Auth, Cache, Context, Enum, Exception, Format, Http, Mapping, Metadata, Proxy, Resilience, Runtime, Support, Testing, Transport, Value}\…` | `KonradMichalik\Outbound\…` |
+| `KonradMichalik\Typo3Outbound\{Attribute, Auth, Cache, Codegen, Command, Context, DependencyInjection, Enum, Exception, Format, Http, Mapping, Metadata, Proxy, Resilience, Runtime, Support, Testing, Transport, Value}\…`, except the TYPO3 adapters below | `KonradMichalik\Outbound\…` |
 | `KonradMichalik\Typo3Outbound\Outbound` | `KonradMichalik\Outbound\Outbound` |
 | `KonradMichalik\Typo3Outbound\Value\SiteSetting` | `KonradMichalik\Outbound\Value\Setting` |
 | `CallContext::siteIdentifier()` | `CallContext::scope()`, only relevant for your own `CallContext` implementations |
 | `StaticCallContext(site: …)` | `StaticCallContext(scope: …)` |
-| `KonradMichalik\Typo3Outbound\Typo3\RequestContext` and the other adapters | `KonradMichalik\Typo3Outbound\RequestContext`, the `Typo3` namespace segment is gone |
+| `KonradMichalik\Typo3Outbound\Typo3\RequestContext` and the other adapters | `KonradMichalik\Typo3Outbound\Context\RequestContext`; the adapters now live in `Cache`, `Context`, `Resilience`, `Proxy`, `Mapping` and `Configuration` below `KonradMichalik\Typo3Outbound` |
 | `outbound:call … --site=main` | `outbound:call … --scope=main` |
 
 Exception codes, attributes and their parameters stay the same. Replace the namespaces with a search and replace over your code, then flush all caches so the generated proxies and the container are rebuilt.

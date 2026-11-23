@@ -65,9 +65,6 @@ ddev composer test:coverage
 
 # Functional tests (need a database, SQLite is enough)
 ddev exec env typo3DatabaseDriver=pdo_sqlite composer test:functional
-
-# Petstore interfaces against petstore3.swagger.io (needs network)
-ddev composer test:live
 ```
 
 ## TYPO3 Setup
@@ -95,14 +92,7 @@ Both instances install the fixture extension `outbound_petstore` as sitepackage,
 
 The DDEV setup comes from the add-on [ddev-typo3-multi-version-extension][2]; update it with `ddev add-on get konradmichalik/ddev-typo3-multi-version-extension`. `config.yaml`, `docker-compose.zz-project.yaml`, `.setup/project.sh`, `.setup/hooks/` and `commands/web/benchmark` belong to this repository and survive updates. The `post-typo3-setup` hook removes the page TypoScript that `typo3 setup` creates, because it would hide the TypoScript of the Petstore site set.
 
-## Petstore demo
-
-The same Petstore frontend runs without TYPO3 and DDEV, with the PHP on your host. Each page lists the requests it sent, so retries and cache hits are visible.
-
-```bash
-# http://localhost:8080 against petstore3.swagger.io, append ?mock=1 for the fixture responses
-composer demo
-```
+The standalone Petstore demo and the live tests belong to the core package [`konradmichalik/php-outbound`](https://github.com/konradmichalik/php-outbound).
 
 ## Performance benchmark
 

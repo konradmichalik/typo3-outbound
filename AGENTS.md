@@ -14,8 +14,14 @@ TYPO3 extension `typo3_outbound` (`konradmichalik/typo3-outbound`): the TYPO3 in
 
 ## Structure
 
-- `Classes/`: adapters to TYPO3, each implementing an interface of the core: `CacheResponseCache`, `CacheStateStore`, `LockFactoryCacheLock`, `CacheManagerInvalidator`, `PageCacheTagReporter`, `PhpCacheProxyStore`, `RateLimiterStorage`, `RequestContext` (call context and scope runner), `Typo3ExecutionContext`, `SettingsFactory` (extension configuration), `ValinorCacheFactory`
-- `Classes/Middleware/RequestContextMiddleware`: hands the current request to `RequestContext`
+- `Classes/`: adapters to TYPO3, each implementing an interface of the core, grouped like the core's directories:
+  - `Cache/`: `CacheResponseCache`, `CacheManagerInvalidator`, `LockFactoryCacheLock`, `PageCacheTagReporter`
+  - `Resilience/`: `CacheStateStore`, `RateLimiterStorage`
+  - `Context/`: `RequestContext` (call context and scope runner), `Typo3ExecutionContext`
+  - `Proxy/`: `PhpCacheProxyStore`
+  - `Mapping/`: `ValinorCacheFactory`
+  - `Configuration/`: `Configuration` (cache registration), `SettingsFactory` (extension configuration)
+  - `Middleware/RequestContextMiddleware`: hands the current request to `RequestContext`
 - `Configuration/Services.php`: registers the core services (its location comes from the autoloader, because it differs between Composer and the vendor bundle of classic mode) and the compiler pass; loaded before `Services.yaml`, whose explicit definitions override
 - `Configuration/Services.yaml`: wiring of the TYPO3 adapters, caches and console commands
 - `Tests/Functional/Fixtures/Extensions/outbound_petstore/`: self-contained fixture extension: Petstore interfaces (`KonradMichalik\OutboundPetstore\Api`), DTOs, responses, mock transport and an Extbase plugin as TYPO3 frontend; installed as sitepackage by DDEV. `Api`, `Dto`, `Transport` and `Resources/Private/Responses` are a derived copy of `tests/src/Fixtures/Petstore` in the core, because `Tests/` is not part of the Composer dist
