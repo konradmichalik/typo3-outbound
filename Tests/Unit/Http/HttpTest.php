@@ -43,6 +43,25 @@ final class HttpTest extends TestCase
     }
 
     #[Test]
+    public function hostGuardComparesThePortToo(): void
+    {
+        HostGuard::check('https://api.example.com:443/a', 'https://api.example.com', [], false, 'E');
+        HostGuard::check('https://api.example.com:8443/a', 'https://api.example.com', ['api.example.com:8443'], false, 'E');
+
+        HostGuard::check('https://intranet.local:443/a', 'http://intranet.local', [], true, 'E');
+
+        $this->expectException(BlockedRequest::class);
+        HostGuard::check('https://api.example.com:8443/a', 'https://api.example.com', [], false, 'E');
+    }
+
+    #[Test]
+    public function aPortInTheAllowListAlsoBindsUrlsWithoutExplicitPort(): void
+    {
+        $this->expectException(BlockedRequest::class);
+        HostGuard::check('https://api.example.com/a', 'https://api.example.com:8443', ['api.example.com:8443'], false, 'E');
+    }
+
+    #[Test]
     public function hostGuardRejectsForeignHostsAndPlainHttp(): void
     {
         HostGuard::check('https://api.example.com/a', 'https://api.example.com', [], false, 'E');

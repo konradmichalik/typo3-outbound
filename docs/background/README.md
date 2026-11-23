@@ -7,7 +7,7 @@ The compiler pass reflects all registered interfaces once and stores their metad
 ## Security model
 
 - HTTPS only; plain HTTP only with `allowPrivateNetwork`, which is meant for intranet APIs
-- Every URL, including next-page links from responses, must match the allowed hosts
+- Every URL, including next-page links from responses, must match the allowed hosts; a port other than 80 or 443 must be the port of the base URI or appear in an entry like `api.example.com:8443`, and such an entry allows only that port
 - `NoPrivateNetworkHttpClient` blocks private addresses (it cannot verify targets behind an HTTP proxy; `outbound:lint` warns)
 - Redirects are disabled; response size is limited during and after download
 - Path placeholders are percent-encoded and dot segments (`.`, `..`) are rejected; generated proxy code contains no attribute values

@@ -16,6 +16,7 @@ namespace KonradMichalik\Typo3Outbound\Http;
 use KonradMichalik\Typo3Outbound\Exception\BlockedRequest;
 
 use function in_array;
+use function is_int;
 use function is_string;
 use function parse_url;
 use function sprintf;
@@ -51,9 +52,15 @@ final class HostGuard
             throw new BlockedRequest(sprintf('%s: only https URLs are allowed, got %s.', $endpoint, $scheme), 1794700061, $endpoint);
         }
         $allowed = [] !== $allowedHosts ? $allowedHosts : [(string) parse_url($baseUri, \PHP_URL_HOST)];
-        if (!in_array(strtolower($host), array_map(strtolower(...), $allowed), true)) {
-            throw new BlockedRequest(sprintf('%s: host "%s" is not allowed for this connection.', $endpoint, $host), 1794700062, $endpoint);
+        $port = self::port($url);
+        $basePort = self::port($baseUri);
+        foreach ($allowed as $entry) {
+            if (self::matches($entry, strtolower($host), $port, $basePort)) {
+                return;
+            }
         }
+
+        throw new BlockedRequest(sprintf('%s: host "%s:%d" is not allowed for this connection.', $endpoint, $host, $port), 1794700062, $endpoint);
     }
 
     /**
@@ -75,5 +82,24 @@ final class HostGuard
         $directory = substr($path, 0, (int) strrpos($path, '/') + 1);
 
         return $origin.('' === $directory ? '/' : $directory).$link;
+    }
+
+    /**
+     * An entry is "host" or "host:port". Without a port it allows the default ports and the port of the base URI.
+     */
+    private static function matches(string $entry, string $host, int $port, int $basePort): bool
+    {
+        if (1 === preg_match('/^(\[[^\]]+\]|[^:]+):(\d+)$/', $entry, $match)) {
+            return strtolower($match[1]) === $host && (int) $match[2] === $port;
+        }
+
+        return strtolower($entry) === $host && in_array($port, [80, 443, $basePort], true);
+    }
+
+    private static function port(string $url): int
+    {
+        $port = parse_url($url, \PHP_URL_PORT);
+
+        return is_int($port) ? $port : ('http' === strtolower((string) parse_url($url, \PHP_URL_SCHEME)) ? 80 : 443);
     }
 }
