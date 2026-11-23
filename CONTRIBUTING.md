@@ -123,7 +123,7 @@ Build/verify.sh --no-live
 
 After completing your work, **open a pull request** and provide a description of your changes. Ideally, your PR should reference an issue that explains the problem you are addressing.
 
-All mentioned code quality tools run automatically on every push. For more details, see the relevant [workflows][1].
+All mentioned code quality tools run automatically on pull requests and on pushes to `main`. For more details, see the relevant [workflows][1].
 
 [1]: .github/workflows
 [2]: https://github.com/konradmichalik/ddev-typo3-multi-version-extension
