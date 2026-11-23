@@ -15,7 +15,7 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Auth;
 
 use KonradMichalik\Typo3Outbound\Auth\TokenProvider;
 use KonradMichalik\Typo3Outbound\Context\SapiExecutionContext;
-use KonradMichalik\Typo3Outbound\Exception\ApiTransportFailed;
+use KonradMichalik\Typo3Outbound\Exception\{ApiTransportFailed, ApiUnauthorized};
 use KonradMichalik\Typo3Outbound\Outbound;
 use KonradMichalik\Typo3Outbound\Proxy\FileProxyStore;
 use KonradMichalik\Typo3Outbound\Testing\MockTransport;
@@ -60,6 +60,29 @@ final class TokenBudgetTest extends TestCase
         }
 
         self::assertCount(1, array_filter($mock->calls(), static fn ($call): bool => 'token_budget::token' === $call->endpoint));
+    }
+
+    #[Test]
+    public function aPersistent401KeepsTheFreshToken(): void
+    {
+        $mock = new MockTransport();
+        $mock->onKey('token_budget::token')->respondWithJson(['access_token' => 'first', 'expires_in' => 3600])->respondWithJson(['access_token' => 'second', 'expires_in' => 3600])->respondWithJson(['access_token' => 'third', 'expires_in' => 3600]);
+        $mock->on(TokenBudgetApi::class, 'find')->respondWith(401)->respondWith(401)->respondWithJson('one');
+        $api = Outbound::create([TokenBudgetApi::class])
+            ->withTransport($mock)
+            ->withClock(new FakeClock())
+            ->withExecutionContext(new SapiExecutionContext(false))
+            ->withProxyStore(new FileProxyStore(sys_get_temp_dir().'/typo3-outbound-test-proxies'))
+            ->api(TokenBudgetApi::class);
+
+        try {
+            $api->find(1);
+            self::fail('A persistent 401 must fail.');
+        } catch (ApiUnauthorized) {
+        }
+        $api->find(2);
+
+        self::assertCount(2, array_filter($mock->calls(), static fn ($call): bool => 'token_budget::token' === $call->endpoint));
     }
 
     #[Test]

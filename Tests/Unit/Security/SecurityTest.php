@@ -110,6 +110,38 @@ final class SecurityTest extends TestCase
     }
 
     #[Test]
+    public function aNormalizedUrlInATransportErrorIsRedactedToo(): void
+    {
+        $mock = new MockTransport();
+        $mock->on(KeyedApi::class, 'file')->failWith('Could not resolve host for "https://keyed.example.com:443/files/report?api_key=top-secret-key".');
+
+        try {
+            $this->outbound([KeyedApi::class])->withTransport($mock)->api(KeyedApi::class)->file('report');
+            self::fail('Expected a transport failure.');
+        } catch (ApiTransportFailed $exception) {
+            for ($e = $exception; null !== $e; $e = $e->getPrevious()) {
+                self::assertStringNotContainsString('top-secret-key', $e->getMessage());
+            }
+        }
+    }
+
+    #[Test]
+    public function aUrlWithAnApostropheInATransportErrorIsRedactedToo(): void
+    {
+        $mock = new MockTransport();
+        $mock->on(KeyedApi::class, 'file')->failWith('Could not resolve host for "https://keyed.example.com/o\'clock/files/report?api_key=top-secret-key".');
+
+        try {
+            $this->outbound([KeyedApi::class])->withTransport($mock)->api(KeyedApi::class)->file('report');
+            self::fail('Expected a transport failure.');
+        } catch (ApiTransportFailed $exception) {
+            for ($e = $exception; null !== $e; $e = $e->getPrevious()) {
+                self::assertStringNotContainsString('top-secret-key', $e->getMessage());
+            }
+        }
+    }
+
+    #[Test]
     public function lazyTransportErrorsDoNotLeakQueryCredentials(): void
     {
         $mock = new MockTransport();

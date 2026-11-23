@@ -27,7 +27,6 @@ use Throwable;
 use function min;
 use function round;
 use function sprintf;
-use function str_replace;
 use function strlen;
 
 /**
@@ -87,7 +86,8 @@ final readonly class Dispatcher
 
             $this->observer->observe($execution, $headers);
 
-            if (401 === $status && $this->authenticator->invalidate($execution->connection) && $this->mayResend($execution) && $execution->refreshCredentials()) {
+            // Checked first: a second 401 must not discard the token that was just fetched.
+            if (401 === $status && $execution->canRefreshCredentials() && $this->authenticator->invalidate($execution->connection) && $this->mayResend($execution) && $execution->refreshCredentials()) {
                 $response->cancel();
                 $response = $this->send($execution);
                 continue;
@@ -182,9 +182,13 @@ final readonly class Dispatcher
      */
     private static function safeMessage(Throwable $exception, Execution $execution): string
     {
-        $url = $execution->request->url;
-
-        return str_replace($url, Redactor::url($url, $execution->request->sensitiveKeys), $exception->getMessage());
+        // Every URL, not only the one sent: curl quotes it normalized (port, trailing slash, encoding).
+        // An apostrophe is valid in a URL path, so it must not end the match.
+        return (string) preg_replace_callback(
+            '~https?://[^\s"<>]+~i',
+            static fn (array $match): string => Redactor::url($match[0], $execution->request->sensitiveKeys),
+            $exception->getMessage(),
+        );
     }
 
     /**

@@ -46,6 +46,11 @@ final class Execution
         private readonly Closure $rebuild,
     ) {}
 
+    public function canRefreshCredentials(): bool
+    {
+        return !$this->credentialsRefreshed;
+    }
+
     /**
      * Rebuilds the request with fresh credentials, at most once per call.
      */
