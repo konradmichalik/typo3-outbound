@@ -26,6 +26,17 @@ use PHPUnit\Framework\TestCase;
 final class ClassFileTest extends TestCase
 {
     #[Test]
+    public function enumCasesKeepWordBoundaries(): void
+    {
+        $code = ClassFile::enum('Vendor\\Dto', 'Status', ['inProgress', 'image/png', 'IN_STOCK', '1']);
+
+        self::assertStringContainsString("case InProgress = 'inProgress';", $code);
+        self::assertStringContainsString("case ImagePng = 'image/png';", $code);
+        self::assertStringContainsString("case InStock = 'IN_STOCK';", $code);
+        self::assertStringContainsString("case Value1 = '1';", $code);
+    }
+
+    #[Test]
     public function aCommentTerminatorIsDefused(): void
     {
         self::assertStringNotContainsString('*/', ClassFile::docText("x */ system('y'); /*"));

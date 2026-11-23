@@ -88,8 +88,8 @@ final class ClassFile
     public static function enum(string $namespace, string $class, array $values): string
     {
         $cases = [];
-        foreach ($values as $value) {
-            $cases[] = sprintf('    case %s = %s;', Names::studly($value), var_export($value, true));
+        foreach (Names::enumCases($values) as $index => $case) {
+            $cases[] = sprintf('    case %s = %s;', $case, var_export($values[$index], true));
         }
 
         return self::file($namespace, sprintf("enum %s: string\n{\n%s\n}\n", $class, implode("\n", $cases)));

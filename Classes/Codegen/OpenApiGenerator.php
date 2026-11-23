@@ -76,7 +76,7 @@ final class OpenApiGenerator
 
         foreach ((array) ($spec['components']['schemas'] ?? []) as $name => $schema) {
             if (is_array($schema)) {
-                $this->schema(Names::studly((string) $name), $schema);
+                $this->schema(Names::className((string) $name), $schema);
             }
         }
         $this->files['Api/'.$base.'.php'] = $this->base($base);
@@ -335,7 +335,7 @@ final class OpenApiGenerator
     private function phpType(array $schema, string $context, array &$uses): array
     {
         if (is_string($schema['$ref'] ?? null)) {
-            $class = Names::studly(substr($schema['$ref'], (int) strrpos($schema['$ref'], '/') + 1));
+            $class = Names::className(substr($schema['$ref'], (int) strrpos($schema['$ref'], '/') + 1));
             $uses[] = $this->namespace.'\\Dto\\'.$class;
 
             return [$class, null];

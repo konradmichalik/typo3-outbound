@@ -68,6 +68,37 @@ final class CodegenTest extends TestCase
     }
 
     #[Test]
+    public function awkwardSchemaNamesAndEnumValuesStillCompile(): void
+    {
+        $spec = [
+            'openapi' => '3.0.3',
+            'info' => ['title' => 'Edge', 'version' => '1'],
+            'servers' => [['url' => 'https://edge.example.com']],
+            'paths' => ['/objects/{id}' => ['get' => [
+                'tags' => ['objects'],
+                'operationId' => 'getObject',
+                'parameters' => [['name' => 'id', 'in' => 'path', 'required' => true, 'schema' => ['type' => 'integer']]],
+                'responses' => ['200' => ['description' => 'ok', 'content' => ['application/json' => ['schema' => ['$ref' => '#/components/schemas/Object']]]]],
+            ]]],
+            'components' => ['schemas' => [
+                'Object' => ['type' => 'object', 'properties' => ['status' => ['$ref' => '#/components/schemas/Status']]],
+                'Status' => ['type' => 'string', 'enum' => ['1', '2', 'a-b', 'a_b', 'class']],
+            ]],
+        ];
+        $directory = sys_get_temp_dir().'/outbound-codegen-edge-'.bin2hex(random_bytes(4));
+        mkdir($directory);
+
+        foreach ((new OpenApiGenerator())->generate($spec, 'Generated\Edge', 'Edge') as $path => $code) {
+            $file = $directory.'/'.str_replace('/', '_', $path);
+            file_put_contents($file, $code);
+            exec(escapeshellarg(\PHP_BINARY).' -l '.escapeshellarg($file).' 2>&1', $output, $exitCode);
+            self::assertSame(0, $exitCode, $path.': '.implode("\n", $output)."\n".$code);
+            unlink($file);
+        }
+        rmdir($directory);
+    }
+
+    #[Test]
     public function sampleResponseGeneratesNestedDtos(): void
     {
         $files = (new DtoGenerator())->generate('Vendor\\Dto', 'ContactDto', ['id' => 1, 'full_name' => 'Ada', 'address' => ['city' => 'Dresden'], 'tags' => [['label' => 'vip']], 'notes' => null], camelCase: true);
