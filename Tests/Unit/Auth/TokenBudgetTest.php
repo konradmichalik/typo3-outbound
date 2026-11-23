@@ -61,4 +61,24 @@ final class TokenBudgetTest extends TestCase
 
         self::assertCount(1, array_filter($mock->calls(), static fn ($call): bool => 'token_budget::token' === $call->endpoint));
     }
+
+    #[Test]
+    public function aLifetimeSentAsStringIsHonoured(): void
+    {
+        $clock = new FakeClock();
+        $mock = new MockTransport();
+        $mock->onKey('token_budget::token')->respondWithJson(['access_token' => 'first', 'expires_in' => '3600'])->respondWithJson(['access_token' => 'second', 'expires_in' => '3600']);
+        $mock->on(TokenBudgetApi::class, 'find')->respondWithJson('one')->respondWithJson('two');
+        $api = Outbound::create([TokenBudgetApi::class])
+            ->withTransport($mock)
+            ->withClock($clock)
+            ->withExecutionContext(new SapiExecutionContext(false))
+            ->withProxyStore(new FileProxyStore(sys_get_temp_dir().'/typo3-outbound-test-proxies'))
+            ->api(TokenBudgetApi::class);
+        $api->find(1);
+        $clock->advance(600.0);
+        $api->find(2);
+
+        self::assertCount(1, array_filter($mock->calls(), static fn ($call): bool => 'token_budget::token' === $call->endpoint));
+    }
 }

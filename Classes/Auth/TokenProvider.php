@@ -27,7 +27,6 @@ use Throwable;
 
 use function http_build_query;
 use function is_array;
-use function is_int;
 use function is_numeric;
 use function is_string;
 use function json_decode;
@@ -100,7 +99,8 @@ final class TokenProvider
         if ($status >= 400 || !is_array($payload) || !is_string($payload['access_token'] ?? null)) {
             throw new ApiUnauthorized(sprintf('Connection %s: token request answered %d without an access token.', $connection->name, $status), 1794700071, $connection->name.'::token', $status);
         }
-        $lifetime = is_int($payload['expires_in'] ?? null) ? $payload['expires_in'] : 300;
+        // RFC 6749 asks for a number, but some servers send it as a string.
+        $lifetime = is_numeric($payload['expires_in'] ?? null) ? (int) $payload['expires_in'] : 300;
         $ttl = max(1, $lifetime - self::EXPIRY_MARGIN);
         $this->memo[$key] = ['token' => $payload['access_token'], 'expires' => $this->clock->now() + $ttl];
         $this->store->set($key, $this->memo[$key], $ttl);
