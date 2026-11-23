@@ -4,7 +4,7 @@ Thank you for considering contributing to this project! Every contribution is we
 
 ## Requirements
 
-- [DDEV](https://ddev.readthedocs.io/en/stable/)
+- [DDEV](https://ddev.readthedocs.io/en/stable/) with the add-on [ddev-typo3-multi-version-extension][2]
 
 ## Preparation
 
@@ -24,43 +24,50 @@ ddev composer install
 
 ```bash
 # All linters
-ddev cgl lint
+ddev composer cgl lint
 
 # Specific linters
-ddev cgl lint:composer
-ddev cgl lint:editorconfig
-ddev cgl lint:language
-ddev cgl lint:php
-ddev cgl lint:typoscript
-ddev cgl lint:yaml
+ddev composer cgl lint:composer
+ddev composer cgl lint:editorconfig
+ddev composer cgl lint:php
 
 # Fix all CGL issues
-ddev cgl fix
+ddev composer cgl fix
 
 # Fix specific CGL issues
-ddev cgl fix:composer
-ddev cgl fix:editorconfig
-ddev cgl fix:php
+ddev composer cgl fix:composer
+ddev composer cgl fix:editorconfig
+ddev composer cgl fix:php
 ```
 
 ## Run static code analysis
 
 ```bash
 # All static code analyzers
-ddev cgl sca
+ddev composer cgl sca
 
 # Specific static code analyzers
-ddev cgl sca:php
+ddev composer cgl sca:php
+
+# Rector (dry run) and dependency analysis
+ddev composer cgl migration:rector -- --dry-run
+ddev composer cgl analyze:dependencies
 ```
 
 ## Run tests
 
 ```bash
-# All tests
+# Unit tests
 ddev composer test
 
-# All tests with code coverage
+# Unit tests with code coverage
 ddev composer test:coverage
+
+# Functional tests (need a database, SQLite is enough)
+ddev exec env typo3DatabaseDriver=pdo_sqlite composer test:functional
+
+# Petstore interfaces against petstore3.swagger.io (needs network)
+ddev composer test:live
 ```
 
 ## TYPO3 Setup
@@ -72,52 +79,37 @@ For testing the extension, you need to set up the TYPO3 instances.
 ddev install all
 
 # Or install specific TYPO3 versions
-ddev install 11
-ddev install 12
 ddev install 13
+ddev install 14
 
 # Open the overview page
 ddev launch
 
 # Run TYPO3 specific commands
-ddev 12 typo3 cache:flush
+ddev 14 typo3 outbound:debug
 ddev 13 composer install
-ddev all typo3 database:updateschema
+ddev all typo3 cache:flush
 ```
 
-## Performance benchmark
+Both instances install the fixture extension `outbound_petstore` as sitepackage, so the Petstore plugin renders on the start page.
 
-To check whether attribute routing is meaningfully slower than a conventional middleware, the
-`routing_benchmark` fixture extension exposes matched endpoint pairs — one served by
-`typo3-outbound` (`/api/bench/routing/*`), one by a hand-rolled PSR-15 middleware
-(`/api/bench/plain/*`) that returns byte-for-byte identical responses. Server-side timings are
-recorded by [`konradmichalik/typo3-request-profiler`][2] (pinned to `dev-main` until the
-`TYPO3_REQUEST_PROFILER_FORCE` opt-in is released) and aggregated into a comparison table.
+## Full verification
+
+`Build/verify.sh` runs every check that needs DDEV, a database or network access in one go: linters, static analysis, unit and functional tests, the console commands in both TYPO3 instances and the Petstore plugin. It never stops at the first failure and prints a summary at the end.
 
 ```bash
-# Install an instance (profiler + benchmark fixture are pulled in automatically)
-ddev install 13
+# All steps
+Build/verify.sh
 
-# Run the benchmark (default 50 requests per endpoint)
-ddev benchmark            # lowest supported version
-ddev benchmark 13 100     # version 13, 100 requests per endpoint
+# Without the calls to petstore3.swagger.io
+Build/verify.sh --no-live
 ```
-
-Each scenario (no arguments, path parameter, query parameter, entity resolution) is run
-interleaved after a warmup, then `timing.total_ms` is reported per variant with the
-routing-vs-plain delta. The dispatch overhead is in the order of ~0.1-0.3 ms per request —
-negligible against a full frontend request, so the large percentage delta on the cheaper
-scenarios is an artifact of the near-zero plain-middleware baseline. The entity-resolution
-scenario's plain counterpart performs the same `PersistenceManagerInterface::getObjectByIdentifier()`
-lookup as the routing side, so that comparison isolates dispatch overhead from the DB round trip;
-its delta lands in the same absolute range as the scalar scenarios, showing entity resolution
-adds no disproportionate cost beyond typo3-outbound's normal argument-resolution overhead.
 
 ## Submit a pull request
 
 After completing your work, **open a pull request** and provide a description of your changes. Ideally, your PR should reference an issue that explains the problem you are addressing.
 
-All mentioned code quality tools will run automatically on every pull request. For more details, see the relevant [workflows][1].
+All mentioned code quality tools run automatically on every push. For more details, see the relevant [workflows][1].
 
 [1]: .github/workflows
-[2]: https://github.com/konradmichalik/typo3-request-profiler
+[2]: https://github.com/konradmichalik/ddev-typo3-multi-version-extension
