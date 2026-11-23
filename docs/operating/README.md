@@ -72,7 +72,7 @@ ddev launch                      # overview page
 ddev 14 typo3 outbound:debug     # TYPO3 CLI of one instance
 ```
 
-`ddev install` installs the fixture extension `outbound_petstore` as sitepackage and imports `Tests/Acceptance/Fixtures/sites/main`, whose site set renders the Petstore plugin on https://13.typo3-outbound.ddev.site and https://14.typo3-outbound.ddev.site. Set `OUTBOUND_PETSTORE_MOCK=1` in `.ddev/docker-compose.zz-project.yaml` to answer from the fixture responses. Update the add-on with `ddev add-on get konradmichalik/ddev-typo3-multi-version-extension`; `config.yaml`, `docker-compose.zz-project.yaml` and `.setup/project.sh` are repo-owned and survive updates.
+`ddev install` installs the fixture extension `outbound_petstore` as sitepackage and imports `Tests/Acceptance/Fixtures/sites/main`, whose site set renders the Petstore plugin on https://13.typo3-outbound.ddev.site and https://14.typo3-outbound.ddev.site. Set `OUTBOUND_PETSTORE_MOCK=1` in `.ddev/docker-compose.zz-project.yaml` to answer from the fixture responses. Update the add-on with `ddev add-on get konradmichalik/ddev-typo3-multi-version-extension`; `config.yaml`, `docker-compose.zz-project.yaml`, `.setup/project.sh` and `.setup/hooks/` are repo-owned and survive updates. The `post-typo3-setup` hook removes the page TypoScript that `typo3 setup` creates, because it would hide the TypoScript of the Petstore site set.
 
 ## Petstore demo
 
