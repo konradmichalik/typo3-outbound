@@ -18,6 +18,7 @@ use KonradMichalik\Typo3Outbound\Context\SapiExecutionContext;
 use KonradMichalik\Typo3Outbound\Exception\ApiRateLimited;
 use KonradMichalik\Typo3Outbound\Metadata\ConnectionMetadata;
 use KonradMichalik\Typo3Outbound\Resilience\{InMemoryStateStore, RateLimitGuard, RetryPolicy};
+use KonradMichalik\Typo3Outbound\Support\SystemClock;
 use KonradMichalik\Typo3Outbound\Tests\Support\{FakeClock, SwitchableCallContext};
 use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\MyCRMApi;
 use KonradMichalik\Typo3Outbound\Value\SiteSetting;
@@ -33,6 +34,24 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(RateLimitGuard::class)]
 final class ResilienceTest extends TestCase
 {
+    /**
+     * symfony/rate-limiter before 7.4.22 reported a retry time that had already passed,
+     * so a burst in the CLI gave up instead of waiting (Immomio pilot).
+     */
+    #[Test]
+    public function aBurstInTheCliWaitsForEverySecondTokenInsteadOfFailing(): void
+    {
+        $connection = new ConnectionMetadata('burst', MyCRMApi::class, new Connection('https://x'), rateLimit: new RateLimit(2, '1 second'));
+        $guard = new RateLimitGuard(new InMemoryStateStore(), new SapiExecutionContext(false), new SystemClock());
+        $start = microtime(true);
+
+        for ($call = 0; $call < 4; ++$call) {
+            $guard->acquire($connection, 'E');
+        }
+
+        self::assertGreaterThan(0.5, microtime(true) - $start);
+    }
+
     #[Test]
     public function retryAfterBeyondTheCapGivesUpInsteadOfWaiting(): void
     {
