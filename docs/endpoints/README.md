@@ -27,7 +27,7 @@ Verb options: `unwrap: 'data'` for envelopes, `idempotent: true` for safe POSTs 
 | Return type | Behaviour |
 |-------------|-----------|
 | DTO, scalar, `?DTO` | mapped; `#[OnStatus(404, returns: null)]` turns a status into a value |
-| `array` with `@return list<Dto>` or `array<string, int>` | mapped by the PHPDoc type |
+| `array` with `@return list<Dto>`, `array<string, int>` or a shape like `array{city: string, temperature: float}` | mapped by the PHPDoc type; a plain `array` or `mixed` values fail in strict mode |
 | `void` | status checked, body ignored |
 | `RawResponse` | unmapped, for downloads and streams |
 | `iterable` with `@return iterable<Dto>` and `#[Paginate]` | pages loaded lazily |

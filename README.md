@@ -52,16 +52,12 @@ Declare the API as an interface carrying `#[Connection]` and annotate a method w
 ```php
 use KonradMichalik\Typo3Outbound\Attribute as Outbound;
 
-final readonly class ForecastDto
-{
-    public function __construct(public string $city, public float $temperature) {}
-}
-
 #[Outbound\Connection(baseUri: 'https://api.weather.example.com')]
 interface WeatherApi
 {
+    /** @return array{city: string, temperature: float} */
     #[Outbound\Get('/forecast/{city}')]
-    public function forecast(string $city): ForecastDto;
+    public function forecast(string $city): array;
 }
 ```
 
@@ -74,14 +70,14 @@ final readonly class ForecastService
 
     public function temperatureIn(string $city): float
     {
-        return $this->weather->forecast($city)->temperature;
+        return $this->weather->forecast($city)['temperature'];
     }
 }
 ```
 
-That's it: `temperatureIn('Dresden')` sends `GET https://api.weather.example.com/forecast/Dresden`, maps the JSON response to a `ForecastDto` and reads its `temperature`. Every interface with `#[Connection]` or `#[Resource]` that your `Configuration/Services.yaml` resource covers becomes a service. For interfaces outside that resource or in one of its `exclude` paths, call `OutboundServices::discover($builder, $directory)` in `Configuration/Services.php`.
+That's it: `temperatureIn('Dresden')` sends `GET https://api.weather.example.com/forecast/Dresden`, checks the JSON response against the declared shape and reads its `temperature`. For larger responses, return a DTO class instead of an array shape. Every interface with `#[Connection]` or `#[Resource]` that your `Configuration/Services.yaml` resource covers becomes a service. For interfaces outside that resource or in one of its `exclude` paths, call `OutboundServices::discover($builder, $directory)` in `Configuration/Services.php`.
 
-Everything else is opt-in on top of that. A larger API splits into resources, takes its base URI and secret from the site configuration, retries, caches and maps a 404 to `null`, all declared with attributes:
+Everything else is opt-in on top of that. A larger API splits into resources, takes its base URI and secret from the site configuration, maps responses to DTOs, retries, caches and maps a 404 to `null`, all declared with attributes:
 
 ```php
 use KonradMichalik\Typo3Outbound\Value\{Secret, SiteSetting};
