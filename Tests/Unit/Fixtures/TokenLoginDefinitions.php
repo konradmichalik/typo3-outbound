@@ -103,3 +103,14 @@ interface SiteLoginUrlWithoutHostsApi
     #[Outbound\Get('/a')]
     public function a(): string;
 }
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+#[Outbound\Connection(baseUri: new Env('OUTBOUND_TEST_LOGIN_BASE'), allowedHosts: ['login.example.com', 'sandbox.login.example.com'])]
+#[Outbound\Auth\TokenLogin(url: '/auth/token', body: ['username' => 'user', 'password' => new Env('OUTBOUND_TEST_PASSWORD')])]
+interface EnvBaseLoginApi
+{
+    #[Outbound\Get('/items/{id}')]
+    public function find(int $id): string;
+}

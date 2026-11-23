@@ -27,6 +27,8 @@ use Throwable;
 
 use function array_keys;
 use function array_map;
+use function array_values;
+use function hash;
 use function http_build_query;
 use function is_array;
 use function is_numeric;
@@ -37,6 +39,7 @@ use function max;
 use function rtrim;
 use function sprintf;
 use function str_starts_with;
+use function substr;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -68,7 +71,8 @@ final class TokenProvider
 
     public function token(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth, TransportOptions $options): string
     {
-        $key = $this->key($connection);
+        $url = $this->url($connection, $auth);
+        $key = $this->key($connection, $auth, $url);
         $now = $this->clock->now();
         if (isset($this->memo[$key]) && $this->memo[$key]['expires'] > $now) {
             return $this->memo[$key]['token'];
@@ -80,8 +84,7 @@ final class TokenProvider
             return $cached['token'];
         }
 
-        $url = $this->url($connection, $auth);
-        HostGuard::check($url, $url, $this->allowedHosts($connection, $auth), $connection->definition->allowPrivateNetwork, $connection->name.' token');
+        $this->guardHost($connection, $auth, $url);
         $duration = $this->budget->attemptDuration(null);
         // Symfony reads a max_duration of 0 as unlimited.
         if ($duration <= 0.0) {
@@ -97,8 +100,13 @@ final class TokenProvider
 
     public function invalidate(ConnectionMetadata $connection): void
     {
-        unset($this->memo[$this->key($connection)]);
-        $this->store->delete($this->key($connection));
+        $auth = $connection->auth;
+        if (!$auth instanceof OAuth2ClientCredentials && !$auth instanceof TokenLogin) {
+            return;
+        }
+        $key = $this->key($connection, $auth, $this->url($connection, $auth));
+        unset($this->memo[$key]);
+        $this->store->delete($key);
     }
 
     /**
@@ -162,21 +170,28 @@ final class TokenProvider
     }
 
     /**
-     * A literal or environment value is trusted; one from site settings must match the allow list.
-     *
-     * @return list<string>
+     * Credentials of a login go only to hosts the connection allows, like every other call;
+     * a literal or environment token URL is trusted unless allowedHosts says otherwise.
      */
-    private function allowedHosts(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth): array
+    private function guardHost(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth, string $url): void
     {
-        $source = $auth instanceof TokenLogin ? $auth->url : $auth->tokenUrl;
-        $relative = $auth instanceof TokenLogin && is_string($auth->url) && str_starts_with($auth->url, '/');
-        $fromSettings = $source instanceof SiteSetting || ($relative && $connection->definition->baseUri instanceof SiteSetting);
+        $definition = $connection->definition;
+        if ($auth instanceof TokenLogin) {
+            $relative = str_starts_with($this->values->resolve($auth->url), '/');
+            HostGuard::check($url, $relative ? $this->values->resolve($definition->baseUri) : $url, $definition->allowedHosts, $definition->allowPrivateNetwork, $connection->name.' token');
 
-        return $fromSettings ? $connection->definition->allowedHosts : [];
+            return;
+        }
+        HostGuard::check($url, $url, $auth->tokenUrl instanceof SiteSetting ? $definition->allowedHosts : [], $definition->allowPrivateNetwork, $connection->name.' token');
     }
 
-    private function key(ConnectionMetadata $connection): string
+    /**
+     * A token belongs to the host and account it was issued for, so switching either never reuses it.
+     */
+    private function key(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth, string $url): string
     {
-        return sprintf('token_%s_%s', $connection->name, $this->context->siteIdentifier() ?? 'none');
+        $principal = $this->values->resolve($auth instanceof TokenLogin ? array_values($auth->body)[0] : $auth->clientId);
+
+        return sprintf('token_%s_%s_%s', $connection->name, $this->context->siteIdentifier() ?? 'none', substr(hash('sha256', $url."\n".$principal), 0, 16));
     }
 }

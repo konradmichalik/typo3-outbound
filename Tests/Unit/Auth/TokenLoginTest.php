@@ -15,12 +15,12 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Auth;
 
 use KonradMichalik\Typo3Outbound\Auth\{Authenticator, TokenProvider};
 use KonradMichalik\Typo3Outbound\Context\SapiExecutionContext;
-use KonradMichalik\Typo3Outbound\Exception\ApiUnauthorized;
+use KonradMichalik\Typo3Outbound\Exception\{ApiUnauthorized, BlockedRequest};
 use KonradMichalik\Typo3Outbound\Outbound;
 use KonradMichalik\Typo3Outbound\Proxy\FileProxyStore;
 use KonradMichalik\Typo3Outbound\Testing\MockTransport;
 use KonradMichalik\Typo3Outbound\Tests\Support\{FakeClock, RecordingLogger};
-use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\{AbsoluteTokenLoginApi, TokenLoginApi};
+use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\{AbsoluteTokenLoginApi, EnvBaseLoginApi, TokenLoginApi};
 use KonradMichalik\Typo3Outbound\Transport\Call;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
@@ -61,6 +61,7 @@ final class TokenLoginTest extends TestCase
     protected function tearDown(): void
     {
         putenv('OUTBOUND_TEST_PASSWORD');
+        putenv('OUTBOUND_TEST_LOGIN_BASE');
     }
 
     #[Test]
@@ -92,6 +93,36 @@ final class TokenLoginTest extends TestCase
         $this->api(AbsoluteTokenLoginApi::class)->find(1);
 
         self::assertSame('https://auth.example.com/login', $this->calls('absolute_token_login::token')[0]->request->url);
+    }
+
+    #[Test]
+    public function credentialsAreNeverSentToAHostOutsideTheAllowList(): void
+    {
+        putenv('OUTBOUND_TEST_LOGIN_BASE=https://login.example.org');
+        $this->mock->onKey('env_base_login::token')->respondWithJson(['token' => 'abc']);
+
+        try {
+            $this->api(EnvBaseLoginApi::class)->find(1);
+            self::fail('A login host outside allowedHosts must be blocked.');
+        } catch (BlockedRequest) {
+        }
+        self::assertCount(0, $this->calls('env_base_login::token'));
+    }
+
+    #[Test]
+    public function aChangedBaseUriLogsInAgainInsteadOfReusingTheToken(): void
+    {
+        $this->mock->onKey('env_base_login::token')->respondWithJson(['token' => 'live'])->respondWithJson(['token' => 'sandbox']);
+        $this->mock->on(EnvBaseLoginApi::class, 'find')->respondWithJson('one')->respondWithJson('two');
+        $api = $this->api(EnvBaseLoginApi::class);
+
+        putenv('OUTBOUND_TEST_LOGIN_BASE=https://login.example.com');
+        $api->find(1);
+        putenv('OUTBOUND_TEST_LOGIN_BASE=https://sandbox.login.example.com');
+        $api->find(2);
+
+        self::assertCount(2, $this->calls('env_base_login::token'));
+        self::assertSame('Bearer sandbox', $this->mock->calls(EnvBaseLoginApi::class, 'find')[1]->request->headers['Authorization'] ?? null);
     }
 
     #[Test]
