@@ -114,3 +114,14 @@ interface EnvBaseLoginApi
     #[Outbound\Get('/items/{id}')]
     public function find(int $id): string;
 }
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
+#[Outbound\Connection(baseUri: 'https://login.example.com')]
+#[Outbound\Auth\TokenLogin(url: '/auth/token', body: ['grant_type' => 'password', 'username' => new Env('OUTBOUND_TEST_LOGIN_USER'), 'password' => new Env('OUTBOUND_TEST_PASSWORD')])]
+interface ConstantFirstFieldLoginApi
+{
+    #[Outbound\Get('/items/{id}')]
+    public function find(int $id): string;
+}

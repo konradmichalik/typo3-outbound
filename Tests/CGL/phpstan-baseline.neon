@@ -405,7 +405,7 @@ parameters:
 		-
 			message: '#^Calling putenv\(\) is forbidden, might overwrite existing variables\.$#'
 			identifier: disallowed.function
-			count: 6
+			count: 10
 			path: ../Unit/Auth/TokenLoginTest.php
 
 		-

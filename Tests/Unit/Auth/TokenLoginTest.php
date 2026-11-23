@@ -20,7 +20,7 @@ use KonradMichalik\Typo3Outbound\Outbound;
 use KonradMichalik\Typo3Outbound\Proxy\FileProxyStore;
 use KonradMichalik\Typo3Outbound\Testing\MockTransport;
 use KonradMichalik\Typo3Outbound\Tests\Support\{FakeClock, RecordingLogger};
-use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\{AbsoluteTokenLoginApi, EnvBaseLoginApi, TokenLoginApi};
+use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\{AbsoluteTokenLoginApi, ConstantFirstFieldLoginApi, EnvBaseLoginApi, TokenLoginApi};
 use KonradMichalik\Typo3Outbound\Transport\Call;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
@@ -62,6 +62,34 @@ final class TokenLoginTest extends TestCase
     {
         putenv('OUTBOUND_TEST_PASSWORD');
         putenv('OUTBOUND_TEST_LOGIN_BASE');
+        putenv('OUTBOUND_TEST_LOGIN_USER');
+    }
+
+    #[Test]
+    public function aChangedAccountLogsInAgainEvenBehindAConstantField(): void
+    {
+        $this->mock->onKey('constant_first_field_login::token')->respondWithJson(['token' => 'alice-token'])->respondWithJson(['token' => 'bob-token']);
+        $this->mock->on(ConstantFirstFieldLoginApi::class, 'find')->respondWithJson('one')->respondWithJson('two');
+        $api = $this->api(ConstantFirstFieldLoginApi::class);
+
+        putenv('OUTBOUND_TEST_LOGIN_USER=alice');
+        $api->find(1);
+        putenv('OUTBOUND_TEST_LOGIN_USER=bob');
+        $api->find(2);
+
+        self::assertCount(2, $this->calls('constant_first_field_login::token'));
+        self::assertSame('Bearer bob-token', $this->mock->calls(ConstantFirstFieldLoginApi::class, 'find')[1]->request->headers['Authorization'] ?? null);
+    }
+
+    #[Test]
+    public function aLoginBodyThatCannotBeEncodedThrowsUnauthorized(): void
+    {
+        putenv("OUTBOUND_TEST_PASSWORD=\xB1");
+
+        $this->expectException(ApiUnauthorized::class);
+        $this->expectExceptionCode(1794700242);
+
+        $this->api(TokenLoginApi::class)->find(1);
     }
 
     #[Test]

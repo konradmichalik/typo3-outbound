@@ -27,7 +27,6 @@ use Throwable;
 
 use function array_keys;
 use function array_map;
-use function array_values;
 use function hash;
 use function http_build_query;
 use function is_array;
@@ -37,6 +36,7 @@ use function json_decode;
 use function json_encode;
 use function max;
 use function rtrim;
+use function serialize;
 use function sprintf;
 use function str_starts_with;
 use function substr;
@@ -55,7 +55,7 @@ use const JSON_THROW_ON_ERROR;
  */
 final class TokenProvider
 {
-    private const EXPIRY_MARGIN = 30;
+    public const EXPIRY_MARGIN = 30;
 
     /** @var array<string, array{token: string, expires: float}> */
     private array $memo = [];
@@ -71,7 +71,7 @@ final class TokenProvider
 
     public function token(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth, TransportOptions $options): string
     {
-        $url = $this->url($connection, $auth);
+        [$url, $hostReference] = $this->url($connection, $auth);
         $key = $this->key($connection, $auth, $url);
         $now = $this->clock->now();
         if (isset($this->memo[$key]) && $this->memo[$key]['expires'] > $now) {
@@ -84,13 +84,13 @@ final class TokenProvider
             return $cached['token'];
         }
 
-        $this->guardHost($connection, $auth, $url);
+        $this->guardHost($connection, $auth, $url, $hostReference);
         $duration = $this->budget->attemptDuration(null);
         // Symfony reads a max_duration of 0 as unlimited.
         if ($duration <= 0.0) {
             throw new ApiTransportFailed(sprintf('Connection %s: the time budget of this request is exhausted, no token requested.', $connection->name), 1794700072, $connection->name.'::token');
         }
-        [$token, $lifetime] = $this->fetch($connection, $auth, $this->spec($auth, $url), $options->withMaxDuration($duration));
+        [$token, $lifetime] = $this->fetch($connection, $auth, $url, $options->withMaxDuration($duration));
         $ttl = max(1, $lifetime - self::EXPIRY_MARGIN);
         $this->memo[$key] = ['token' => $token, 'expires' => $this->clock->now() + $ttl];
         $this->store->set($key, $this->memo[$key], $ttl);
@@ -98,26 +98,44 @@ final class TokenProvider
         return $token;
     }
 
-    public function invalidate(ConnectionMetadata $connection): void
+    /**
+     * @return bool whether the connection uses a token that could be discarded
+     */
+    public function invalidate(ConnectionMetadata $connection): bool
     {
         $auth = $connection->auth;
         if (!$auth instanceof OAuth2ClientCredentials && !$auth instanceof TokenLogin) {
-            return;
+            return false;
         }
-        $key = $this->key($connection, $auth, $this->url($connection, $auth));
+        $key = $this->key($connection, $auth, $this->url($connection, $auth)[0]);
         unset($this->memo[$key]);
         $this->store->delete($key);
+
+        return true;
+    }
+
+    /**
+     * The account a token is issued for. A login body is fingerprinted as a whole,
+     * because the order of its fields says nothing about which one names the account.
+     */
+    public function principal(OAuth2ClientCredentials|TokenLogin $auth): string
+    {
+        if ($auth instanceof OAuth2ClientCredentials) {
+            return 'oauth:'.$this->values->resolve($auth->clientId);
+        }
+
+        return 'login:'.hash('sha256', serialize(array_map($this->values->resolve(...), $auth->body)));
     }
 
     /**
      * @return array{string, int} token and lifetime in seconds
      */
-    private function fetch(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth, RequestSpec $spec, TransportOptions $options): array
+    private function fetch(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth, string $url, TransportOptions $options): array
     {
         [$field, $failedCode, $noTokenCode] = $auth instanceof TokenLogin ? [$auth->tokenField, 1794700242, 1794700243] : ['access_token', 1794700070, 1794700071];
         $endpoint = $connection->name.'::token';
         try {
-            $response = $this->transport->request(new Call($endpoint, [], $spec, $options));
+            $response = $this->transport->request(new Call($endpoint, [], $this->spec($auth, $url), $options));
             $status = $response->getStatusCode();
             $payload = json_decode($response->getContent(false), true);
         } catch (Throwable $exception) {
@@ -147,9 +165,9 @@ final class TokenProvider
     private function spec(OAuth2ClientCredentials|TokenLogin $auth, string $url): RequestSpec
     {
         if ($auth instanceof TokenLogin) {
-            $body = array_map(fn ($value): string => $this->values->resolve($value), $auth->body);
+            $body = array_map($this->values->resolve(...), $auth->body);
 
-            return new RequestSpec('POST', $url, ['Content-Type' => 'application/json', 'Accept' => 'application/json'], json_encode($body, JSON_THROW_ON_ERROR), array_map('strval', array_keys($body)));
+            return new RequestSpec('POST', $url, ['Content-Type' => 'application/json', 'Accept' => 'application/json'], json_encode($body, JSON_THROW_ON_ERROR), array_map(strval(...), array_keys($body)));
         }
         $form = ['grant_type' => 'client_credentials', 'client_id' => $this->values->resolve($auth->clientId), 'client_secret' => $this->values->resolve($auth->clientSecret)];
         if (null !== $auth->scope) {
@@ -159,30 +177,30 @@ final class TokenProvider
         return new RequestSpec('POST', $url, ['Content-Type' => 'application/x-www-form-urlencoded', 'Accept' => 'application/json'], http_build_query($form), ['client_secret']);
     }
 
-    private function url(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth): string
+    /**
+     * @return array{string, string} the URL and the URL whose host it is checked against
+     */
+    private function url(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth): array
     {
         $url = $this->values->resolve($auth instanceof TokenLogin ? $auth->url : $auth->tokenUrl);
         if ($auth instanceof TokenLogin && str_starts_with($url, '/')) {
-            return rtrim($this->values->resolve($connection->definition->baseUri), '/').$url;
+            $baseUri = $this->values->resolve($connection->definition->baseUri);
+
+            return [rtrim($baseUri, '/').$url, $baseUri];
         }
 
-        return $url;
+        return [$url, $url];
     }
 
     /**
      * Credentials of a login go only to hosts the connection allows, like every other call;
      * a literal or environment token URL is trusted unless allowedHosts says otherwise.
      */
-    private function guardHost(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth, string $url): void
+    private function guardHost(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth, string $url, string $hostReference): void
     {
         $definition = $connection->definition;
-        if ($auth instanceof TokenLogin) {
-            $relative = str_starts_with($this->values->resolve($auth->url), '/');
-            HostGuard::check($url, $relative ? $this->values->resolve($definition->baseUri) : $url, $definition->allowedHosts, $definition->allowPrivateNetwork, $connection->name.' token');
-
-            return;
-        }
-        HostGuard::check($url, $url, $auth->tokenUrl instanceof SiteSetting ? $definition->allowedHosts : [], $definition->allowPrivateNetwork, $connection->name.' token');
+        $allowedHosts = $auth instanceof TokenLogin || $auth->tokenUrl instanceof SiteSetting ? $definition->allowedHosts : [];
+        HostGuard::check($url, $hostReference, $allowedHosts, $definition->allowPrivateNetwork, $connection->name.' token');
     }
 
     /**
@@ -190,8 +208,6 @@ final class TokenProvider
      */
     private function key(ConnectionMetadata $connection, OAuth2ClientCredentials|TokenLogin $auth, string $url): string
     {
-        $principal = $this->values->resolve($auth instanceof TokenLogin ? array_values($auth->body)[0] : $auth->clientId);
-
-        return sprintf('token_%s_%s_%s', $connection->name, $this->context->siteIdentifier() ?? 'none', substr(hash('sha256', $url."\n".$principal), 0, 16));
+        return sprintf('token_%s_%s_%s', $connection->name, $this->context->siteIdentifier() ?? 'none', substr(hash('sha256', $url."\n".$this->principal($auth)), 0, 16));
     }
 }

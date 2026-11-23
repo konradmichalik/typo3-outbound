@@ -19,7 +19,6 @@ use KonradMichalik\Typo3Outbound\Enum\ApiKeyLocation;
 use KonradMichalik\Typo3Outbound\Metadata\ConnectionMetadata;
 use KonradMichalik\Typo3Outbound\Transport\TransportOptions;
 
-use function array_values;
 use function base64_encode;
 use function hash;
 use function substr;
@@ -48,20 +47,14 @@ final readonly class Authenticator
             $auth instanceof Bearer => $this->bearer($this->values->resolve($auth->token), $site),
             $auth instanceof Basic => $this->basic($this->values->resolve($auth->username), $this->values->resolve($auth->password), $site),
             $auth instanceof ApiKey => $this->apiKey($auth, $this->values->resolve($auth->value), $site),
-            $auth instanceof OAuth2ClientCredentials => $this->bearer($this->tokens->token($connection, $auth, $options), $site, 'oauth:'.$this->values->resolve($auth->clientId)),
-            $auth instanceof TokenLogin => $this->bearer($this->tokens->token($connection, $auth, $options), $site, 'login:'.$this->values->resolve(array_values($auth->body)[0])),
+            $auth instanceof OAuth2ClientCredentials, $auth instanceof TokenLogin => $this->bearer($this->tokens->token($connection, $auth, $options), $site, $this->tokens->principal($auth)),
             default => new Credentials(identity: 'anonymous:'.$site),
         };
     }
 
     public function invalidate(ConnectionMetadata $connection): bool
     {
-        if (!$connection->auth instanceof OAuth2ClientCredentials && !$connection->auth instanceof TokenLogin) {
-            return false;
-        }
-        $this->tokens->invalidate($connection);
-
-        return true;
+        return $this->tokens->invalidate($connection);
     }
 
     private function bearer(string $token, string $site, ?string $principal = null): Credentials
