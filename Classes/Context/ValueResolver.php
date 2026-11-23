@@ -45,21 +45,25 @@ final readonly class ValueResolver
     {
         return match (true) {
             is_string($value) => $value,
-            $value instanceof Env => $this->env($value->name),
+            $value instanceof Env => $this->env($value),
             $value instanceof SiteSetting => $this->setting($value->key),
             $value instanceof Secret => $this->secret($value),
             default => throw new MissingContext(sprintf('Unsupported value source %s.', $value::class), 1794700051),
         };
     }
 
-    private function env(string $name): string
+    private function env(Env $env): string
     {
+        $name = $env->name;
         $value = getenv($name);
         if (false === $value || '' === $value) {
             $value = $_ENV[$name] ?? $_SERVER[$name] ?? null;
         }
         // Values read from secret files usually end with a newline, which no header accepts.
         $value = is_string($value) ? rtrim($value, "\r\n") : null;
+        if ((null === $value || '' === $value) && null !== $env->default) {
+            return $env->default;
+        }
         if (null === $value || '' === $value) {
             throw new MissingContext(sprintf('Environment variable "%s" is not set.', $name), 1794700052);
         }
@@ -84,6 +88,6 @@ final readonly class ValueResolver
             throw new MissingContext(sprintf('Site setting "%s" must reference an environment variable as "env:NAME", not hold the secret itself.', $secret->key), 1794700054);
         }
 
-        return $this->env(substr($reference, 4));
+        return $this->env(new Env(substr($reference, 4)));
     }
 }

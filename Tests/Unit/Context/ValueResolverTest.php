@@ -27,6 +27,12 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ValueResolver::class)]
 final class ValueResolverTest extends TestCase
 {
+    protected function tearDown(): void
+    {
+        putenv('OUTBOUND_TEST_EMPTY');
+        putenv('OUTBOUND_TEST_SET');
+    }
+
     #[Test]
     public function secretsAreReadFromTheReferencedEnvironmentVariable(): void
     {
@@ -52,6 +58,30 @@ final class ValueResolverTest extends TestCase
 
         $this->expectExceptionCode(1794700052);
         (new ValueResolver(new StaticCallContext()))->resolve(new Env('OUTBOUND_TEST_TOKEN'));
+    }
+
+    #[Test]
+    public function aMissingVariableFallsBackToTheDefault(): void
+    {
+        putenv('OUTBOUND_TEST_UNSET');
+
+        self::assertSame('https://api.example.com', (new ValueResolver(new StaticCallContext()))->resolve(new Env('OUTBOUND_TEST_UNSET', 'https://api.example.com')));
+    }
+
+    #[Test]
+    public function anEmptyVariableFallsBackToTheDefault(): void
+    {
+        putenv('OUTBOUND_TEST_EMPTY=');
+
+        self::assertSame('fallback', (new ValueResolver(new StaticCallContext()))->resolve(new Env('OUTBOUND_TEST_EMPTY', 'fallback')));
+    }
+
+    #[Test]
+    public function aSetVariableWinsOverTheDefault(): void
+    {
+        putenv('OUTBOUND_TEST_SET=real');
+
+        self::assertSame('real', (new ValueResolver(new StaticCallContext()))->resolve(new Env('OUTBOUND_TEST_SET', 'fallback')));
     }
 
     #[Test]

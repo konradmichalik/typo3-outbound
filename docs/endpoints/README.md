@@ -9,6 +9,7 @@ Values from the environment are value objects, checked by IDE and PHPStan:
 | Value | Resolves to |
 |-------|-------------|
 | `new Env('NAME')` | an environment variable |
+| `new Env('NAME', default: 'https://api.example.com')` | the environment variable, or the default when it is missing or empty |
 | `new SiteSetting('crm.baseUri')` | a setting of the current site |
 | `new Secret('crm.token')` | a site setting holding `env:NAME`, resolved from that environment variable; a plain value is rejected |
 

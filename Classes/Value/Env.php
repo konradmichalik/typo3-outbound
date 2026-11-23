@@ -28,6 +28,7 @@ final readonly class Env implements ValueSource
 {
     public function __construct(
         public string $name,
+        public ?string $default = null,
     ) {}
 
     public function describe(): string
