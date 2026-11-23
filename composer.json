@@ -5,6 +5,14 @@
 		"GPL-2.0-or-later"
 	],
 	"type": "typo3-cms-extension",
+	"keywords": [
+		"typo3",
+		"api-client",
+		"http-client",
+		"outbound",
+		"rest",
+		"openapi"
+	],
 	"authors": [
 		{
 			"name": "Konrad Michalik",
@@ -12,6 +20,11 @@
 			"role": "Maintainer"
 		}
 	],
+	"homepage": "https://github.com/konradmichalik/typo3-outbound",
+	"support": {
+		"issues": "https://github.com/konradmichalik/typo3-outbound/issues",
+		"source": "https://github.com/konradmichalik/typo3-outbound"
+	},
 	"require": {
 		"php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
 		"ext-mbstring": "*",
@@ -42,6 +55,9 @@
 		"typo3/cms-fluid": "^13.4 || ^14.0",
 		"typo3/cms-frontend": "^13.4 || ^14.0",
 		"typo3/testing-framework": "^8.2 || ^9.0"
+	},
+	"suggest": {
+		"phpunit/phpunit": "Required for OutboundTestTrait."
 	},
 	"autoload": {
 		"psr-4": {
