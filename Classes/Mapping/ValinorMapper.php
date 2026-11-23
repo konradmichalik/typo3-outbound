@@ -71,12 +71,13 @@ final class ValinorMapper implements ResponseMapper
         try {
             return $this->builder($connection->definition->dateFormat, $connection->definition->permissiveTypes)->mapper()->map($signature, $source);
         } catch (MappingError $error) {
+            // Valinor's own texts quote the response value, which may be personal data; so do its exceptions.
             $messages = [];
             foreach ($error->messages()->errors() as $message) {
-                $messages[] = $message->path().': '.$message;
+                $messages[] = $message->path().': expected '.$message->expectedSignature();
             }
 
-            throw new ApiMappingFailed(sprintf('%s: the response does not match %s (%s%s).', $endpoint, $signature, implode('; ', array_slice($messages, 0, 3)), count($messages) > 3 ? '; ...' : ''), 1794700110, $endpoint, null, null, $error);
+            throw new ApiMappingFailed(sprintf('%s: the response does not match %s (%s%s).', $endpoint, $signature, implode('; ', array_slice($messages, 0, 3)), count($messages) > 3 ? '; ...' : ''), 1794700110, $endpoint);
         } catch (Throwable $exception) {
             if (!str_starts_with($exception::class, 'CuyZ\\Valinor\\')) {
                 throw $exception;

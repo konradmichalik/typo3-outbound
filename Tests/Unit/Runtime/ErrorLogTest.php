@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Unit\Runtime;
 
-use KonradMichalik\Typo3Outbound\Exception\ApiValidationFailed;
+use KonradMichalik\Typo3Outbound\Exception\{ApiMappingFailed, ApiValidationFailed};
 use KonradMichalik\Typo3Outbound\Outbound;
 use KonradMichalik\Typo3Outbound\Proxy\FileProxyStore;
 use KonradMichalik\Typo3Outbound\Runtime\ResultMapper;
@@ -57,6 +57,28 @@ final class ErrorLogTest extends TestCase
 
         self::assertNotSame([], $logger->records);
         self::assertStringNotContainsString('jane.doe@example.com', json_encode($logger->records, \JSON_THROW_ON_ERROR));
+    }
+
+    #[Test]
+    public function aMappingErrorNamesPathAndTypeButNoValue(): void
+    {
+        $mock = new MockTransport();
+        $mock->on(ItemsApi::class, 'find')->respondWithJson(['id' => 'jane.doe@example.com']);
+        $api = Outbound::create([ItemsApi::class])
+            ->withTransport($mock)
+            ->withClock(new FakeClock())
+            ->withProxyStore(new FileProxyStore(sys_get_temp_dir().'/typo3-outbound-test-proxies'))
+            ->api(ItemsApi::class);
+
+        try {
+            $api->find(1);
+            self::fail('A string id must not map to an int.');
+        } catch (ApiMappingFailed $exception) {
+            self::assertStringContainsString('id', $exception->getMessage());
+            for ($e = $exception; null !== $e; $e = $e->getPrevious()) {
+                self::assertStringNotContainsString('jane.doe', $e->getMessage());
+            }
+        }
     }
 
     #[Test]
