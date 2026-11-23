@@ -16,6 +16,7 @@ namespace KonradMichalik\Typo3Outbound\Proxy;
 use KonradMichalik\Typo3Outbound\Runtime\EndpointInvoker;
 use ReflectionClass;
 
+use function array_values;
 use function class_exists;
 use function filemtime;
 use function filesize;
@@ -73,8 +74,12 @@ final readonly class ProxyFactory
      */
     public static function identifier(ReflectionClass $interface): string
     {
-        $file = $interface->getFileName();
-        $fingerprint = is_string($file) ? filemtime($file).':'.filesize($file) : '';
+        // The proxy implements inherited methods too, so parent interfaces count as well.
+        $fingerprint = '';
+        foreach ([$interface, ...array_values($interface->getInterfaces())] as $declaring) {
+            $file = $declaring->getFileName();
+            $fingerprint .= is_string($file) ? filemtime($file).':'.filesize($file).';' : '';
+        }
 
         return 'OutboundProxy_'.$interface->getShortName().'_'.substr(hash('xxh128', $interface->getName().':'.$fingerprint.':'.ProxyGenerator::VERSION), 0, 12);
     }
