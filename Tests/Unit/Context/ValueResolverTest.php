@@ -46,6 +46,15 @@ final class ValueResolverTest extends TestCase
     }
 
     #[Test]
+    public function anEnvironmentValueOfOnlyANewlineIsNotSet(): void
+    {
+        putenv("OUTBOUND_TEST_TOKEN=\n");
+
+        $this->expectExceptionCode(1794700052);
+        (new ValueResolver(new StaticCallContext()))->resolve(new Env('OUTBOUND_TEST_TOKEN'));
+    }
+
+    #[Test]
     public function siteSettingsNeedASite(): void
     {
         $this->expectException(MissingContext::class);

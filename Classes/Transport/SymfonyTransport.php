@@ -13,11 +13,14 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Transport;
 
+use RuntimeException;
+use Symfony\Component\HttpClient\Exception\{InvalidArgumentException, TransportException};
 use Symfony\Component\HttpClient\{HttpClient, NoPrivateNetworkHttpClient};
 use Symfony\Contracts\HttpClient\{HttpClientInterface, ResponseInterface};
 
 use function min;
 use function sprintf;
+use function str_starts_with;
 
 /**
  * SymfonyTransport.
@@ -49,19 +52,28 @@ final class SymfonyTransport implements Transport
         $client = $options->allowPrivateNetwork ? $this->client : ($this->guarded ??= new NoPrivateNetworkHttpClient($this->client));
         $limit = $options->maxResponseBytes;
 
-        return $client->request($call->request->method, $call->request->url, [
-            'headers' => $call->request->headers,
-            'body' => $call->request->body ?? '',
-            'max_duration' => $options->maxDuration,
-            'timeout' => min($options->maxDuration, 30.0),
-            'max_redirects' => 0,
-            'verify_peer' => $options->verifyTls,
-            'verify_host' => $options->verifyTls,
-            'on_progress' => static function (int $downloaded) use ($limit, $call): void {
-                if ($downloaded > $limit) {
-                    throw new \RuntimeException(sprintf('%s: response exceeds %d bytes.', $call->endpoint, $limit), 1794700080);
-                }
-            },
-        ]);
+        try {
+            return $client->request($call->request->method, $call->request->url, [
+                'headers' => $call->request->headers,
+                'body' => $call->request->body ?? '',
+                'max_duration' => $options->maxDuration,
+                'timeout' => min($options->maxDuration, 30.0),
+                'max_redirects' => 0,
+                'verify_peer' => $options->verifyTls,
+                'verify_host' => $options->verifyTls,
+                'on_progress' => static function (int $downloaded) use ($limit, $call): void {
+                    if ($downloaded > $limit) {
+                        throw new RuntimeException(sprintf('%s: response exceeds %d bytes.', $call->endpoint, $limit), 1794700080);
+                    }
+                },
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            // Symfony quotes the whole header line, credentials included.
+            if (str_starts_with($exception->getMessage(), 'Invalid header:')) {
+                throw new TransportException('Invalid header: a header value contains CR, LF or NUL.', 1794700135);
+            }
+
+            throw $exception;
+        }
     }
 }

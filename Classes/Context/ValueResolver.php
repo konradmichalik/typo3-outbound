@@ -19,6 +19,7 @@ use KonradMichalik\Typo3Outbound\Value\{Env, Secret, SiteSetting, ValueSource};
 use function getenv;
 use function is_scalar;
 use function is_string;
+use function rtrim;
 use function sprintf;
 use function str_starts_with;
 use function substr;
@@ -57,7 +58,9 @@ final readonly class ValueResolver
         if (false === $value || '' === $value) {
             $value = $_ENV[$name] ?? $_SERVER[$name] ?? null;
         }
-        if (!is_string($value) || '' === $value) {
+        // Values read from secret files usually end with a newline, which no header accepts.
+        $value = is_string($value) ? rtrim($value, "\r\n") : null;
+        if (null === $value || '' === $value) {
             throw new MissingContext(sprintf('Environment variable "%s" is not set.', $name), 1794700052);
         }
 
