@@ -11,7 +11,7 @@ The compiler pass reads all API interfaces once and bakes their metadata into th
 - HTTPS only; plain HTTP and private addresses only with `allowPrivateNetwork`, meant for intranet APIs
 - Every URL, next-page links included, must match the allowed hosts; ports other than 80 and 443 must be the base URI's or listed as `host:port`
 - URLs from site settings (base URI, token or login URL) need `allowedHosts`, enforced when the container is built
-- Redirects are off; the response size is limited during and after the download
+- Redirects are off: a 3xx answer throws `ApiRedirected` naming the target; the response size is limited during and after the download
 - Path values are percent-encoded, dot segments are rejected, and generated proxy code contains no attribute values
 - Secrets come from environment variables via `Secret`, never from site settings
 - Logs and exception messages mask credentials and sensitive query or header names; error bodies and argument values are never logged

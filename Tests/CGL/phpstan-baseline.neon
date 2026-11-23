@@ -175,6 +175,12 @@ parameters:
 			path: ../../Classes/Context/ValueResolver.php
 
 		-
+			message: '#^Cognitive complexity for "KonradMichalik\\Typo3Outbound\\DependencyInjection\\OutboundServices\:\:interfaceIn\(\)" is 13, keep it under 10$#'
+			identifier: complexity.functionLike
+			count: 1
+			path: ../../Classes/DependencyInjection/OutboundServices.php
+
+		-
 			message: '#^Class cognitive complexity is 50, keep it under 40$#'
 			identifier: complexity.classLike
 			count: 1
@@ -331,7 +337,7 @@ parameters:
 			path: ../../Classes/Runtime/Paginator.php
 
 		-
-			message: '#^Class cognitive complexity is 41, keep it under 40$#'
+			message: '#^Class cognitive complexity is 44, keep it under 40$#'
 			identifier: complexity.classLike
 			count: 1
 			path: ../../Classes/Runtime/ResultMapper.php
@@ -391,6 +397,12 @@ parameters:
 			path: ../../Classes/Typo3/Configuration.php
 
 		-
+			message: '#^Calling putenv\(\) is forbidden, might overwrite existing variables\.$#'
+			identifier: disallowed.function
+			count: 10
+			path: ../Unit/Auth/TokenLoginTest.php
+
+		-
 			message: '#^Calling exec\(\) is forbidden\.$#'
 			identifier: disallowed.function
 			count: 1
@@ -401,12 +413,6 @@ parameters:
 			identifier: disallowed.function
 			count: 8
 			path: ../Unit/Context/ValueResolverTest.php
-
-		-
-			message: '#^Calling putenv\(\) is forbidden, might overwrite existing variables\.$#'
-			identifier: disallowed.function
-			count: 10
-			path: ../Unit/Auth/TokenLoginTest.php
 
 		-
 			message: '#^Calling putenv\(\) is forbidden, might overwrite existing variables\.$#'

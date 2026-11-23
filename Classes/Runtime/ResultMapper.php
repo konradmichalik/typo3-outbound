@@ -14,11 +14,11 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Runtime;
 
 use JsonException;
-use KonradMichalik\Typo3Outbound\Exception\{ApiConflict, ApiException, ApiMappingFailed, ApiNotFound, ApiRateLimited, ApiUnauthorized, ApiUnavailable, ApiValidationFailed};
+use KonradMichalik\Typo3Outbound\Exception\{ApiConflict, ApiException, ApiMappingFailed, ApiNotFound, ApiRateLimited, ApiRedirected, ApiUnauthorized, ApiUnavailable, ApiValidationFailed};
 use KonradMichalik\Typo3Outbound\Format\{ErrorDocument, PlainJson};
 use KonradMichalik\Typo3Outbound\Metadata\ReturnKind;
 use KonradMichalik\Typo3Outbound\Resilience\RetryPolicy;
-use KonradMichalik\Typo3Outbound\Support\DotPath;
+use KonradMichalik\Typo3Outbound\Support\{DotPath, Redactor};
 use KonradMichalik\Typo3Outbound\Value\RawResponse;
 use Psr\Log\LoggerInterface;
 
@@ -150,6 +150,7 @@ final readonly class ResultMapper
             in_array($status, [409, 412], true) => new ApiConflict($message, 1794700144, $key, $status, $requestId),
             429 === $status => new ApiRateLimited($message, 1794700145, $key, $status, $requestId, self::retryAfter($result)),
             $status >= 500 => new ApiUnavailable($message, 1794700146, $key, $status, $requestId),
+            $status >= 300 && $status < 400 => new ApiRedirected(sprintf('%s answered %d, but redirects are not followed%s.', $key, $status, null !== $result->header('location') ? '; it points to '.Redactor::url($result->header('location')) : ''), 1794700148, $key, $status, $requestId),
             default => new ApiValidationFailed($message, 1794700147, $key, $status, $requestId, $error->fieldErrors),
         };
     }
