@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Exception;
 
+use LogicException;
+
 /**
  * InvalidDefinition.
  *
@@ -23,4 +25,4 @@ namespace KonradMichalik\Typo3Outbound\Exception;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-final class InvalidDefinition extends \LogicException {}
+final class InvalidDefinition extends LogicException {}

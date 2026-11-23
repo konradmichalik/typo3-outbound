@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Runtime;
 
+use LogicException;
+use Throwable;
+
 /**
  * Flight.
  *
@@ -27,7 +30,7 @@ final class Flight
 {
     public ?Pending $leader = null;
     public ?Result $result = null;
-    public ?\Throwable $error = null;
+    public ?Throwable $error = null;
 
     public function isDone(): bool
     {
@@ -40,6 +43,6 @@ final class Flight
             throw $this->error;
         }
 
-        return $this->result ?? throw new \LogicException('Flight has no outcome yet.', 1794700151);
+        return $this->result ?? throw new LogicException('Flight has no outcome yet.', 1794700151);
     }
 }

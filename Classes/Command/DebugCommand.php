@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Command;
 
 use KonradMichalik\Typo3Outbound\Metadata\{EndpointMetadata, Registry};
+use ReflectionClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\{InputArgument, InputInterface, InputOption};
@@ -72,7 +73,7 @@ final class DebugCommand extends Command
             }
             $metadata = $this->registry->connection($name);
             $baseUri = $metadata->definition->baseUri;
-            $output->writeln(sprintf('<info>%s</info> %s, base URI %s, auth %s, format %s', $name, $metadata->interface, is_string($baseUri) ? $baseUri : $baseUri->describe(), null !== $metadata->auth ? (new \ReflectionClass($metadata->auth))->getShortName() : 'none', (new \ReflectionClass($metadata->definition->format))->getShortName()));
+            $output->writeln(sprintf('<info>%s</info> %s, base URI %s, auth %s, format %s', $name, $metadata->interface, is_string($baseUri) ? $baseUri : $baseUri->describe(), null !== $metadata->auth ? (new ReflectionClass($metadata->auth))->getShortName() : 'none', (new ReflectionClass($metadata->definition->format))->getShortName()));
         }
         $table = new Table($output);
         $table->setHeaders(['Endpoint', 'Method', 'Path', 'Returns', 'Cache', 'Retry', 'Timeout']);
@@ -89,7 +90,7 @@ final class DebugCommand extends Command
      */
     private function row(EndpointMetadata $endpoint): array
     {
-        $origin = static fn(string $name): string => isset($endpoint->origins[$name]) ? ' ('.$endpoint->origins[$name].')' : '';
+        $origin = static fn (string $name): string => isset($endpoint->origins[$name]) ? ' ('.$endpoint->origins[$name].')' : '';
 
         return [
             'endpoint' => $endpoint->key,

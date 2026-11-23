@@ -17,6 +17,9 @@ use KonradMichalik\Typo3Outbound\Attribute as Outbound;
 use KonradMichalik\Typo3Outbound\Enum\ApiKeyLocation;
 use KonradMichalik\Typo3Outbound\Value\{Env, SiteSetting};
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://keyed.example.com')]
 #[Outbound\Auth\ApiKey(name: 'api_key', value: new Env('OUTBOUND_TEST_KEY'), in: ApiKeyLocation::Query)]
 interface KeyedApi
@@ -31,9 +34,15 @@ interface KeyedApi
     public function login(#[Outbound\Body] #[Outbound\Sensitive] array $credentials): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: new SiteSetting('unsafe.baseUri'))]
 interface SiteUriWithoutHostsApi {}
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface SiteUriWithoutHostsResource extends SiteUriWithoutHostsApi
 {
@@ -41,6 +50,9 @@ interface SiteUriWithoutHostsResource extends SiteUriWithoutHostsApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://api.example.com')]
 #[Outbound\Auth\OAuth2ClientCredentials(tokenUrl: new SiteSetting('auth.tokenUrl'), clientId: 'id', clientSecret: 'secret')]
 interface SiteTokenUrlWithoutHostsApi
@@ -49,6 +61,9 @@ interface SiteTokenUrlWithoutHostsApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: new SiteSetting('tenant.baseUri'), allowedHosts: ['api.example.com'])]
 #[Outbound\Auth\OAuth2ClientCredentials(tokenUrl: new SiteSetting('tenant.tokenUrl'), clientId: 'id', clientSecret: 'secret')]
 interface TenantApi
@@ -57,6 +72,9 @@ interface TenantApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://93.184.216.34', maxResponseBytes: 100)]
 interface SmallLimitApi
 {
@@ -64,6 +82,9 @@ interface SmallLimitApi
     public function blob(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://127.0.0.1')]
 interface PrivateAddressApi
 {
@@ -71,6 +92,9 @@ interface PrivateAddressApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'http://127.0.0.1', allowPrivateNetwork: true)]
 interface IntranetApi
 {
@@ -78,6 +102,9 @@ interface IntranetApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://93.184.216.34', headers: ['X-Static' => new Env('OUTBOUND_TEST_KEY'), 'X-Plain' => 'visible'])]
 interface StaticHeaderApi
 {

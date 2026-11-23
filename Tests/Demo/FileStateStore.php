@@ -15,6 +15,8 @@ namespace KonradMichalik\Typo3Outbound\Tests\Demo;
 
 use KonradMichalik\Typo3Outbound\Resilience\StateStore;
 
+use function is_array;
+
 /**
  * FileStateStore.
  *

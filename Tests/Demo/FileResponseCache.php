@@ -15,6 +15,8 @@ namespace KonradMichalik\Typo3Outbound\Tests\Demo;
 
 use KonradMichalik\Typo3Outbound\Cache\{CacheEntry, ResponseCache};
 
+use function is_array;
+
 /**
  * FileResponseCache.
  *

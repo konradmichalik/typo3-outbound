@@ -15,6 +15,9 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\Percent;
 
 use KonradMichalik\Typo3Outbound\Attribute as Outbound;
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://percent.example.com')]
 interface PercentApi
 {

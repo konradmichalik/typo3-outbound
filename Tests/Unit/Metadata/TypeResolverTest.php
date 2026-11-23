@@ -17,6 +17,7 @@ use KonradMichalik\Typo3Outbound\Metadata\TypeResolver;
 use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\TypeResolver\Subject;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 /**
  * TypeResolverTest.
@@ -32,7 +33,7 @@ final class TypeResolverTest extends TestCase
     #[DataProvider('signatures')]
     public function itQualifiesClassNamesAndLeavesTypeSyntaxAlone(string $signature, string $expected): void
     {
-        $resolved = (new TypeResolver())->resolve($signature, new \ReflectionClass(Subject::class));
+        $resolved = (new TypeResolver())->resolve($signature, new ReflectionClass(Subject::class));
 
         self::assertSame(str_replace('NS\\', self::NS, $expected), $resolved);
     }

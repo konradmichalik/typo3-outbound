@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Command;
 
+use Closure;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -36,10 +37,10 @@ use function sprintf;
 final class Writer
 {
     /**
-     * @param array<string, string>    $files
-     * @param \Closure(string): string  $path
+     * @param array<string, string>   $files
+     * @param Closure(string): string $path
      */
-    public static function write(array $files, string $directory, bool $force, OutputInterface $output, \Closure $path): int
+    public static function write(array $files, string $directory, bool $force, OutputInterface $output, Closure $path): int
     {
         if ('' === $directory) {
             $output->writeln('<error>--output is required.</error>');

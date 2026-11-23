@@ -21,6 +21,7 @@ use KonradMichalik\Typo3Outbound\Typo3\RequestContext;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{InputArgument, InputInterface, InputOption};
 use Symfony\Component\Console\Output\OutputInterface;
+use Traversable;
 
 use function array_filter;
 use function explode;
@@ -91,7 +92,7 @@ final class CallCommand extends Command
                     $output->writeln(sprintf('%s: %s', $name, $value));
                 }
                 if (is_string($request->body)) {
-                    $sensitive = [] !== array_filter($endpoint->parametersOf(ParameterKind::Body), static fn(ParameterMetadata $parameter): bool => $parameter->sensitive);
+                    $sensitive = [] !== array_filter($endpoint->parametersOf(ParameterKind::Body), static fn (ParameterMetadata $parameter): bool => $parameter->sensitive);
                     $output->writeln('');
                     $output->writeln($sensitive ? Redactor::MASK : $request->body);
                 }
@@ -102,7 +103,7 @@ final class CallCommand extends Command
             if ($result instanceof \KonradMichalik\Typo3Outbound\Value\Deferred) {
                 $result = $result->get();
             }
-            if ($result instanceof \Traversable) {
+            if ($result instanceof Traversable) {
                 $result = iterator_to_array($result, false);
             }
             $output->writeln(json_encode((new Normalizer())->forBody($result), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));

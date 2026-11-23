@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Runtime;
 
+use Closure;
 use KonradMichalik\Typo3Outbound\Http\RequestSpec;
 use KonradMichalik\Typo3Outbound\Metadata\{ConnectionMetadata, EndpointMetadata};
 use KonradMichalik\Typo3Outbound\Transport\TransportOptions;
@@ -32,8 +33,8 @@ final class Execution
     private bool $credentialsRefreshed = false;
 
     /**
-     * @param array<string, mixed>                         $arguments
-     * @param \Closure(): array{0: RequestSpec, 1: string}  $rebuild
+     * @param array<string, mixed>                        $arguments
+     * @param Closure(): array{0: RequestSpec, 1: string} $rebuild
      */
     public function __construct(
         public readonly EndpointMetadata $endpoint,
@@ -42,7 +43,7 @@ final class Execution
         public RequestSpec $request,
         public readonly string $identity,
         public readonly TransportOptions $options,
-        private readonly \Closure $rebuild,
+        private readonly Closure $rebuild,
     ) {}
 
     /**

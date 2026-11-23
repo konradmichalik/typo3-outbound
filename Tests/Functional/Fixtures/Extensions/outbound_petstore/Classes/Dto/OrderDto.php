@@ -13,13 +13,18 @@ declare(strict_types=1);
 
 namespace KonradMichalik\OutboundPetstore\Dto;
 
+use DateTimeImmutable;
+
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 final readonly class OrderDto
 {
     public function __construct(
         public ?int $id = null,
         public ?int $petId = null,
         public ?int $quantity = null,
-        public ?\DateTimeImmutable $shipDate = null,
+        public ?DateTimeImmutable $shipDate = null,
         public ?OrderStatus $status = null,
         public ?bool $complete = null,
     ) {}

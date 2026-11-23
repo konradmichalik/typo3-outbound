@@ -16,11 +16,17 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures;
 use KonradMichalik\Typo3Outbound\Attribute as Outbound;
 use KonradMichalik\Typo3Outbound\Value\{Env, FilePart};
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 final readonly class DocumentDto
 {
     public function __construct(public int $id, public string $title = '') {}
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://docs.example.com/api')]
 #[Outbound\Auth\OAuth2ClientCredentials(tokenUrl: 'https://auth.example.com/token', clientId: new Env('OUTBOUND_TEST_CLIENT_ID'), clientSecret: new Env('OUTBOUND_TEST_CLIENT_SECRET'), scope: 'documents')]
 interface DocumentsApi

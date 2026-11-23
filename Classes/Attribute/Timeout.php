@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Attribute;
 
+use Attribute;
+
 /**
  * Timeout.
  *
@@ -23,7 +25,7 @@ namespace KonradMichalik\Typo3Outbound\Attribute;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 final readonly class Timeout
 {
     public function __construct(

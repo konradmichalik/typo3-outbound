@@ -15,6 +15,8 @@ namespace KonradMichalik\Typo3Outbound\Tests\Support;
 
 use KonradMichalik\Typo3Outbound\Resilience\{InMemoryStateStore, StateStore};
 
+use function count;
+
 /**
  * CountingStateStore.
  *
@@ -52,6 +54,6 @@ final class CountingStateStore implements StateStore
 
     public function count(string $operation, string $keyPrefix): int
     {
-        return count(array_filter($this->operations, static fn(array $entry): bool => $entry[0] === $operation && str_starts_with($entry[1], $keyPrefix)));
+        return count(array_filter($this->operations, static fn (array $entry): bool => $entry[0] === $operation && str_starts_with($entry[1], $keyPrefix)));
     }
 }

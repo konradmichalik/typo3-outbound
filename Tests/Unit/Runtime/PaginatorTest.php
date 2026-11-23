@@ -40,7 +40,7 @@ final class PaginatorTest extends TestCase
         $items = $this->api($mock)->pages();
 
         self::assertSame(0, $mock->count(ItemsApi::class, 'pages'));
-        $ids = array_map(static fn(ItemDto $item): int => $item->id, iterator_to_array($items, false));
+        $ids = array_map(static fn (ItemDto $item): int => $item->id, iterator_to_array($items, false));
 
         self::assertSame([1, 2, 3], $ids);
         self::assertSame(2, $mock->count(ItemsApi::class, 'pages'));

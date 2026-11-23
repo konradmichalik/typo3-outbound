@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Metadata;
 
+use PhpToken;
+use ReflectionClass;
+
 use function count;
 use function file_get_contents;
 use function in_array;
@@ -20,6 +23,7 @@ use function is_string;
 use function ltrim;
 use function preg_replace_callback;
 use function str_contains;
+use function strlen;
 use function strrpos;
 use function strtolower;
 use function substr;
@@ -56,9 +60,9 @@ final class TypeResolver
     private array $contexts = [];
 
     /**
-     * @param \ReflectionClass<object> $declaringClass
+     * @param ReflectionClass<object> $declaringClass
      */
-    public function resolve(string $signature, \ReflectionClass $declaringClass): string
+    public function resolve(string $signature, ReflectionClass $declaringClass): string
     {
         $context = $this->context($declaringClass);
 
@@ -66,7 +70,7 @@ final class TypeResolver
         // they are keywords, not class names.
         return (string) preg_replace_callback(
             '/int<\s*(?:-?\d+|min)\s*,\s*(?:-?\d+|max)\s*>|(?<![\w\\\\-])(\\\\?[A-Za-z_][\w\\\\-]*)(?![\w\\\\-]*\??\s*:)/',
-            fn(array $match): string => isset($match[1]) ? $this->qualify($match[1], $context) : $match[0],
+            fn (array $match): string => isset($match[1]) ? $this->qualify($match[1], $context) : $match[0],
             $signature,
         );
     }
@@ -93,11 +97,11 @@ final class TypeResolver
     }
 
     /**
-     * @param \ReflectionClass<object> $class
+     * @param ReflectionClass<object> $class
      *
      * @return array{namespace: string, imports: array<string, string>}
      */
-    private function context(\ReflectionClass $class): array
+    private function context(ReflectionClass $class): array
     {
         $file = $class->getFileName();
         if (!is_string($file)) {
@@ -112,7 +116,7 @@ final class TypeResolver
      */
     private function parse(string $code, string $namespace): array
     {
-        $tokens = \PhpToken::tokenize($code);
+        $tokens = PhpToken::tokenize($code);
         $imports = [];
         $count = count($tokens);
         for ($i = 0; $i < $count; ++$i) {

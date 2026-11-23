@@ -15,13 +15,21 @@ namespace KonradMichalik\Typo3Outbound\Proxy;
 
 use KonradMichalik\Typo3Outbound\Exception\InvalidDefinition;
 use KonradMichalik\Typo3Outbound\Runtime\EndpointInvoker;
+use ReflectionClass;
+use ReflectionIntersectionType;
+use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionParameter;
+use ReflectionType;
+use ReflectionUnionType;
+use UnitEnum;
 
 use function array_map;
+use function defined;
 use function implode;
 use function in_array;
 use function is_array;
 use function is_object;
-use function defined;
 use function ltrim;
 use function preg_match;
 use function sprintf;
@@ -48,9 +56,9 @@ final class ProxyGenerator
     public const VERSION = '1';
 
     /**
-     * @param \ReflectionClass<object> $interface
+     * @param ReflectionClass<object> $interface
      */
-    public function generate(\ReflectionClass $interface, string $className): string
+    public function generate(ReflectionClass $interface, string $className): string
     {
         if (1 !== preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $className)) {
             throw new InvalidDefinition(sprintf('Invalid proxy class name "%s".', $className), 1794700160);
@@ -71,14 +79,14 @@ final class ProxyGenerator
     }
 
     /**
-     * @param \ReflectionClass<object> $interface
+     * @param ReflectionClass<object> $interface
      */
-    private function method(\ReflectionClass $interface, \ReflectionMethod $method): string
+    private function method(ReflectionClass $interface, ReflectionMethod $method): string
     {
         $parameters = array_map($this->parameter(...), $method->getParameters());
-        $arguments = array_map(static fn(\ReflectionParameter $parameter): string => '$'.$parameter->getName(), $method->getParameters());
+        $arguments = array_map(static fn (ReflectionParameter $parameter): string => '$'.$parameter->getName(), $method->getParameters());
         $returnType = $method->getReturnType();
-        $returnsVoid = $returnType instanceof \ReflectionNamedType && 'void' === $returnType->getName();
+        $returnsVoid = $returnType instanceof ReflectionNamedType && 'void' === $returnType->getName();
         $call = sprintf('$this->invoker->call(\\%s::class, %s, [%s])', $method->getDeclaringClass()->getName(), var_export($method->getName(), true), implode(', ', $arguments));
 
         return sprintf(
@@ -90,7 +98,7 @@ final class ProxyGenerator
         );
     }
 
-    private function parameter(\ReflectionParameter $parameter): string
+    private function parameter(ReflectionParameter $parameter): string
     {
         if ($parameter->isPassedByReference() || $parameter->isVariadic()) {
             throw new InvalidDefinition(sprintf('Parameter $%s: by-reference and variadic parameters are not supported.', $parameter->getName()), 1794700161);
@@ -103,7 +111,7 @@ final class ProxyGenerator
         return $code;
     }
 
-    private function defaultValue(\ReflectionParameter $parameter): string
+    private function defaultValue(ReflectionParameter $parameter): string
     {
         if ($parameter->isDefaultValueConstant()) {
             $constant = (string) $parameter->getDefaultValueConstantName();
@@ -119,7 +127,7 @@ final class ProxyGenerator
             return str_contains($constant, '::') || str_contains($constant, '\\') ? '\\'.ltrim($constant, '\\') : '\\'.$constant;
         }
         $value = $parameter->getDefaultValue();
-        if ($value instanceof \UnitEnum) {
+        if ($value instanceof UnitEnum) {
             return '\\'.$value::class.'::'.$value->name;
         }
         if (is_object($value) || (is_array($value) && $this->containsObject($value))) {
@@ -143,15 +151,15 @@ final class ProxyGenerator
         return false;
     }
 
-    private function type(\ReflectionType $type): string
+    private function type(ReflectionType $type): string
     {
-        if ($type instanceof \ReflectionUnionType) {
+        if ($type instanceof ReflectionUnionType) {
             return implode('|', array_map($this->type(...), $type->getTypes()));
         }
-        if ($type instanceof \ReflectionIntersectionType) {
+        if ($type instanceof ReflectionIntersectionType) {
             return '('.implode('&', array_map($this->type(...), $type->getTypes())).')';
         }
-        if (!$type instanceof \ReflectionNamedType) {
+        if (!$type instanceof ReflectionNamedType) {
             return (string) $type;
         }
         $name = $type->isBuiltin() || in_array($type->getName(), ['self', 'static'], true) ? $type->getName() : '\\'.$type->getName();

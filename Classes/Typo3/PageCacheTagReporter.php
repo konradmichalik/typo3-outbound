@@ -48,6 +48,6 @@ final readonly class PageCacheTagReporter implements CacheTagReporter
         if (!$collector instanceof CacheDataCollectorInterface) {
             return;
         }
-        $collector->addCacheTags(...array_map(static fn(string $tag): CacheTag => new CacheTag($tag, $lifetime), $tags));
+        $collector->addCacheTags(...array_map(static fn (string $tag): CacheTag => new CacheTag($tag, $lifetime), $tags));
     }
 }

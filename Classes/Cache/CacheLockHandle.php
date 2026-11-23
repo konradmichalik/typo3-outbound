@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Cache;
 
+use Closure;
+
 /**
  * CacheLockHandle.
  *
@@ -28,11 +30,11 @@ final class CacheLockHandle
     private bool $released = false;
 
     /**
-     * @param \Closure(): void $release
+     * @param Closure(): void $release
      * @param bool            $waited  True when another process held the lock first
      */
     public function __construct(
-        private readonly \Closure $release,
+        private readonly Closure $release,
         public readonly bool $waited = false,
     ) {}
 

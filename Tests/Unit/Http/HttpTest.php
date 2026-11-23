@@ -94,7 +94,7 @@ final class HttpTest extends TestCase
     {
         $url = HostGuard::absolute($link, 'https://api.example.com/v1/items');
 
-        self::assertSame('api.example.com', parse_url($url, PHP_URL_HOST));
+        self::assertSame('api.example.com', parse_url($url, \PHP_URL_HOST));
         HostGuard::check($url, 'https://api.example.com', [], false, 'E');
     }
 
@@ -114,7 +114,7 @@ final class HttpTest extends TestCase
     {
         $url = HostGuard::absolute('//evil.example.org/x', 'https://api.example.com/v1/items');
 
-        self::assertSame('api.example.com', parse_url($url, PHP_URL_HOST));
+        self::assertSame('api.example.com', parse_url($url, \PHP_URL_HOST));
         HostGuard::check($url, 'https://api.example.com', [], false, 'E');
     }
 

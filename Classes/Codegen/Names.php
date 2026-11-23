@@ -36,7 +36,7 @@ final class Names
     public static function studly(string $value): string
     {
         $parts = preg_split('/[^A-Za-z0-9]+|(?<=[a-z0-9])(?=[A-Z])/', $value) ?: [];
-        $name = implode('', array_map(static fn(string $part): string => ucfirst(strtolower($part)), $parts));
+        $name = implode('', array_map(static fn (string $part): string => ucfirst(strtolower($part)), $parts));
         $name = (string) preg_replace('/^[^A-Za-z]+/', '', $name);
 
         return '' === $name ? 'Generated' : $name;

@@ -16,6 +16,7 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Typo3;
 use KonradMichalik\Typo3Outbound\Typo3\{PageCacheTagReporter, RequestContext};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use TYPO3\CMS\Core\Cache\{CacheDataCollector, CacheTag};
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -37,7 +38,7 @@ final class PageCacheTagReporterTest extends TestCase
     public function tagsAndLifetimeReachTheFrontendCacheCollector(): void
     {
         $collector = new CacheDataCollector();
-        $context = new RequestContext((new \ReflectionClass(SiteFinder::class))->newInstanceWithoutConstructor());
+        $context = new RequestContext((new ReflectionClass(SiteFinder::class))->newInstanceWithoutConstructor());
         $context->setRequest((new ServerRequest('https://localhost/', 'GET', 'php://memory'))->withAttribute('frontend.cache.collector', $collector));
 
         (new PageCacheTagReporter($context))->report(['outbound_petstore', 'petstore_pet_10'], 60);
@@ -50,7 +51,7 @@ final class PageCacheTagReporterTest extends TestCase
     public function aCollectorAddedLaterIsFoundThroughTheGlobalRequest(): void
     {
         $collector = new CacheDataCollector();
-        $context = new RequestContext((new \ReflectionClass(SiteFinder::class))->newInstanceWithoutConstructor());
+        $context = new RequestContext((new ReflectionClass(SiteFinder::class))->newInstanceWithoutConstructor());
         $context->setRequest(new ServerRequest('https://localhost/', 'GET', 'php://memory'));
         $GLOBALS['TYPO3_REQUEST'] = (new ServerRequest('https://localhost/', 'GET', 'php://memory'))->withAttribute('frontend.cache.collector', $collector);
 

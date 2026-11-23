@@ -41,8 +41,8 @@ final class HostGuard
      */
     public static function check(string $url, string $baseUri, array $allowedHosts, bool $allowInsecure, string $endpoint): void
     {
-        $scheme = parse_url($url, PHP_URL_SCHEME);
-        $host = parse_url($url, PHP_URL_HOST);
+        $scheme = parse_url($url, \PHP_URL_SCHEME);
+        $host = parse_url($url, \PHP_URL_HOST);
         if (!is_string($host) || '' === $host || !is_string($scheme)) {
             throw new BlockedRequest(sprintf('%s: "%s" is not an absolute URL.', $endpoint, $url), 1794700060, $endpoint);
         }
@@ -50,8 +50,8 @@ final class HostGuard
         if ('https' !== $scheme && !('http' === $scheme && $allowInsecure)) {
             throw new BlockedRequest(sprintf('%s: only https URLs are allowed, got %s.', $endpoint, $scheme), 1794700061, $endpoint);
         }
-        $allowed = [] !== $allowedHosts ? $allowedHosts : [(string) parse_url($baseUri, PHP_URL_HOST)];
-        if (!in_array(strtolower($host), array_map('strtolower', $allowed), true)) {
+        $allowed = [] !== $allowedHosts ? $allowedHosts : [(string) parse_url($baseUri, \PHP_URL_HOST)];
+        if (!in_array(strtolower($host), array_map(strtolower(...), $allowed), true)) {
             throw new BlockedRequest(sprintf('%s: host "%s" is not allowed for this connection.', $endpoint, $host), 1794700062, $endpoint);
         }
     }
@@ -64,14 +64,14 @@ final class HostGuard
         if (1 === preg_match('#^https?://#i', $link)) {
             return $link;
         }
-        $scheme = (string) parse_url($current, PHP_URL_SCHEME);
-        $host = (string) parse_url($current, PHP_URL_HOST);
-        $port = parse_url($current, PHP_URL_PORT);
+        $scheme = (string) parse_url($current, \PHP_URL_SCHEME);
+        $host = (string) parse_url($current, \PHP_URL_HOST);
+        $port = parse_url($current, \PHP_URL_PORT);
         $origin = $scheme.'://'.$host.(null !== $port && false !== $port ? ':'.$port : '');
         if (str_starts_with($link, '/')) {
             return $origin.$link;
         }
-        $path = (string) parse_url($current, PHP_URL_PATH);
+        $path = (string) parse_url($current, \PHP_URL_PATH);
         $directory = substr($path, 0, (int) strrpos($path, '/') + 1);
 
         return $origin.('' === $directory ? '/' : $directory).$link;

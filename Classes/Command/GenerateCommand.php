@@ -18,6 +18,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{InputInterface, InputOption};
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
+use Throwable;
 
 use function file_get_contents;
 use function is_array;
@@ -52,7 +53,7 @@ final class GenerateCommand extends Command
         $from = (string) $input->getOption('from');
         try {
             $spec = str_ends_with($from, '.json') ? json_decode((string) file_get_contents($from), true) : Yaml::parseFile($from);
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $output->writeln('<error>Cannot read '.$from.': '.$exception->getMessage().'</error>');
 
             return Command::INVALID;
@@ -65,6 +66,6 @@ final class GenerateCommand extends Command
         /** @var array<string, mixed> $spec */
         $files = (new OpenApiGenerator())->generate($spec, (string) $input->getOption('namespace'), (string) $input->getOption('name'));
 
-        return Writer::write($files, (string) $input->getOption('output'), true === $input->getOption('force'), $output, static fn(string $path): string => $path);
+        return Writer::write($files, (string) $input->getOption('output'), true === $input->getOption('force'), $output, static fn (string $path): string => $path);
     }
 }

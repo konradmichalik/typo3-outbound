@@ -89,6 +89,6 @@ final class Redactor
 
         return 1 === preg_match(self::SENSITIVE_NAME, $name)
             || 1 === preg_match(self::SENSITIVE_NAME, $base)
-            || in_array(strtolower($base), array_map('strtolower', $extraKeys), true);
+            || in_array(strtolower($base), array_map(strtolower(...), $extraKeys), true);
     }
 }

@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Exception;
 
+use RuntimeException;
+use Throwable;
+
 /**
  * ApiException.
  *
@@ -24,7 +27,7 @@ namespace KonradMichalik\Typo3Outbound\Exception;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-abstract class ApiException extends \RuntimeException
+abstract class ApiException extends RuntimeException
 {
     public function __construct(
         string $message,
@@ -32,7 +35,7 @@ abstract class ApiException extends \RuntimeException
         public readonly string $endpoint = '',
         public readonly ?int $status = null,
         public readonly ?string $requestId = null,
-        ?\Throwable $previous = null,
+        ?Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $previous);
     }

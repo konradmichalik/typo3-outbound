@@ -15,6 +15,8 @@ namespace KonradMichalik\Typo3Outbound\Testing;
 
 use KonradMichalik\Typo3Outbound\Metadata\Naming;
 use KonradMichalik\Typo3Outbound\Transport\{Call, Transport};
+use LogicException;
+use ReflectionClass;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -80,7 +82,7 @@ final class MockTransport implements Transport
             }
         }
 
-        throw new \LogicException(sprintf('Unexpected call to %s with %s.', $call->endpoint, json_encode($call->arguments)), 1794700170);
+        throw new LogicException(sprintf('Unexpected call to %s with %s.', $call->endpoint, json_encode($call->arguments)), 1794700170);
     }
 
     /**
@@ -95,7 +97,7 @@ final class MockTransport implements Transport
         }
         $key = self::key($interface, $method);
 
-        return array_values(array_filter($this->calls, static fn(Call $call): bool => $call->endpoint === $key));
+        return array_values(array_filter($this->calls, static fn (Call $call): bool => $call->endpoint === $key));
     }
 
     /**
@@ -117,6 +119,6 @@ final class MockTransport implements Transport
      */
     public static function key(string $interface, string $method): string
     {
-        return Naming::endpointKey((new \ReflectionClass($interface))->getShortName(), $method);
+        return Naming::endpointKey((new ReflectionClass($interface))->getShortName(), $method);
     }
 }

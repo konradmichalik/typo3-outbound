@@ -61,7 +61,7 @@ final class ClassFile
      */
     public static function dto(string $namespace, string $class, array $properties, ?string $description = null): string
     {
-        usort($properties, static fn(array $a, array $b): int => (int) $a['optional'] <=> (int) $b['optional']);
+        usort($properties, static fn (array $a, array $b): int => (int) $a['optional'] <=> (int) $b['optional']);
         $docs = [];
         $parameters = [];
         foreach ($properties as $property) {
@@ -100,7 +100,7 @@ final class ClassFile
      */
     public static function file(string $namespace, string $body, array $uses = []): string
     {
-        $imports = [] !== $uses ? implode("\n", array_map(static fn(string $use): string => 'use '.$use.';', $uses))."\n\n" : '';
+        $imports = [] !== $uses ? implode("\n", array_map(static fn (string $use): string => 'use '.$use.';', $uses))."\n\n" : '';
 
         return sprintf("<?php\n\ndeclare(strict_types=1);\n\nnamespace %s;\n\n%s%s", $namespace, $imports, $body);
     }

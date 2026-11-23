@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Attribute;
 
+use Attribute;
+
 /**
  * CircuitBreaker.
  *
@@ -23,7 +25,7 @@ namespace KonradMichalik\Typo3Outbound\Attribute;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-#[\Attribute(\Attribute::TARGET_CLASS)]
+#[Attribute(Attribute::TARGET_CLASS)]
 final readonly class CircuitBreaker
 {
     public function __construct(

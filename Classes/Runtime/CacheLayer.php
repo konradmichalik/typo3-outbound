@@ -20,6 +20,8 @@ use KonradMichalik\Typo3Outbound\Metadata\{ParameterKind, ReturnKind};
 use KonradMichalik\Typo3Outbound\Resilience\StateStore;
 use KonradMichalik\Typo3Outbound\Support\Clock;
 use Psr\Log\LoggerInterface;
+use Throwable;
+use WeakReference;
 
 use function array_flip;
 use function array_intersect_key;
@@ -57,7 +59,7 @@ final class CacheLayer
 
     private const STORED_HEADERS = ['link', 'content-type', 'etag'];
 
-    /** @var array<string, \WeakReference<Flight>> */
+    /** @var array<string, WeakReference<Flight>> */
     private array $flights = [];
 
     public function __construct(
@@ -120,7 +122,7 @@ final class CacheLayer
             }
 
             throw $exception;
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $lock?->release();
 
             throw $exception;
@@ -129,7 +131,7 @@ final class CacheLayer
         $flight = new Flight();
         $pending = new Pending($execution, $started->response, $started->startedAt, entry: $entry, flight: $flight, leader: true, lock: $lock);
         $flight->leader = $pending;
-        $this->flights[$key] = \WeakReference::create($flight);
+        $this->flights[$key] = WeakReference::create($flight);
 
         return $pending;
     }
@@ -159,7 +161,7 @@ final class CacheLayer
             $leader = $flight->leader ?? $pending;
             try {
                 $flight->result = $this->complete($leader);
-            } catch (\Throwable $exception) {
+            } catch (Throwable $exception) {
                 $flight->error = $exception;
             } finally {
                 $leader->lock?->release();
@@ -252,7 +254,7 @@ final class CacheLayer
         }
         ksort($headers);
 
-        return hash('sha256', $execution->request->method."\n".$body."\n".json_encode($headers, JSON_THROW_ON_ERROR));
+        return hash('sha256', $execution->request->method."\n".$body."\n".json_encode($headers, \JSON_THROW_ON_ERROR));
     }
 
     /**

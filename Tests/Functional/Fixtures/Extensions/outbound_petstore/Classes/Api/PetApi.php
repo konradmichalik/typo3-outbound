@@ -17,6 +17,9 @@ use KonradMichalik\OutboundPetstore\Dto\{PetDto, PetStatus};
 use KonradMichalik\Typo3Outbound\Attribute as Outbound;
 use KonradMichalik\Typo3Outbound\Value\Deferred;
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource('/pet')]
 interface PetApi extends PetstoreApi
 {

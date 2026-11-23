@@ -15,6 +15,11 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit;
 
 use PHPUnit\Framework\Attributes\{CoversNothing, Test};
 use PHPUnit\Framework\TestCase;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
+
+use function count;
 
 /**
  * ExceptionCodeUniquenessTest.
@@ -28,9 +33,9 @@ final class ExceptionCodeUniquenessTest extends TestCase
     public function everyExceptionCodeInClassesIsUsedOnce(): void
     {
         $sites = [];
-        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(__DIR__.'/../../Classes', \RecursiveDirectoryIterator::SKIP_DOTS));
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__.'/../../Classes', RecursiveDirectoryIterator::SKIP_DOTS));
 
-        /** @var \SplFileInfo $file */
+        /** @var SplFileInfo $file */
         foreach ($files as $file) {
             preg_match_all('/\b1794\d{6}\b/', (string) file_get_contents($file->getPathname()), $matches);
             foreach ($matches[0] as $code) {
@@ -39,6 +44,6 @@ final class ExceptionCodeUniquenessTest extends TestCase
         }
 
         self::assertNotEmpty($sites);
-        self::assertSame([], array_filter($sites, static fn(array $paths): bool => count($paths) > 1));
+        self::assertSame([], array_filter($sites, static fn (array $paths): bool => count($paths) > 1));
     }
 }

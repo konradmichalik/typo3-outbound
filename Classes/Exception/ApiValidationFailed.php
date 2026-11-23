@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Exception;
 
+use Throwable;
+
 /**
  * ApiValidationFailed.
  *
@@ -35,7 +37,7 @@ final class ApiValidationFailed extends ApiException
         ?int $status = null,
         ?string $requestId = null,
         public readonly array $fieldErrors = [],
-        ?\Throwable $previous = null,
+        ?Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $endpoint, $status, $requestId, $previous);
     }

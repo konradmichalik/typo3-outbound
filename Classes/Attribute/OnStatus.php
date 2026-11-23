@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Attribute;
 
+use Attribute;
+
 /**
  * OnStatus.
  *
@@ -23,7 +25,7 @@ namespace KonradMichalik\Typo3Outbound\Attribute;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-#[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 final readonly class OnStatus
 {
     public function __construct(

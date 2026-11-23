@@ -77,6 +77,6 @@ final readonly class EndpointInvoker
         $execution = $this->calls->create($endpoint, $connection, $arguments);
         $pending = $this->layer->begin($execution);
 
-        return new Deferred(fn(): mixed => $this->results->map($this->layer->finish($pending), $execution));
+        return new Deferred(fn (): mixed => $this->results->map($this->layer->finish($pending), $execution));
     }
 }

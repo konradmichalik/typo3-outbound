@@ -46,8 +46,8 @@ $pets = $outbound->api(PetApi::class);
 $store = $outbound->api(StoreApi::class);
 
 $page = (string) ($_GET['page'] ?? 'pets');
-$link = static fn(array $query = []): string => '?'.http_build_query([...$query, ...($mock ? ['mock' => 1] : [])]);
-$e = static fn(mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES);
+$link = static fn (array $query = []): string => '?'.http_build_query([...$query, ...($mock ? ['mock' => 1] : [])]);
+$e = static fn (mixed $value): string => htmlspecialchars((string) $value, \ENT_QUOTES);
 
 $content = '';
 $error = null;
@@ -85,7 +85,7 @@ function renderPets(array $list, string $status, Closure $link, Closure $e): str
             $e($pet->id),
             $e($pet->name),
             $e($pet->category?->name ?? '–'),
-            $e(implode(', ', array_filter(array_map(static fn($tag) => $tag->name, $pet->tags))) ?: '–'),
+            $e(implode(', ', array_filter(array_map(static fn ($tag) => $tag->name, $pet->tags))) ?: '–'),
             $e($pet->status?->value ?? '–'),
         );
     }
@@ -107,7 +107,7 @@ function renderPet(?PetDto $pet, Closure $e, string $title = 'Pet'): string
     if (null === $pet) {
         return '<h1>Pet</h1><p>Not found. <code>#[OnStatus(404, returns: null)]</code> turned the 404 into <code>null</code>.</p>';
     }
-    $photos = implode('', array_map(static fn(string $url): string => '<li>'.$e($url).'</li>', $pet->photoUrls));
+    $photos = implode('', array_map(static fn (string $url): string => '<li>'.$e($url).'</li>', $pet->photoUrls));
 
     return sprintf(
         '<h1>%s</h1><dl><dt>ID</dt><dd>%s</dd><dt>Name</dt><dd>%s</dd><dt>Category</dt><dd>%s</dd><dt>Status</dt><dd>%s</dd><dt>Photo URLs</dt><dd><ul>%s</ul></dd></dl>
@@ -123,7 +123,7 @@ function renderPet(?PetDto $pet, Closure $e, string $title = 'Pet'): string
 
 function renderAddForm(Closure $link, Closure $e): string
 {
-    $options = implode('', array_map(static fn(PetStatus $case): string => sprintf('<option>%s</option>', $case->value), PetStatus::cases()));
+    $options = implode('', array_map(static fn (PetStatus $case): string => sprintf('<option>%s</option>', $case->value), PetStatus::cases()));
 
     return sprintf(
         '<h1>Add a pet</h1><form method="post" action="%s" class="stack">
@@ -218,18 +218,18 @@ button { background: var(--accent); color: var(--surface); border: 0; cursor: po
 <body>
 <header>
   <strong>typo3-outbound · Petstore</strong>
-  <nav><?= $nav ?></nav>
-  <span class="mode muted"><?= $mock ? 'Fixture responses · <a href="?page='.$e($page).'">switch to live</a>' : 'Live: petstore3.swagger.io · <a href="?page='.$e($page).'&amp;mock=1">switch to fixtures</a>' ?></span>
+  <nav><?php echo $nav; ?></nav>
+  <span class="mode muted"><?php echo $mock ? 'Fixture responses · <a href="?page='.$e($page).'">switch to live</a>' : 'Live: petstore3.swagger.io · <a href="?page='.$e($page).'&amp;mock=1">switch to fixtures</a>'; ?></span>
 </header>
 <main>
-<?php if (null !== $error): ?>
-  <div class="error"><strong><?= $e((new ReflectionClass($error))->getShortName()) ?></strong>: <?= $e($error->getMessage()) ?><br><span>Endpoint <?= $e($error->endpoint) ?>, status <?= $e($error->status ?? '–') ?></span></div>
-<?php else: ?>
-  <?= $content ?>
-<?php endif ?>
+<?php if (null !== $error) { ?>
+  <div class="error"><strong><?php echo $e((new ReflectionClass($error))->getShortName()); ?></strong>: <?php echo $e($error->getMessage()); ?><br><span>Endpoint <?php echo $e($error->endpoint); ?>, status <?php echo $e($error->status ?? '–'); ?></span></div>
+<?php } else { ?>
+  <?php echo $content; ?>
+<?php } ?>
   <h2>Requests sent for this page</h2>
-  <p class="muted"><?= count($transport->attempts) ?> requests in <?= $e(number_format($duration, 1)) ?> ms. No row means the answer came from the cache.</p>
-  <div class="scroll"><table><thead><tr><th>Endpoint</th><th>Method</th><th>URL</th><th>Status</th></tr></thead><tbody><?= $log ?: '<tr><td colspan="4">None.</td></tr>' ?></tbody></table></div>
+  <p class="muted"><?php echo count($transport->attempts); ?> requests in <?php echo $e(number_format($duration, 1)); ?> ms. No row means the answer came from the cache.</p>
+  <div class="scroll"><table><thead><tr><th>Endpoint</th><th>Method</th><th>URL</th><th>Status</th></tr></thead><tbody><?php echo $log ?: '<tr><td colspan="4">None.</td></tr>'; ?></tbody></table></div>
 </main>
 </body>
 </html>

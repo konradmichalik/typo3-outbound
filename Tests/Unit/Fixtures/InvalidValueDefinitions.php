@@ -18,9 +18,15 @@ use KonradMichalik\Typo3Outbound\Enum\PaginationStyle;
 
 require_once __DIR__.'/Definitions.php';
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://values.example.com')]
 interface ValuesBaseApi {}
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface ZeroLifetimeApi extends ValuesBaseApi
 {
@@ -29,6 +35,9 @@ interface ZeroLifetimeApi extends ValuesBaseApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface NegativeLifetimeApi extends ValuesBaseApi
 {
@@ -37,6 +46,9 @@ interface NegativeLifetimeApi extends ValuesBaseApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface NegativeStaleApi extends ValuesBaseApi
 {
@@ -45,6 +57,9 @@ interface NegativeStaleApi extends ValuesBaseApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface ZeroTimeoutApi extends ValuesBaseApi
 {
@@ -53,6 +68,9 @@ interface ZeroTimeoutApi extends ValuesBaseApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface NegativeTimeoutApi extends ValuesBaseApi
 {
@@ -61,6 +79,9 @@ interface NegativeTimeoutApi extends ValuesBaseApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface NegativeRetriesApi extends ValuesBaseApi
 {
@@ -69,6 +90,9 @@ interface NegativeRetriesApi extends ValuesBaseApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface ShrinkingBackoffApi extends ValuesBaseApi
 {
@@ -77,6 +101,9 @@ interface ShrinkingBackoffApi extends ValuesBaseApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface NegativeDelayApi extends ValuesBaseApi
 {
@@ -85,6 +112,9 @@ interface NegativeDelayApi extends ValuesBaseApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface BadRetryStatusApi extends ValuesBaseApi
 {
@@ -93,6 +123,9 @@ interface BadRetryStatusApi extends ValuesBaseApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface ZeroPageSizeApi extends ValuesBaseApi
 {
@@ -102,6 +135,9 @@ interface ZeroPageSizeApi extends ValuesBaseApi
     public function a(): iterable;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface ZeroMaxPagesApi extends ValuesBaseApi
 {
@@ -111,6 +147,9 @@ interface ZeroMaxPagesApi extends ValuesBaseApi
     public function a(): iterable;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface CursorWithoutPathApi extends ValuesBaseApi
 {
@@ -120,6 +159,9 @@ interface CursorWithoutPathApi extends ValuesBaseApi
     public function a(): iterable;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface BracedPathApi extends ValuesBaseApi
 {
@@ -127,10 +169,16 @@ interface BracedPathApi extends ValuesBaseApi
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://zerothresholdbreaker.example.com')]
 #[Outbound\CircuitBreaker(failureThreshold: 0)]
 interface ZeroThresholdBreakerBase {}
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface ZeroThresholdBreakerApi extends ZeroThresholdBreakerBase
 {
@@ -138,10 +186,16 @@ interface ZeroThresholdBreakerApi extends ZeroThresholdBreakerBase
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://zerocooldownbreaker.example.com')]
 #[Outbound\CircuitBreaker(cooldown: 0)]
 interface ZeroCooldownBreakerBase {}
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface ZeroCooldownBreakerApi extends ZeroCooldownBreakerBase
 {
@@ -149,10 +203,16 @@ interface ZeroCooldownBreakerApi extends ZeroCooldownBreakerBase
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://garbageintervallimit.example.com')]
 #[Outbound\RateLimit(10, per: 'garbage 5')]
 interface GarbageIntervalLimitBase {}
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface GarbageIntervalLimitApi extends GarbageIntervalLimitBase
 {
@@ -160,10 +220,16 @@ interface GarbageIntervalLimitApi extends GarbageIntervalLimitBase
     public function a(): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://zerointervallimit.example.com')]
 #[Outbound\RateLimit(10, per: '0 seconds')]
 interface ZeroIntervalLimitBase {}
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface ZeroIntervalLimitApi extends ZeroIntervalLimitBase
 {

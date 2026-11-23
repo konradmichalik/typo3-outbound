@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Attribute;
 
+use Attribute;
 use KonradMichalik\Typo3Outbound\Enum\BodyFormat;
 
 /**
@@ -25,7 +26,7 @@ use KonradMichalik\Typo3Outbound\Enum\BodyFormat;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-#[\Attribute(\Attribute::TARGET_PARAMETER)]
+#[Attribute(Attribute::TARGET_PARAMETER)]
 final readonly class Body
 {
     public function __construct(

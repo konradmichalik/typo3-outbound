@@ -16,6 +16,9 @@ namespace KonradMichalik\OutboundPetstore\Api;
 use KonradMichalik\OutboundPetstore\Dto\OrderDto;
 use KonradMichalik\Typo3Outbound\Attribute as Outbound;
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource('/store')]
 interface StoreApi extends PetstoreApi
 {

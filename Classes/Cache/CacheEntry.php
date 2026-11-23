@@ -13,6 +13,10 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Cache;
 
+use function is_array;
+use function is_int;
+use function is_string;
+
 /**
  * CacheEntry.
  *

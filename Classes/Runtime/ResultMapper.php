@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Runtime;
 
+use JsonException;
 use KonradMichalik\Typo3Outbound\Exception\{ApiConflict, ApiException, ApiMappingFailed, ApiNotFound, ApiRateLimited, ApiUnauthorized, ApiUnavailable, ApiValidationFailed};
 use KonradMichalik\Typo3Outbound\Format\{ErrorDocument, PlainJson};
 use KonradMichalik\Typo3Outbound\Metadata\ReturnKind;
@@ -88,7 +89,7 @@ final readonly class ResultMapper
 
         try {
             return json_decode($result->body, true, 512, JSON_BIGINT_AS_STRING | JSON_THROW_ON_ERROR);
-        } catch (\JsonException $exception) {
+        } catch (JsonException $exception) {
             throw new ApiMappingFailed(sprintf('%s: the response is not valid JSON.', $execution->endpoint->key), 1794700140, $execution->endpoint->key, $result->status, null, $exception);
         }
     }
@@ -119,6 +120,11 @@ final readonly class ResultMapper
         return 'mixed' === $endpoint->returnType->signature ? $item : $this->mapper->map($endpoint->returnType->signature, $item, $execution->connection, $endpoint->mapKeys, $endpoint->key);
     }
 
+    public static function isListSignature(string $signature): bool
+    {
+        return 1 === preg_match('/^(\?)?(list|non-empty-list|array|non-empty-array|iterable)\s*</', $signature);
+    }
+
     private function error(Result $result, Execution $execution): ApiException
     {
         $key = $execution->endpoint->key;
@@ -126,7 +132,7 @@ final readonly class ResultMapper
         $document = null;
         try {
             $document = '' === trim($result->body) ? null : json_decode($result->body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException) {
+        } catch (JsonException) {
         }
         $error = $execution->connection->definition->format->error($status, $document) ?? new ErrorDocument();
         $requestId = $result->header('x-request-id') ?? $result->header('request-id') ?? $result->header('x-correlation-id');
@@ -164,7 +170,7 @@ final readonly class ResultMapper
         return new RawResponse(
             $result->status,
             $result->headers,
-            static fn(): string => null !== $response ? $response->getContent(false) : $result->body,
+            static fn (): string => null !== $response ? $response->getContent(false) : $result->body,
             static function () use ($response, $result): iterable {
                 if (null === $response) {
                     yield $result->body;
@@ -193,11 +199,6 @@ final readonly class ResultMapper
         $type = strtolower($result->header('content-type') ?? '');
 
         return '' === $type || str_contains($type, 'json');
-    }
-
-    public static function isListSignature(string $signature): bool
-    {
-        return 1 === preg_match('/^(\?)?(list|non-empty-list|array|non-empty-array|iterable)\s*</', $signature);
     }
 
     private static function retryAfter(Result $result): ?int

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Typo3;
 
 use KonradMichalik\Typo3Outbound\Runtime\Settings;
+use Throwable;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 
 use function is_array;
@@ -35,7 +36,7 @@ final readonly class SettingsFactory
     {
         try {
             $values = $this->configuration->get('typo3_outbound');
-        } catch (\Throwable) {
+        } catch (Throwable) {
             $values = [];
         }
 

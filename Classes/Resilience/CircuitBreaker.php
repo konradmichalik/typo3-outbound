@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Resilience;
 
-use KonradMichalik\Typo3Outbound\Exception\ApiUnavailable;
 use KonradMichalik\Typo3Outbound\Context\CallContext;
+use KonradMichalik\Typo3Outbound\Exception\ApiUnavailable;
 use KonradMichalik\Typo3Outbound\Metadata\ConnectionMetadata;
 use KonradMichalik\Typo3Outbound\Support\Clock;
 use Psr\Log\LoggerInterface;

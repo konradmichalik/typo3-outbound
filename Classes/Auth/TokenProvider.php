@@ -23,6 +23,7 @@ use KonradMichalik\Typo3Outbound\Runtime\RequestBudget;
 use KonradMichalik\Typo3Outbound\Support\Clock;
 use KonradMichalik\Typo3Outbound\Transport\{Call, Transport, TransportOptions};
 use KonradMichalik\Typo3Outbound\Value\SiteSetting;
+use Throwable;
 
 use function http_build_query;
 use function is_array;
@@ -88,7 +89,7 @@ final class TokenProvider
             $response = $this->transport->request(new Call($connection->name.'::token', [], $spec, $options));
             $status = $response->getStatusCode();
             $payload = json_decode($response->getContent(false), true);
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             throw new ApiUnauthorized(sprintf('Connection %s: token request failed.', $connection->name), 1794700070, $connection->name.'::token', null, null, $exception);
         }
         if ($status >= 400 || !is_array($payload) || !is_string($payload['access_token'] ?? null)) {

@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Value;
 
+use Stringable;
+
 /**
  * Iri.
  *
@@ -24,7 +26,7 @@ namespace KonradMichalik\Typo3Outbound\Value;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-final readonly class Iri implements \Stringable
+final readonly class Iri implements Stringable
 {
     public function __construct(
         public string $value,

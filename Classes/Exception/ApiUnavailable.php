@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Exception;
 
+use Throwable;
+
 /**
  * ApiUnavailable.
  *
@@ -32,7 +34,7 @@ final class ApiUnavailable extends ApiException
         ?int $status = null,
         ?string $requestId = null,
         public readonly ?int $retryAt = null,
-        ?\Throwable $previous = null,
+        ?Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $endpoint, $status, $requestId, $previous);
     }

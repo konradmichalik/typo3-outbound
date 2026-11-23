@@ -31,10 +31,10 @@ use function array_values;
 final readonly class EndpointMetadata
 {
     /**
-     * @param class-string                     $interface
-     * @param list<ParameterMetadata>          $parameters
-     * @param list<OnStatus>                   $onStatus
-     * @param array<string, string>            $origins    Attribute name => interface or method it was taken from
+     * @param class-string            $interface
+     * @param list<ParameterMetadata> $parameters
+     * @param list<OnStatus>          $onStatus
+     * @param array<string, string>   $origins    Attribute name => interface or method it was taken from
      */
     public function __construct(
         public string $key,
@@ -62,7 +62,7 @@ final readonly class EndpointMetadata
      */
     public function parametersOf(ParameterKind $kind): array
     {
-        return array_values(array_filter($this->parameters, static fn(ParameterMetadata $parameter): bool => $parameter->kind === $kind));
+        return array_values(array_filter($this->parameters, static fn (ParameterMetadata $parameter): bool => $parameter->kind === $kind));
     }
 
     public function httpMethod(): string

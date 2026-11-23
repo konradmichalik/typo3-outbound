@@ -20,6 +20,8 @@ use KonradMichalik\Typo3Outbound\Attribute as Outbound;
  *
  * The public instance needs no credentials for the endpoints used here. Its
  * state is shared by everyone, so live tests must not rely on specific data.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 #[Outbound\Connection(baseUri: 'https://petstore3.swagger.io/api/v3')]
 #[Outbound\Retry(maxRetries: 2)]

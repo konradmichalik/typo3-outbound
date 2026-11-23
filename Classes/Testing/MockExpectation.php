@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Testing;
 
 use KonradMichalik\Typo3Outbound\Transport\Call;
+use RuntimeException;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use function array_key_exists;
@@ -73,7 +74,7 @@ final class MockExpectation
     {
         $body = file_get_contents($path);
         if (!is_string($body)) {
-            throw new \RuntimeException(sprintf('Fixture "%s" is not readable.', $path), 1794700171);
+            throw new RuntimeException(sprintf('Fixture "%s" is not readable.', $path), 1794700171);
         }
 
         return $this->respondWith($status, $body, ['content-type' => 'application/json', ...$headers]);
@@ -109,7 +110,7 @@ final class MockExpectation
     public function next(): MockResponse
     {
         if ([] === $this->responses) {
-            throw new \RuntimeException(sprintf('No response configured for %s.', $this->endpoint), 1794700172);
+            throw new RuntimeException(sprintf('No response configured for %s.', $this->endpoint), 1794700172);
         }
 
         return count($this->responses) > 1 ? array_shift($this->responses) : $this->responses[0];

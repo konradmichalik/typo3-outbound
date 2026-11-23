@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Value;
 
+use Closure;
+
 use function strtolower;
 
 /**
@@ -29,14 +31,14 @@ final readonly class RawResponse
 {
     /**
      * @param array<string, list<string>> $headers Lower-case header names
-     * @param \Closure(): string           $content
-     * @param \Closure(): iterable<string> $chunks
+     * @param Closure(): string           $content
+     * @param Closure(): iterable<string> $chunks
      */
     public function __construct(
         public int $status,
         public array $headers,
-        private \Closure $content,
-        private \Closure $chunks,
+        private Closure $content,
+        private Closure $chunks,
     ) {}
 
     public function header(string $name): ?string

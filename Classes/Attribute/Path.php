@@ -25,7 +25,7 @@ use Attribute;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-#[\Attribute(\Attribute::TARGET_PARAMETER)]
+#[Attribute(Attribute::TARGET_PARAMETER)]
 final readonly class Path
 {
     public function __construct(

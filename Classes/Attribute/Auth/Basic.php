@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Attribute\Auth;
 
+use Attribute;
 use KonradMichalik\Typo3Outbound\Value\ValueSource;
 
 /**
@@ -22,7 +23,7 @@ use KonradMichalik\Typo3Outbound\Value\ValueSource;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-#[\Attribute(\Attribute::TARGET_CLASS)]
+#[Attribute(Attribute::TARGET_CLASS)]
 final readonly class Basic implements Authentication
 {
     public function __construct(

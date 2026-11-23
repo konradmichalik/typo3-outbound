@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Exception;
 
+use LogicException;
+
 /**
  * MissingContext.
  *
@@ -23,4 +25,4 @@ namespace KonradMichalik\Typo3Outbound\Exception;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-final class MissingContext extends \LogicException {}
+final class MissingContext extends LogicException {}

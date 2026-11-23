@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Attribute;
 
+use Attribute;
 use KonradMichalik\Typo3Outbound\Enum\PaginationStyle;
 
 /**
@@ -25,7 +26,7 @@ use KonradMichalik\Typo3Outbound\Enum\PaginationStyle;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-#[\Attribute(\Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_METHOD)]
 final readonly class Paginate
 {
     /**

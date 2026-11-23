@@ -16,15 +16,24 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures;
 use KonradMichalik\Typo3Outbound\Attribute as Outbound;
 use KonradMichalik\Typo3Outbound\Value\Deferred;
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 enum Shelf: string
 {
     case Top = 'top';
     case Bottom = 'bottom';
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://shop.example.com')]
 interface ShopApi {}
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource('/products')]
 interface ProductsApi extends ShopApi
 {
@@ -51,9 +60,15 @@ interface ProductsApi extends ShopApi
     public function remove(int $id): void;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://bad.example.com')]
 interface BadTagsApi {}
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface DotInTagApi extends BadTagsApi
 {
@@ -62,6 +77,9 @@ interface DotInTagApi extends BadTagsApi
     public function a(int $id): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface UnknownPlaceholderApi extends BadTagsApi
 {
@@ -70,6 +88,9 @@ interface UnknownPlaceholderApi extends BadTagsApi
     public function a(int $id): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface NullablePlaceholderApi extends BadTagsApi
 {
@@ -78,6 +99,9 @@ interface NullablePlaceholderApi extends BadTagsApi
     public function a(#[Outbound\Query] ?int $id = null): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource]
 interface FloatPlaceholderApi extends BadTagsApi
 {
@@ -86,6 +110,9 @@ interface FloatPlaceholderApi extends BadTagsApi
     public function a(#[Outbound\Query] float $price): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Resource('/search')]
 interface SearchApi extends ShopApi
 {

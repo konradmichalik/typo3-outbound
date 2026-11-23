@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Value;
 
+use InvalidArgumentException;
+
 use function basename;
 use function is_readable;
 use function sprintf;
@@ -38,7 +40,7 @@ final readonly class FilePart
     public static function fromPath(string $path, ?string $filename = null, ?string $contentType = null): self
     {
         if (!is_readable($path)) {
-            throw new \InvalidArgumentException(sprintf('File "%s" is not readable.', $path), 1794700041);
+            throw new InvalidArgumentException(sprintf('File "%s" is not readable.', $path), 1794700041);
         }
 
         return new self($path, null, $filename ?? basename($path), $contentType);

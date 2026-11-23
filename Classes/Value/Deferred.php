@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Value;
 
+use Closure;
+
 /**
  * Deferred.
  *
@@ -34,10 +36,10 @@ final class Deferred
     private mixed $value = null;
 
     /**
-     * @param \Closure(): T $resolver
+     * @param Closure(): T $resolver
      */
     public function __construct(
-        private readonly \Closure $resolver,
+        private readonly Closure $resolver,
     ) {}
 
     /**

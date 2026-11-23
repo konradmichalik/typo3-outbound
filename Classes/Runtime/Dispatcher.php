@@ -19,8 +19,10 @@ use KonradMichalik\Typo3Outbound\Resilience\{CircuitBreaker, RateLimitGuard, Ret
 use KonradMichalik\Typo3Outbound\Support\{Clock, Redactor};
 use KonradMichalik\Typo3Outbound\Transport\{Call, Transport};
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
+use Throwable;
 
 use function min;
 use function round;
@@ -160,7 +162,7 @@ final readonly class Dispatcher
      * Symfony's transport messages quote the full URL. Credentials sent as query
      * parameters must not reach exception messages or logs through them.
      */
-    private static function safeMessage(\Throwable $exception, Execution $execution): string
+    private static function safeMessage(Throwable $exception, Execution $execution): string
     {
         $url = $execution->request->url;
 
@@ -171,9 +173,9 @@ final readonly class Dispatcher
      * The original exception quotes the URL in its message and in its own chain. Debug
      * output and loggers print previous exceptions, so a redacted stand-in is chained instead.
      */
-    private static function redacted(\Throwable $exception, Execution $execution): \RuntimeException
+    private static function redacted(Throwable $exception, Execution $execution): RuntimeException
     {
-        return new \RuntimeException(sprintf('%s: %s', $exception::class, self::safeMessage($exception, $execution)), 0);
+        return new RuntimeException(sprintf('%s: %s', $exception::class, self::safeMessage($exception, $execution)), 0);
     }
 
     private function content(Execution $execution, ResponseInterface $response, int $status): string

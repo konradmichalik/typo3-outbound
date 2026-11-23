@@ -19,6 +19,8 @@ use KonradMichalik\Typo3Outbound\Tests\Support\{FakeClock, PetstoreKernel};
 use PHPUnit\Framework\Attributes\{CoversNothing, Test};
 use PHPUnit\Framework\TestCase;
 
+use function sprintf;
+
 /**
  * OverheadTest.
  *
@@ -56,7 +58,7 @@ final class OverheadTest extends TestCase
         $cached = (hrtime(true) - $start) / self::RUNS / 1e6;
 
         if ('1' === getenv('OUTBOUND_BENCH_REPORT')) {
-            fwrite(STDERR, sprintf("\nuncached call incl. mock transport: %.3f ms, cache hit: %.3f ms\n", $uncached, $cached));
+            fwrite(\STDERR, sprintf("\nuncached call incl. mock transport: %.3f ms, cache hit: %.3f ms\n", $uncached, $cached));
         }
         self::assertLessThan(1.0, $cached);
         self::assertLessThan(5.0, $uncached);

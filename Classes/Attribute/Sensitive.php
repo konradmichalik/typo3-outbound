@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Attribute;
 
+use Attribute;
+
 /**
  * Sensitive.
  *
@@ -22,5 +24,5 @@ namespace KonradMichalik\Typo3Outbound\Attribute;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-#[\Attribute(\Attribute::TARGET_PARAMETER)]
+#[Attribute(Attribute::TARGET_PARAMETER)]
 final readonly class Sensitive {}

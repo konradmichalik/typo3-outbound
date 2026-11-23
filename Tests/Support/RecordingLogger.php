@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Typo3Outbound\Tests\Support;
 
 use Psr\Log\AbstractLogger;
+use Stringable;
 
 /**
  * RecordingLogger.
@@ -28,7 +29,7 @@ final class RecordingLogger extends AbstractLogger
     /**
      * @param array<array-key, mixed> $context
      */
-    public function log($level, string|\Stringable $message, array $context = []): void
+    public function log($level, string|Stringable $message, array $context = []): void
     {
         $this->records[] = ['level' => (string) $level, 'message' => (string) $message, 'context' => $context];
     }

@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Value;
 
+use InvalidArgumentException;
+use Stringable;
+
 use function is_float;
 use function is_numeric;
 use function sprintf;
@@ -28,7 +31,7 @@ use function var_export;
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
-final readonly class Decimal implements \Stringable
+final readonly class Decimal implements Stringable
 {
     public string $value;
 
@@ -36,7 +39,7 @@ final readonly class Decimal implements \Stringable
     {
         $string = is_float($value) ? var_export($value, true) : (string) $value;
         if (!is_numeric($string)) {
-            throw new \InvalidArgumentException(sprintf('"%s" is not a decimal number.', $string), 1794700040);
+            throw new InvalidArgumentException(sprintf('"%s" is not a decimal number.', $string), 1794700040);
         }
         $this->value = $string;
     }

@@ -18,6 +18,7 @@ use KonradMichalik\Typo3Outbound\Proxy\ProxyGenerator;
 use KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\Proxy\{ConstantDefaultsApi, ConstantHolder};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 /**
  * ProxyGeneratorTest.
@@ -30,7 +31,7 @@ final class ProxyGeneratorTest extends TestCase
     #[Test]
     public function generatedCodeContainsNoAttributeValues(): void
     {
-        $code = (new ProxyGenerator())->generate(new \ReflectionClass(PetApi::class), 'PetProxy');
+        $code = (new ProxyGenerator())->generate(new ReflectionClass(PetApi::class), 'PetProxy');
 
         self::assertStringNotContainsString('petstore_pet_', $code);
         self::assertStringNotContainsString('/findByStatus', $code);
@@ -42,13 +43,13 @@ final class ProxyGeneratorTest extends TestCase
     public function invalidClassNamesAreRejected(): void
     {
         $this->expectExceptionCode(1794700160);
-        (new ProxyGenerator())->generate(new \ReflectionClass(PetApi::class), 'Evil; system("x")');
+        (new ProxyGenerator())->generate(new ReflectionClass(PetApi::class), 'Evil; system("x")');
     }
 
     #[Test]
     public function constantDefaultsAreEmittedAsCodeThatCompiles(): void
     {
-        $code = (new ProxyGenerator())->generate(new \ReflectionClass(ConstantDefaultsApi::class), 'ConstantsProxy');
+        $code = (new ProxyGenerator())->generate(new ReflectionClass(ConstantDefaultsApi::class), 'ConstantsProxy');
 
         self::assertStringContainsString('int $limit = \\'.ConstantDefaultsApi::class.'::MAX', $code);
         self::assertStringContainsString('int $cap = \\PHP_INT_MAX', $code);
@@ -61,12 +62,12 @@ final class ProxyGeneratorTest extends TestCase
     public function aGeneratedProxyWithConstantDefaultsCanBeLoaded(): void
     {
         $file = sys_get_temp_dir().'/outbound-proxy-lint-'.bin2hex(random_bytes(4)).'.php';
-        file_put_contents($file, (new ProxyGenerator())->generate(new \ReflectionClass(ConstantDefaultsApi::class), 'ConstantsProxy'));
+        file_put_contents($file, (new ProxyGenerator())->generate(new ReflectionClass(ConstantDefaultsApi::class), 'ConstantsProxy'));
 
         try {
-            exec(escapeshellarg(PHP_BINARY).' -l '.escapeshellarg($file).' 2>&1', $output, $status);
+            exec(escapeshellarg(\PHP_BINARY).' -l '.escapeshellarg($file).' 2>&1', $output, $status);
             self::assertSame(0, $status, implode("\n", $output));
-            exec(escapeshellarg(PHP_BINARY).' -r '.escapeshellarg('interface_exists('.var_export(ConstantDefaultsApi::class, true).') || require '.var_export(__DIR__.'/../Fixtures/Proxy/ConstantDefaultsApi.php', true).'; require '.var_export($file, true).'; echo "loaded";').' 2>&1', $loadOutput, $loadStatus);
+            exec(escapeshellarg(\PHP_BINARY).' -r '.escapeshellarg('interface_exists('.var_export(ConstantDefaultsApi::class, true).') || require '.var_export(__DIR__.'/../Fixtures/Proxy/ConstantDefaultsApi.php', true).'; require '.var_export($file, true).'; echo "loaded";').' 2>&1', $loadOutput, $loadStatus);
             self::assertSame(0, $loadStatus, implode("\n", $loadOutput));
         } finally {
             unlink($file);

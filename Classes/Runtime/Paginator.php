@@ -13,11 +13,13 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Runtime;
 
+use Generator;
 use KonradMichalik\Typo3Outbound\Enum\PaginationStyle;
 use KonradMichalik\Typo3Outbound\Format\PlainJson;
 use KonradMichalik\Typo3Outbound\Http\{HostGuard, LinkHeader};
 use KonradMichalik\Typo3Outbound\Metadata\{ConnectionMetadata, EndpointMetadata};
 use KonradMichalik\Typo3Outbound\Support\DotPath;
+use LogicException;
 use Psr\Log\LoggerInterface;
 
 use function array_filter;
@@ -48,11 +50,11 @@ final readonly class Paginator
     /**
      * @param array<string, mixed> $arguments
      *
-     * @return \Generator<int, mixed>
+     * @return Generator<int, mixed>
      */
-    public function iterate(EndpointMetadata $endpoint, ConnectionMetadata $connection, array $arguments): \Generator
+    public function iterate(EndpointMetadata $endpoint, ConnectionMetadata $connection, array $arguments): Generator
     {
-        $pagination = $endpoint->paginate ?? throw new \LogicException('Endpoint is not paginated.', 1794700150);
+        $pagination = $endpoint->paginate ?? throw new LogicException('Endpoint is not paginated.', 1794700150);
         $format = $connection->definition->format;
         $page = $pagination->firstPage;
         $offset = 0;
@@ -63,7 +65,7 @@ final readonly class Paginator
             $extra = match ($pagination->style) {
                 PaginationStyle::Page => [$pagination->pageParam => $page, $pagination->sizeParam => $pagination->size],
                 PaginationStyle::Offset => [$pagination->pageParam => $offset, $pagination->sizeParam => $pagination->size],
-                PaginationStyle::Cursor => array_filter([$pagination->cursorParam => $cursor, $pagination->sizeParam => $pagination->size], static fn(mixed $value): bool => null !== $value),
+                PaginationStyle::Cursor => array_filter([$pagination->cursorParam => $cursor, $pagination->sizeParam => $pagination->size], static fn (mixed $value): bool => null !== $value),
                 PaginationStyle::LinkHeader, PaginationStyle::Format => null === $url ? [$pagination->sizeParam => $pagination->size] : [],
             };
             $execution = $this->calls->create($endpoint, $connection, $arguments, $extra, $url);

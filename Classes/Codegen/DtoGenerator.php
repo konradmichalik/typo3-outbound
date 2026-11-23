@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Codegen;
 
+use InvalidArgumentException;
+
 use function array_is_list;
 use function array_key_exists;
 use function get_debug_type;
@@ -46,7 +48,7 @@ final class DtoGenerator
             $sample = $this->merge($sample);
         }
         if (!is_array($sample)) {
-            throw new \InvalidArgumentException('The sample must be a JSON object or a list of objects.', 1794700210);
+            throw new InvalidArgumentException('The sample must be a JSON object or a list of objects.', 1794700210);
         }
         $this->object($namespace, $class, $sample, $camelCase);
 

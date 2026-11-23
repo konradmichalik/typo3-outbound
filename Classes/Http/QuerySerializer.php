@@ -74,8 +74,8 @@ final class QuerySerializer
             return match ($style) {
                 QueryStyle::CommaDelimited, QueryStyle::DeepObject => [[$name, implode(',', array_map(self::scalar(...), $value))]],
                 QueryStyle::PipeDelimited => [[$name, implode('|', array_map(self::scalar(...), $value))]],
-                QueryStyle::Brackets => array_map(static fn(mixed $item): array => [$name.'[]', self::scalar($item)], $value),
-                QueryStyle::Form => array_map(static fn(mixed $item): array => [$name, self::scalar($item)], $value),
+                QueryStyle::Brackets => array_map(static fn (mixed $item): array => [$name.'[]', self::scalar($item)], $value),
+                QueryStyle::Form => array_map(static fn (mixed $item): array => [$name, self::scalar($item)], $value),
             };
         }
 

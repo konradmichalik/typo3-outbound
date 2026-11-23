@@ -15,15 +15,21 @@ namespace KonradMichalik\Typo3Outbound\Tests\Unit\Fixtures\Proxy;
 
 use KonradMichalik\Typo3Outbound\Attribute as Outbound;
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 #[Outbound\Connection(baseUri: 'https://constants.example.com')]
 interface ConstantDefaultsApi
 {
     public const MAX = 25;
 
     #[Outbound\Get('/items')]
-    public function list(int $limit = self::MAX, int $cap = PHP_INT_MAX, int $size = \PHP_INT_SIZE, int $other = ConstantHolder::LIMIT): string;
+    public function list(int $limit = self::MAX, int $cap = \PHP_INT_MAX, int $size = \PHP_INT_SIZE, int $other = ConstantHolder::LIMIT): string;
 }
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 final class ConstantHolder
 {
     public const LIMIT = 7;

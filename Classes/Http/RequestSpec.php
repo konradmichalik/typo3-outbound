@@ -26,9 +26,9 @@ namespace KonradMichalik\Typo3Outbound\Http;
 final readonly class RequestSpec
 {
     /**
-     * @param array<string, string>      $headers
+     * @param array<string, string>        $headers
      * @param string|iterable<string>|null $body
-     * @param list<string>               $sensitiveKeys Query keys and header names to redact in logs
+     * @param list<string>                 $sensitiveKeys Query keys and header names to redact in logs
      */
     public function __construct(
         public string $method,

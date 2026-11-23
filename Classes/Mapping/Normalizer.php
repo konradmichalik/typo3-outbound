@@ -13,7 +13,12 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Mapping;
 
+use BackedEnum;
+use DateTimeInterface;
+use JsonSerializable;
 use KonradMichalik\Typo3Outbound\Value\{Decimal, Iri};
+use Stringable;
+use UnitEnum;
 
 use function get_object_vars;
 use function is_array;
@@ -35,7 +40,7 @@ use function is_scalar;
 final readonly class Normalizer
 {
     public function __construct(
-        private string $dateFormat = \DateTimeInterface::ATOM,
+        private string $dateFormat = DateTimeInterface::ATOM,
         private bool $booleansAsStrings = true,
     ) {}
 
@@ -60,12 +65,12 @@ final readonly class Normalizer
         return match (true) {
             null === $value => null,
             is_bool($value) => $query ? $this->bool($value) : $value,
-            $value instanceof \BackedEnum => $query ? (string) $value->value : $value->value,
-            $value instanceof \UnitEnum => $value->name,
-            $value instanceof \DateTimeInterface => $value->format($this->dateFormat),
+            $value instanceof BackedEnum => $query ? (string) $value->value : $value->value,
+            $value instanceof UnitEnum => $value->name,
+            $value instanceof DateTimeInterface => $value->format($this->dateFormat),
             $value instanceof Decimal, $value instanceof Iri => $value->value,
-            $value instanceof \JsonSerializable => $this->normalize($value->jsonSerialize(), $query),
-            $value instanceof \Stringable => (string) $value,
+            $value instanceof JsonSerializable => $this->normalize($value->jsonSerialize(), $query),
+            $value instanceof Stringable => (string) $value,
             is_object($value) => $this->members(get_object_vars($value), $query),
             is_array($value) => $this->members($value, $query),
             default => $query && is_scalar($value) ? (string) $value : $value,

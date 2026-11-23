@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace KonradMichalik\OutboundPetstore\Dto;
 
+/**
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ */
 enum OrderStatus: string
 {
     case Placed = 'placed';

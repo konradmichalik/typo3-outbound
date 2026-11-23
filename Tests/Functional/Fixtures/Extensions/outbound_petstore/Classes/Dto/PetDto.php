@@ -15,6 +15,8 @@ namespace KonradMichalik\OutboundPetstore\Dto;
 
 /**
  * Pet, as defined by components/schemas/Pet of the Petstore OpenAPI document.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 final readonly class PetDto
 {
