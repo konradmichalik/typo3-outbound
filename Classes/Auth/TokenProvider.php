@@ -15,7 +15,7 @@ namespace KonradMichalik\Typo3Outbound\Auth;
 
 use KonradMichalik\Typo3Outbound\Attribute\Auth\OAuth2ClientCredentials;
 use KonradMichalik\Typo3Outbound\Context\{CallContext, ValueResolver};
-use KonradMichalik\Typo3Outbound\Exception\ApiUnauthorized;
+use KonradMichalik\Typo3Outbound\Exception\{ApiTransportFailed, ApiUnauthorized};
 use KonradMichalik\Typo3Outbound\Http\{HostGuard, RequestSpec};
 use KonradMichalik\Typo3Outbound\Metadata\ConnectionMetadata;
 use KonradMichalik\Typo3Outbound\Resilience\StateStore;
@@ -78,7 +78,12 @@ final class TokenProvider
         // A literal or environment value is trusted; one from site settings must match the allow list.
         $allowedHosts = $auth->tokenUrl instanceof SiteSetting ? $connection->definition->allowedHosts : [];
         HostGuard::check($tokenUrl, $tokenUrl, $allowedHosts, $connection->definition->allowPrivateNetwork, $connection->name.' token');
-        $options = $options->withMaxDuration($this->budget->attemptDuration(null));
+        $duration = $this->budget->attemptDuration(null);
+        // Symfony reads a max_duration of 0 as unlimited.
+        if ($duration <= 0.0) {
+            throw new ApiTransportFailed(sprintf('Connection %s: the time budget of this request is exhausted, no token requested.', $connection->name), 1794700072, $connection->name.'::token');
+        }
+        $options = $options->withMaxDuration($duration);
         $form = ['grant_type' => 'client_credentials', 'client_id' => $this->values->resolve($auth->clientId), 'client_secret' => $this->values->resolve($auth->clientSecret)];
         if (null !== $auth->scope) {
             $form['scope'] = $auth->scope;
