@@ -38,6 +38,10 @@ return Config::create()
             DocBlockHeader::fromComposer()->__toArray(),
         ),
     )
+    // assertEquals is deliberate where value objects are compared by value, assertSame would fail on a different instance.
+    ->withRule(
+        RuleSet::fromArray(['php_unit_strict' => false]),
+    )
     ->withFinder(
         static fn (Finder $finder) => $finder
             ->in($rootPath)
