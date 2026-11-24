@@ -60,4 +60,27 @@ final class PageCacheTagReporterTest extends TestCase
 
         self::assertCount(1, $collector->getCacheTags());
     }
+
+    #[Test]
+    public function aGlobalRequestWithoutCollectorFallsBackToTheContextRequest(): void
+    {
+        $collector = new CacheDataCollector();
+        $context = new RequestContext((new ReflectionClass(SiteFinder::class))->newInstanceWithoutConstructor());
+        $context->setRequest((new ServerRequest('https://localhost/', 'GET', 'php://memory'))->withAttribute('frontend.cache.collector', $collector));
+        $GLOBALS['TYPO3_REQUEST'] = new ServerRequest('https://localhost/', 'GET', 'php://memory');
+
+        (new PageCacheTagReporter($context))->report(['outbound_petstore'], 30);
+
+        self::assertCount(1, $collector->getCacheTags());
+    }
+
+    #[Test]
+    public function anAttributeThatIsNoCollectorIsIgnored(): void
+    {
+        $context = new RequestContext((new ReflectionClass(SiteFinder::class))->newInstanceWithoutConstructor());
+        $context->setRequest((new ServerRequest('https://localhost/', 'GET', 'php://memory'))->withAttribute('frontend.cache.collector', 'not-a-collector'));
+        $this->expectNotToPerformAssertions();
+
+        (new PageCacheTagReporter($context))->report(['outbound_petstore'], 60);
+    }
 }
