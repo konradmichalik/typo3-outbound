@@ -5,7 +5,7 @@
 # TYPO3 extension `typo3_outbound`
 
 [![Latest Stable Version](https://typo3-badges.dev/badge/typo3_outbound/version/shields.svg)](https://extensions.typo3.org/extension/typo3_outbound)
-![TYPO3](https://img.shields.io/badge/TYPO3-13.4%20%7C%2014-orange.svg)
+![TYPO3](https://img.shields.io/badge/TYPO3-13.4%20%7C%2014.3-orange.svg)
 [![Supported PHP Versions](https://img.shields.io/packagist/dependency-v/konradmichalik/typo3-outbound/php?logo=php)](https://packagist.org/packages/konradmichalik/typo3-outbound)
 [![CGL](https://img.shields.io/github/actions/workflow/status/konradmichalik/typo3-outbound/cgl.yml?label=cgl&logo=github)](https://github.com/konradmichalik/typo3-outbound/actions/workflows/cgl.yml)
 [![Coverage](https://coveralls.io/repos/github/konradmichalik/typo3-outbound/badge.svg?branch=main)](https://coveralls.io/github/konradmichalik/typo3-outbound)
@@ -40,15 +40,20 @@ This extension builds on the framework-agnostic core [`konradmichalik/php-outbou
 
 * TYPO3 >= 13.4
 * PHP 8.2+
-* Symfony components 7.4
 
 ### Composer
+
+[![Packagist](https://img.shields.io/packagist/v/konradmichalik/typo3-outbound?label=version&logo=packagist)](https://packagist.org/packages/konradmichalik/typo3-outbound)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/konradmichalik/typo3-outbound?color=brightgreen)](https://packagist.org/packages/konradmichalik/typo3-outbound)
 
 ``` bash
 composer require konradmichalik/typo3-outbound
 ```
 
 ### TER
+
+[![TER version](https://typo3-badges.dev/badge/typo3_outbound/version/shields.svg)](https://extensions.typo3.org/extension/typo3_outbound)
+[![TER downloads](https://typo3-badges.dev/badge/typo3_outbound/downloads/shields.svg)](https://extensions.typo3.org/extension/typo3_outbound)
 
 Download the zip file from [TYPO3 extension repository (TER)](https://extensions.typo3.org/extension/typo3_outbound).
 
