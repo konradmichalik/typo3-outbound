@@ -44,7 +44,8 @@ step() {
 frontend() {
     local version="$1"
     local html
-    html="$(curl -fsSk "https://${version}.typo3-outbound.ddev.site/")" || return 1
+    # The header answers from the fixture responses, so this step does not depend on the public demo data.
+    html="$(curl -fsSk -H 'X-Outbound-Petstore-Mock: 1' "https://${version}.typo3-outbound.ddev.site/")" || return 1
     grep -q 'outbound-petstore' <<<"$html" || { echo "Petstore plugin not rendered"; return 1; }
     if grep -q 'outbound-error' <<<"$html"; then
         echo "Plugin rendered an API error:"
@@ -73,11 +74,11 @@ for version in 13 14; do
     step "TYPO3 $version: outbound:lint" ddev "$version" typo3 outbound:lint
     step "TYPO3 $version: outbound:call --dry-run" ddev "$version" typo3 outbound:call PetApi::find petId=10 --dry-run
 done
+for version in 13 14; do
+    step "TYPO3 $version: Petstore plugin" frontend "$version"
+done
 if [[ "$LIVE" -eq 1 ]]; then
     step "TYPO3 14: outbound:health" ddev 14 typo3 outbound:health
-    for version in 13 14; do
-        step "TYPO3 $version: Petstore plugin" frontend "$version"
-    done
 fi
 
 echo
