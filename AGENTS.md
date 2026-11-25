@@ -52,6 +52,7 @@ Build/verify.sh           # all checks needing DDEV, a database or network, with
 ```
 
 - Exception codes of the `1794700xxx` range are shared with the core; `ExceptionCodeUniquenessTest` checks the extension and the installed core together
+- Global state in tests (`$GLOBALS`, `Environment`, env vars) is set with the attributes of [`konradmichalik/ttt`](https://github.com/konradmichalik/ttt) (`#[WithGlobal]`, `#[WithEnvironment]`, ...), registered in both `phpunit*.xml`, instead of `setUp()`/`tearDown()` or separate processes
 - `declare(strict_types=1)` everywhere, `final readonly` where sensible
 
 ## Git workflow
