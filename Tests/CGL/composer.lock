@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6edb7cef78a1863cf73cfde9cf750ac5",
+    "content-hash": "1946e642fda1461b671029a6b31aa46c",
     "packages": [],
     "packages-dev": [
         {
@@ -1734,27 +1734,27 @@
         },
         {
             "name": "konradmichalik/php-doc-block-header-fixer",
-            "version": "0.4.0",
+            "version": "0.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/konradmichalik/php-doc-block-header-fixer.git",
-                "reference": "aac6011044fbce11c194ecf553add69200902cc3"
+                "reference": "374f53dbd47ce700cfb1c1d0956dee58faac6983"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/konradmichalik/php-doc-block-header-fixer/zipball/aac6011044fbce11c194ecf553add69200902cc3",
-                "reference": "aac6011044fbce11c194ecf553add69200902cc3",
+                "url": "https://api.github.com/repos/konradmichalik/php-doc-block-header-fixer/zipball/374f53dbd47ce700cfb1c1d0956dee58faac6983",
+                "reference": "374f53dbd47ce700cfb1c1d0956dee58faac6983",
                 "shasum": ""
             },
             "require": {
                 "ext-tokenizer": "*",
                 "friendsofphp/php-cs-fixer": "^3.14",
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0"
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0"
             },
             "require-dev": {
                 "armin/editorconfig-cli": "^2.0",
                 "ergebnis/composer-normalize": "^2.44",
-                "konradmichalik/php-cs-fixer-preset": "^0.2.0",
+                "konradmichalik/php-cs-fixer-preset": "^0.4.0",
                 "phpstan/phpstan": "^2.0",
                 "phpstan/phpstan-phpunit": "^2.0",
                 "phpstan/phpstan-symfony": "^2.0",
@@ -1790,9 +1790,79 @@
             ],
             "support": {
                 "issues": "https://github.com/konradmichalik/php-doc-block-header-fixer/issues",
-                "source": "https://github.com/konradmichalik/php-doc-block-header-fixer/tree/0.4.0"
+                "source": "https://github.com/konradmichalik/php-doc-block-header-fixer/tree/0.5.0"
             },
-            "time": "2026-09-28T09:09:31+00:00"
+            "time": "2026-11-25T08:46:04+00:00"
+        },
+        {
+            "name": "konradmichalik/phpstan-typo3-dead-code",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/konradmichalik/phpstan-typo3-dead-code.git",
+                "reference": "cd899a150e1f99fd823845d158e400cfb2b5511f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/konradmichalik/phpstan-typo3-dead-code/zipball/cd899a150e1f99fd823845d158e400cfb2b5511f",
+                "reference": "cd899a150e1f99fd823845d158e400cfb2b5511f",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
+                "phpstan/phpstan": "^2.1.41",
+                "shipmonk/dead-code-detector": "^1.4",
+                "symfony/yaml": "^6.4 || ^7.0 || ^8.0"
+            },
+            "conflict": {
+                "typo3/class-alias-loader": "<1.2.1"
+            },
+            "require-dev": {
+                "armin/editorconfig-cli": "^2.0",
+                "ergebnis/composer-normalize": "^2.44",
+                "konradmichalik/php-cs-fixer-preset": "^0.4.0",
+                "phpstan/phpstan-phpunit": "^2.1",
+                "phpunit/phpunit": "^11.5 || ^12.0",
+                "rector/rector": "^2.9"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "rules.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "KonradMichalik\\PhpStanTypo3DeadCode\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Konrad Michalik",
+                    "email": "hej@konradmichalik.dev",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "TYPO3 entry points for shipmonk/dead-code-detector: DI constructors, route targets and TypoScript userFunc",
+            "keywords": [
+                "PHPStan",
+                "dead-code",
+                "php",
+                "phpstan-extension",
+                "static-analysis",
+                "typo3"
+            ],
+            "support": {
+                "issues": "https://github.com/konradmichalik/phpstan-typo3-dead-code/issues",
+                "source": "https://github.com/konradmichalik/phpstan-typo3-dead-code/tree/0.2.0"
+            },
+            "time": "2026-11-25T10:28:52+00:00"
         },
         {
             "name": "konradmichalik/phpstan-typo3-preset",
@@ -3801,6 +3871,95 @@
                 "source": "https://github.com/shipmonk-rnd/composer-dependency-analyser/tree/1.8.4"
             },
             "time": "2025-11-25T14:38:16+00:00"
+        },
+        {
+            "name": "shipmonk/dead-code-detector",
+            "version": "1.4.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/shipmonk-rnd/dead-code-detector.git",
+                "reference": "431c13453eeb1790e15c8674ad4d6318218849bc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/shipmonk-rnd/dead-code-detector/zipball/431c13453eeb1790e15c8674ad4d6318218849bc",
+                "reference": "431c13453eeb1790e15c8674ad4d6318218849bc",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "phpstan/phpstan": "^2.1.41"
+            },
+            "require-dev": {
+                "behat/behat": "^3.14",
+                "composer-runtime-api": "^2.0",
+                "composer/semver": "^3.4",
+                "doctrine/orm": "^2.19 || ^3.0",
+                "editorconfig-checker/editorconfig-checker": "^10.7.0",
+                "ergebnis/composer-normalize": "^2.48.1",
+                "laravel/framework": "^10.0 || ^11.0 || ^12.0",
+                "nette/application": "^3.1",
+                "nette/component-model": "^3.0",
+                "nette/neon": "^3.4",
+                "nette/tester": "^2.4",
+                "nette/utils": "^3.0 || ^4.0",
+                "nikic/php-parser": "^5.4.0",
+                "phpat/phpat": "^0.12",
+                "phpbench/phpbench": "^1.2",
+                "phpstan/phpstan-phpunit": "^2.0.16",
+                "phpstan/phpstan-strict-rules": "^2.0.10",
+                "phpstan/phpstan-symfony": "^2.0.15",
+                "phpunit/phpcov": "^9.0.2",
+                "phpunit/phpunit": "^10.5.46",
+                "shipmonk/coding-standard": "^0.3.0",
+                "shipmonk/composer-dependency-analyser": "^1.8.4",
+                "shipmonk/coverage-guard": "^1.1.0",
+                "shipmonk/name-collision-detector": "^2.1.1",
+                "shipmonk/phpstan-dev": "^0.1.6",
+                "shipmonk/phpstan-rules": "^4.3.6",
+                "symfony/contracts": "^2.5 || ^3.0 || ^4.0",
+                "symfony/dependency-injection": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/doctrine-bridge": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/event-dispatcher": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/form": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/framework-bundle": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/http-kernel": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/routing": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/scheduler": "^6.3 || ^7.0 || ^8.0",
+                "symfony/ux-live-component": "^2.34",
+                "symfony/ux-twig-component": "^2.34",
+                "symfony/validator": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "twig/twig": "^3.0"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "rules.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ShipMonk\\PHPStan\\DeadCode\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Dead code detector to find unused PHP code via PHPStan extension. Can automatically remove dead PHP code. Supports libraries like Symfony, Doctrine, PHPUnit etc. Detects dead cycles. Can detect dead code that is tested.",
+            "keywords": [
+                "PHPStan",
+                "dead code",
+                "static analysis",
+                "unused code"
+            ],
+            "support": {
+                "issues": "https://github.com/shipmonk-rnd/dead-code-detector/issues",
+                "source": "https://github.com/shipmonk-rnd/dead-code-detector/tree/1.4.2"
+            },
+            "time": "2026-09-18T07:50:08+00:00"
         },
         {
             "name": "spaze/phpstan-disallowed-calls",
@@ -6414,6 +6573,82 @@
                 }
             ],
             "time": "2026-10-22T14:50:44+00:00"
+        },
+        {
+            "name": "symfony/yaml",
+            "version": "v7.4.24",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/yaml.git",
+                "reference": "f97f59f67644c715788d1bde4d81186e48ee1dbf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/f97f59f67644c715788d1bde4d81186e48ee1dbf",
+                "reference": "f97f59f67644c715788d1bde4d81186e48ee1dbf",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2",
+                "symfony/deprecation-contracts": "^2.5|^3",
+                "symfony/polyfill-ctype": "^1.8"
+            },
+            "conflict": {
+                "symfony/console": "<6.4"
+            },
+            "require-dev": {
+                "symfony/console": "^6.4|^7.0|^8.0"
+            },
+            "bin": [
+                "Resources/bin/yaml-lint"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Yaml\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Loads and dumps YAML files",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/yaml/tree/v7.4.24"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-11-16T12:32:16+00:00"
         },
         {
             "name": "tomasvotruba/cognitive-complexity",
