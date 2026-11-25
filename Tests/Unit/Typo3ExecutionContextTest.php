@@ -13,46 +13,27 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Unit;
 
+use KonradMichalik\Ttt\Attribute\WithEnvironment;
 use KonradMichalik\Typo3Outbound\Context\Typo3ExecutionContext;
-use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, PreserveGlobalState, RunTestsInSeparateProcesses, Test};
+use PHPUnit\Framework\Attributes\{CoversClass, Test, TestWith};
 use PHPUnit\Framework\TestCase;
-use TYPO3\CMS\Core\Core\{ApplicationContext, Environment};
 
 /**
- * Typo3ExecutionContextTest.
- *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 #[CoversClass(Typo3ExecutionContext::class)]
-#[RunTestsInSeparateProcesses]
-#[PreserveGlobalState(false)]
 final class Typo3ExecutionContextTest extends TestCase
 {
     #[Test]
-    #[DataProvider('applicationContexts')]
-    public function webAndDevelopmentFollowTheTypo3Environment(string $context, bool $cli, bool $web, bool $development): void
+    #[TestWith([new WithEnvironment(context: 'Production', cli: false), true, false], 'production on the web')]
+    #[TestWith([new WithEnvironment(context: 'Development', cli: false), true, true], 'development on the web')]
+    #[TestWith([new WithEnvironment(context: 'Production', cli: true), false, false], 'production on the command line')]
+    #[TestWith([new WithEnvironment(context: 'Development/Docker', cli: true), false, true], 'a development sub context')]
+    public function webAndDevelopmentFollowTheTypo3Environment(WithEnvironment $environment, bool $web, bool $development): void
     {
-        $this->initializeEnvironment($context, $cli);
-
         $execution = new Typo3ExecutionContext();
 
         self::assertSame($web, $execution->isWeb());
         self::assertSame($development, $execution->isDevelopment());
-    }
-
-    /**
-     * @return iterable<string, array{string, bool, bool, bool}>
-     */
-    public static function applicationContexts(): iterable
-    {
-        yield 'production on the web' => ['Production', false, true, false];
-        yield 'development on the web' => ['Development', false, true, true];
-        yield 'production on the command line' => ['Production', true, false, false];
-        yield 'a development sub context' => ['Development/Docker', true, false, true];
-    }
-
-    private function initializeEnvironment(string $context, bool $cli): void
-    {
-        Environment::initialize(new ApplicationContext($context), $cli, true, '/tmp/project', '/tmp/project/public', '/tmp/project/var', '/tmp/project/config', '/tmp/project/public/index.php', 'UNIX');
     }
 }

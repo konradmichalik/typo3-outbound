@@ -41,7 +41,7 @@ ddev install all              # TYPO3 13 and 14 under .Build/<version>
 ddev 14 typo3 outbound:debug  # TYPO3 CLI in one instance
 ```
 
-Quality tools live in `Tests/CGL/`, invoked via `composer cgl` (lint, fix, sca, migration). PHPStan runs on level max; `Tests/CGL/phpstan-baseline.neon` holds the cognitive complexity findings of `Configuration.php`.
+Quality tools live in `Tests/CGL/`, invoked via `composer cgl` (lint, fix, sca, migration). PHPStan runs on level max; `Tests/CGL/phpstan-baseline.neon` holds the cognitive complexity findings of `Configuration.php`. `composer cgl sca` also runs the dead code detector with the TYPO3 entry points of `konradmichalik/phpstan-typo3-dead-code`; it needs `--autoload-file=../../vendor/autoload.php`, which the script already passes.
 
 ## Testing
 
@@ -52,6 +52,7 @@ Build/verify.sh           # all checks needing DDEV, a database or network, with
 ```
 
 - Exception codes of the `1794700xxx` range are shared with the core; `ExceptionCodeUniquenessTest` checks the extension and the installed core together
+- Global state in tests (`$GLOBALS`, `Environment`, env vars) is set with the attributes of [`konradmichalik/ttt`](https://github.com/konradmichalik/ttt) (`#[WithGlobal]`, `#[WithEnvironment]`, ...), registered in both `phpunit*.xml`, instead of `setUp()`/`tearDown()` or separate processes
 - `declare(strict_types=1)` everywhere, `final readonly` where sensible
 
 ## Git workflow

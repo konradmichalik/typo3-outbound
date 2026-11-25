@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Unit;
 
+use KonradMichalik\Ttt\Attribute\WithGlobal;
 use KonradMichalik\Typo3Outbound\Configuration\Configuration;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
@@ -25,25 +26,9 @@ use TYPO3\CMS\Core\Cache\Frontend\{PhpFrontend, VariableFrontend};
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 #[CoversClass(Configuration::class)]
+#[WithGlobal('TYPO3_CONF_VARS', [])]
 final class ConfigurationTest extends TestCase
 {
-    private mixed $confVars = null;
-
-    protected function setUp(): void
-    {
-        $this->confVars = $GLOBALS['TYPO3_CONF_VARS'] ?? null;
-        unset($GLOBALS['TYPO3_CONF_VARS']);
-    }
-
-    protected function tearDown(): void
-    {
-        if (null === $this->confVars) {
-            unset($GLOBALS['TYPO3_CONF_VARS']);
-        } else {
-            $GLOBALS['TYPO3_CONF_VARS'] = $this->confVars;
-        }
-    }
-
     #[Test]
     public function allThreeCachesAreRegisteredWithTheirBackendAndGroups(): void
     {

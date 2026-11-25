@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Typo3Outbound\Tests\Unit;
 
+use KonradMichalik\Ttt\Attribute\WithGlobal;
 use KonradMichalik\Typo3Outbound\Cache\PageCacheTagReporter;
 use KonradMichalik\Typo3Outbound\Context\RequestContext;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
@@ -28,13 +29,9 @@ use TYPO3\CMS\Core\Site\SiteFinder;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 #[CoversClass(PageCacheTagReporter::class)]
+#[WithGlobal('TYPO3_REQUEST', null)]
 final class PageCacheTagReporterTest extends TestCase
 {
-    protected function tearDown(): void
-    {
-        unset($GLOBALS['TYPO3_REQUEST']);
-    }
-
     #[Test]
     public function tagsAndLifetimeReachTheFrontendCacheCollector(): void
     {
